@@ -2,10 +2,14 @@ import { useAuthActions } from '@convex-dev/auth/react'
 import { Button } from '../ui/button'
 import { LogOut } from 'lucide-react'
 
-export function SignOutButton() {
+export function SignOutButton({ className }: { className?: string }) {
   const { signOut } = useAuthActions()
   return (
-    <Button onClick={() => void signOut()}>
+    <Button
+      variant="outline"
+      onClick={() => void signOut()}
+      className={className}
+    >
       <LogOut data-icon="inline-start" className="mr-1" /> Sign out
     </Button>
   )

@@ -2,10 +2,10 @@ import { Button } from '#/components/ui/button'
 import { Authenticated, Unauthenticated, AuthLoading } from 'convex/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { SignOutButton } from '#/components/auth/SignOut'
 import { Loader2 } from 'lucide-react'
 import { SignInButton } from '#/components/auth/SignIn'
 import { ModeToggle } from '#/components/theme/mode-toggle'
+import { UserMenu } from '#/components/auth/UserMenu'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -21,7 +21,7 @@ function Home() {
         <SignInButton />
       </Unauthenticated>
       <Authenticated>
-        <SignOutButton />
+        <UserMenu />
       </Authenticated>
 
       <div className="mt-4 flex flex-wrap justify-center gap-2">

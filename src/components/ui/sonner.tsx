@@ -37,7 +37,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           description: '!text-muted-foreground',
           success: '!bg-green-300 dark:!bg-green-700',
           info: '!bg-blue-300 dark:!bg-blue-700',
-          warning: '!bg-yellow-300 dark:!bg-yellow-700',
+          warning: '!bg-yellow-300 dark:!bg-yellow-500 dark:!text-background',
           error: '!bg-red-400 dark:!bg-red-700',
         },
       }}
