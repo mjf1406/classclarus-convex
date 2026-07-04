@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import { Button } from '../ui/button'
+import { useQuery } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react'
-import { useQuery } from 'convex/react'
+import { ONE_HOUR } from '#/lib/queryCache'
+import { Button } from '../ui/button'
 import { api } from '../../../convex/_generated/api'
 import {
   DropdownMenu,
@@ -51,7 +53,10 @@ function getDisplayName(user: Doc<'users'>) {
 
 export function UserMenu() {
   const { isLoading, isAuthenticated } = useConvexAuth()
-  const user = useQuery(api.users.current, isAuthenticated ? {} : 'skip')
+  const { data: user } = useQuery({
+    ...convexQuery(api.users.current, isAuthenticated ? {} : 'skip'),
+    gcTime: ONE_HOUR,
+  })
   const { signOut } = useAuthActions()
 
   if (isLoading || (isAuthenticated && user === undefined)) {

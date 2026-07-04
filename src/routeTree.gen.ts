@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SplatRouteImport } from './routes/$'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteRouteImport } from './routes/_account/route'
+import { Route as AccountIndexRouteImport } from './routes/_account/index'
+import { Route as AccountCClassIdRouteImport } from './routes/_account/c.$classId'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -29,41 +31,61 @@ const SplatRoute = SplatRouteImport.update({
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const AccountRouteRoute = AccountRouteRouteImport.update({
+  id: '/_account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AccountRouteRoute,
+} as any)
+const AccountCClassIdRoute = AccountCClassIdRouteImport.update({
+  id: '/c/$classId',
+  path: '/c/$classId',
+  getParentRoute: () => AccountRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AccountIndexRoute
   '/$': typeof SplatRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/c/$classId': typeof AccountCClassIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/': typeof AccountIndexRoute
+  '/c/$classId': typeof AccountCClassIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_account': typeof AccountRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/_account/': typeof AccountIndexRoute
+  '/_account/c/$classId': typeof AccountCClassIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$' | '/login' | '/unauthorized'
+  fullPaths: '/' | '/$' | '/login' | '/unauthorized' | '/c/$classId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$' | '/login' | '/unauthorized'
-  id: '__root__' | '/' | '/$' | '/login' | '/unauthorized'
+  to: '/$' | '/login' | '/unauthorized' | '/' | '/c/$classId'
+  id:
+    | '__root__'
+    | '/_account'
+    | '/$'
+    | '/login'
+    | '/unauthorized'
+    | '/_account/'
+    | '/_account/c/$classId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AccountRouteRoute: typeof AccountRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
   LoginRoute: typeof LoginRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
@@ -92,18 +114,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_account': {
+      id: '/_account'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AccountRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_account/': {
+      id: '/_account/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRouteRoute
+    }
+    '/_account/c/$classId': {
+      id: '/_account/c/$classId'
+      path: '/c/$classId'
+      fullPath: '/c/$classId'
+      preLoaderRoute: typeof AccountCClassIdRouteImport
+      parentRoute: typeof AccountRouteRoute
     }
   }
 }
 
+interface AccountRouteRouteChildren {
+  AccountIndexRoute: typeof AccountIndexRoute
+  AccountCClassIdRoute: typeof AccountCClassIdRoute
+}
+
+const AccountRouteRouteChildren: AccountRouteRouteChildren = {
+  AccountIndexRoute: AccountIndexRoute,
+  AccountCClassIdRoute: AccountCClassIdRoute,
+}
+
+const AccountRouteRouteWithChildren = AccountRouteRoute._addFileChildren(
+  AccountRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AccountRouteRoute: AccountRouteRouteWithChildren,
   SplatRoute: SplatRoute,
   LoginRoute: LoginRoute,
   UnauthorizedRoute: UnauthorizedRoute,

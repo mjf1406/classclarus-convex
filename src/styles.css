@@ -2,9 +2,9 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/inter';
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -149,4 +149,12 @@ body {
   html {
     @apply font-sans;
   }
+}
+
+.text-2xs {
+  font-size: 0.65rem;
+  line-height: var(
+    --tw-leading,
+    var(--text-xs--line-height) /* calc(1 / 0.625) ≈ 1.6 */
+  );
 }

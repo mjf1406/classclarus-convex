@@ -45,11 +45,17 @@ const ImageSkeleton = React.forwardRef<HTMLImageElement, ImageSkeletonProps>(
             onError?.(e);
         };
 
-        // Reset loading state when src changes
-        React.useEffect(() => {
-            if (src) {
+        // After mount / src change: skip skeleton when the browser already has the image
+        React.useLayoutEffect(() => {
+            if (!src) {
+                return;
+            }
+            setHasError(false);
+            const img = imgRef.current;
+            if (img?.complete && img.naturalWidth > 0) {
+                setIsLoading(false);
+            } else {
                 setIsLoading(true);
-                setHasError(false);
             }
         }, [src]);
 
