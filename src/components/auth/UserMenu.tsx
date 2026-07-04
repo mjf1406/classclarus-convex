@@ -12,20 +12,37 @@ import {
 } from '../ui/dropdown-menu'
 import { SignOutButton } from './SignOut'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import type { Doc } from '../../../convex/_generated/dataModel'
 
-function getInitials(email: string) {
-  const local = email.split('@')[0] ?? email
-  const parts = local.split(/[._-]/).filter(Boolean)
-  if (parts.length >= 2) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+function getInitials(user: Doc<'users'>) {
+  if (user.name && user.name.trim()) {
+    const parts = user.name.trim().split(/\s+/).filter(Boolean)
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+    }
+    return user.name.trim().slice(0, 2).toUpperCase()
   }
-  return local.slice(0, 2).toUpperCase()
+  const local = user.email?.split('@')[0] ?? user.email
+  const localStr = local ?? ''
+  const parts = localStr.split(/[._-]/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase()
+  }
+  return local ?? ''
 }
 
-function getDisplayName(email: string) {
-  const local = email.split('@')[0] ?? email
-  return local
+function getDisplayName(user: Doc<'users'>) {
+  if (user.name && user.name.trim()) {
+    return user.name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ')
+  }
+  const local = user.email?.split('@')[0] ?? user.email
+  const localStr = local ?? ''
+  return localStr
     .split(/[._-]/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -54,8 +71,8 @@ export function UserMenu() {
   }
 
   const email = user.email
-  const initials = getInitials(email)
-  const displayName = user.name ?? getDisplayName(email)
+  const initials = getInitials(user)
+  const displayName = getDisplayName(user)
 
   return (
     <DropdownMenu>
