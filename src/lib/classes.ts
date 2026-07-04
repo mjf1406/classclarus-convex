@@ -122,8 +122,14 @@ export function useUpdateClass() {
         }
 
         if (index === -1) {
-          // Unarchived class should reappear in active lists.
           if (!includeArchived && !isArchived) {
+            // Unarchived class should reappear in active lists.
+            localStore.setQuery(api.classes.listClasses, queryArgs, [
+              updated,
+              ...value,
+            ])
+          } else if (includeArchived && isArchived) {
+            // Archived class should appear in the includeArchived list.
             localStore.setQuery(api.classes.listClasses, queryArgs, [
               updated,
               ...value,
