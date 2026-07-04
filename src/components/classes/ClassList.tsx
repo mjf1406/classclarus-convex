@@ -304,6 +304,7 @@ export function ClassList({
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (isPending || classes === undefined) {
     return <ClassListSkeleton view={view} />
   }
