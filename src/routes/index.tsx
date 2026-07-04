@@ -1,9 +1,6 @@
 import { Button } from '#/components/ui/button'
-import { Authenticated, Unauthenticated, AuthLoading } from 'convex/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
-import { SignInButton } from '#/components/auth/SignIn'
 import { ModeToggle } from '#/components/theme/mode-toggle'
 import { UserMenu } from '#/components/auth/UserMenu'
 
@@ -14,15 +11,7 @@ function Home() {
     <div className="p-8">
       <ModeToggle className="absolute top-4 right-4" />
       <h1 className="text-4xl font-bold mb-4">Welcome to TanStack Start</h1>
-      <AuthLoading>
-        <Loader2 size={28} className="animate-spin" />
-      </AuthLoading>
-      <Unauthenticated>
-        <SignInButton />
-      </Unauthenticated>
-      <Authenticated>
-        <UserMenu />
-      </Authenticated>
+      <UserMenu />
 
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         <Button

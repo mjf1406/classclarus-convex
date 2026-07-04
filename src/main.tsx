@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import PendingComponent from './components/loading/PendingComponent'
+import { ErrorPage } from './components/errors/ErrorPage'
 
 const router = createRouter({
   routeTree,
@@ -11,6 +12,7 @@ const router = createRouter({
   defaultPendingComponent: PendingComponent,
   defaultPendingMs: 50,
   defaultPendingMinMs: 300,
+  defaultErrorComponent: ErrorPage,
 })
 
 declare module '@tanstack/react-router' {
