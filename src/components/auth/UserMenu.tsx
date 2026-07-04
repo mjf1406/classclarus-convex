@@ -56,7 +56,7 @@ export function UserMenu() {
 
   if (isLoading || (isAuthenticated && user === undefined)) {
     return (
-      <Avatar size="sm">
+      <Avatar>
         <AvatarFallback>...</AvatarFallback>
       </Avatar>
     )
@@ -83,7 +83,7 @@ export function UserMenu() {
           className="rounded-full"
           aria-label="Open user menu"
         >
-          <Avatar size="sm">
+          <Avatar>
             {user.image ? (
               <AvatarImage src={user.image} alt={displayName} />
             ) : null}
