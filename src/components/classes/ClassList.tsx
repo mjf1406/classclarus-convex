@@ -286,22 +286,23 @@ export function ClassList({
   const [deletingClass, setDeletingClass] = useState<Doc<'classes'> | null>(
     null,
   )
-  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deletingClass) return
-    setIsDeleting(true)
-    try {
-      await removeClass({ classId: deletingClass._id })
-      toast.success('Class deleted')
-      setDeletingClass(null)
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to delete class',
-      )
-    } finally {
-      setIsDeleting(false)
-    }
+
+    // Fire mutation first so optimistic updates apply, then close immediately.
+    const mutationPromise = removeClass({ classId: deletingClass._id })
+    setDeletingClass(null)
+
+    void mutationPromise
+      .then(() => {
+        toast.success('Class deleted')
+      })
+      .catch((error: unknown) => {
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to delete class',
+        )
+      })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -344,7 +345,7 @@ export function ClassList({
       <AlertDialog
         open={deletingClass !== null}
         onOpenChange={(open) => {
-          if (!open && !isDeleting) setDeletingClass(null)
+          if (!open) setDeletingClass(null)
         }}
       >
         <AlertDialogContent>
@@ -357,16 +358,15 @@ export function ClassList({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              disabled={isDeleting}
               onClick={(e) => {
                 e.preventDefault()
-                void handleDelete()
+                handleDelete()
               }}
             >
-              {isDeleting ? 'Deleting…' : 'Delete'}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
