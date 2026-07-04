@@ -2,7 +2,7 @@
 
 ## Useful Links
 
-- [Shadcn Preset](https://ui.shadcn.com/create?preset=b5wPv7go4&template=vite&pointer=true)
+- [Shadcn Preset](https://ui.shadcn.com/create?preset=bbZ0kFM&template=vite&pointer=true)
 
 ## To Do
 

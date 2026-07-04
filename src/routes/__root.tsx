@@ -4,6 +4,8 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import '../styles.css'
 import { ConvexAuthProvider } from '@convex-dev/auth/react'
 import { ConvexReactClient } from 'convex/react'
+import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '#/components/theme/theme-provider'
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
@@ -15,7 +17,10 @@ function RootComponent() {
   return (
     <>
       <ConvexAuthProvider client={convex}>
-        <Outlet />
+        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+          <Outlet />
+        </ThemeProvider>
+        <Toaster />
       </ConvexAuthProvider>
       <TanStackDevtools
         config={{

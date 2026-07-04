@@ -1,11 +1,16 @@
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
+import PendingComponent from './components/loading/PendingComponent'
 
 const router = createRouter({
   routeTree,
-  defaultPreload: 'intent',
+  defaultPreload: 'viewport',
   scrollRestoration: true,
+  defaultPreloadGcTime: 1000 * 60, // 1 minute,
+  defaultPendingComponent: PendingComponent,
+  defaultPendingMs: 50,
+  defaultPendingMinMs: 300,
 })
 
 declare module '@tanstack/react-router' {
