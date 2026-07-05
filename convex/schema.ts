@@ -15,7 +15,7 @@ export default defineSchema({
     archivedTime: v.optional(v.number()), // null = active, string = archived
     studentCode: v.string(),
     teacherCode: v.string(),
-    guardianCode: v.string(),
+    assistantTeacherCode: v.string(),
     publicDisplayPin: v.optional(v.string()),
   }).index('by_user', ['userId']),
 })

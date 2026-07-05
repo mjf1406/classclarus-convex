@@ -16,7 +16,7 @@ const classDoc = v.object({
   archivedTime: v.optional(v.number()),
   studentCode: v.string(),
   teacherCode: v.string(),
-  guardianCode: v.string(),
+  assistantTeacherCode: v.string(),
   publicDisplayPin: v.optional(v.string()),
 })
 
@@ -98,7 +98,7 @@ export const createClass = mutation({
       publicDisplayPin: args.publicDisplayPin,
       studentCode: generateJoinCode(),
       teacherCode: generateJoinCode(),
-      guardianCode: generateJoinCode(),
+      assistantTeacherCode: generateJoinCode(),
     })
   },
 })

@@ -55,7 +55,7 @@ export function useCreateClass() {
         publicDisplayPin: args.publicDisplayPin,
         studentCode: PENDING_CODE,
         teacherCode: PENDING_CODE,
-        guardianCode: PENDING_CODE,
+        assistantTeacherCode: PENDING_CODE,
       }
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(
