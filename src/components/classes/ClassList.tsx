@@ -1,19 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
-import {
-  Archive,
-  ArchiveRestore,
-  BookText,
-  MoreVertical,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react'
+import { BookText, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useRemoveClass, useUpdateClass } from '#/lib/classes'
+import { useRemoveClass } from '#/lib/classes'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
 import type { Doc } from '../../../convex/_generated/dataModel'
@@ -46,7 +38,6 @@ export type ClassListView = 'grid' | 'list'
 
 type ClassListProps = {
   view?: ClassListView
-  archivedOnly?: boolean
   onCreateClick?: () => void
   onEdit?: (classDoc: Doc<'classes'>) => void
 }
@@ -76,13 +67,9 @@ function ClassTimestamps({ classDoc }: { classDoc: Doc<'classes'> }) {
 
 function ClassActionsMenu({
   onEdit,
-  onArchive,
-  onUnarchive,
   onDelete,
 }: {
-  onEdit?: () => void
-  onArchive?: () => void
-  onUnarchive?: () => void
+  onEdit: () => void
   onDelete: () => void
 }) {
   return (
@@ -100,24 +87,10 @@ function ClassActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        {onEdit && (
-          <DropdownMenuItem onSelect={onEdit}>
-            <Pencil />
-            Edit
-          </DropdownMenuItem>
-        )}
-        {onArchive && (
-          <DropdownMenuItem onSelect={onArchive}>
-            <Archive />
-            Archive
-          </DropdownMenuItem>
-        )}
-        {onUnarchive && (
-          <DropdownMenuItem onSelect={onUnarchive}>
-            <ArchiveRestore />
-            Unarchive
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem onSelect={onEdit}>
+          <Pencil />
+          Edit
+        </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onSelect={onDelete}>
           <Trash2 />
           Delete
@@ -130,14 +103,10 @@ function ClassActionsMenu({
 function ClassCard({
   classDoc,
   onEdit,
-  onArchive,
-  onUnarchive,
   onDelete,
 }: {
   classDoc: Doc<'classes'>
-  onEdit?: () => void
-  onArchive?: () => void
-  onUnarchive?: () => void
+  onEdit: () => void
   onDelete: () => void
 }) {
   return (
@@ -162,12 +131,7 @@ function ClassCard({
                 {classDoc.name}
               </CardTitle>
               <div className="pointer-events-auto">
-                <ClassActionsMenu
-                  onEdit={onEdit}
-                  onArchive={onArchive}
-                  onUnarchive={onUnarchive}
-                  onDelete={onDelete}
-                />
+                <ClassActionsMenu onEdit={onEdit} onDelete={onDelete} />
               </div>
             </div>
             {classDoc.description ? (
@@ -190,14 +154,10 @@ function ClassCard({
 function ClassRow({
   classDoc,
   onEdit,
-  onArchive,
-  onUnarchive,
   onDelete,
 }: {
   classDoc: Doc<'classes'>
-  onEdit?: () => void
-  onArchive?: () => void
-  onUnarchive?: () => void
+  onEdit: () => void
   onDelete: () => void
 }) {
   return (
@@ -233,12 +193,7 @@ function ClassRow({
                 )}
               </div>
               <div className="pointer-events-auto">
-                <ClassActionsMenu
-                  onEdit={onEdit}
-                  onArchive={onArchive}
-                  onUnarchive={onUnarchive}
-                  onDelete={onDelete}
-                />
+                <ClassActionsMenu onEdit={onEdit} onDelete={onDelete} />
               </div>
             </div>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-2xs text-muted-foreground">
@@ -319,34 +274,23 @@ function EmptyState({ onCreateClick }: { onCreateClick?: () => void }) {
 
 export function ClassList({
   view = 'grid',
-  archivedOnly = false,
   onCreateClick,
   onEdit,
 }: ClassListProps) {
-  const listArgs = archivedOnly ? { includeArchived: true as const } : {}
   const { data: classes, isPending } = useQuery({
-    ...convexQuery(api.classes.listClasses, listArgs),
+    ...convexQuery(api.classes.listClasses, {}),
     gcTime: ONE_HOUR,
   })
-  const updateClass = useUpdateClass()
   const removeClass = useRemoveClass()
 
   const [deletingClass, setDeletingClass] = useState<Doc<'classes'> | null>(
     null,
   )
-  const [archivingClass, setArchivingClass] = useState<Doc<'classes'> | null>(
-    null,
-  )
-
-  const displayedClasses = useMemo(() => {
-    if (!classes) return []
-    if (!archivedOnly) return classes
-    return classes.filter((c) => c.archivedTime !== undefined)
-  }, [classes, archivedOnly])
 
   const handleDelete = () => {
     if (!deletingClass) return
 
+    // Fire mutation first so optimistic updates apply, then close immediately.
     const mutationPromise = removeClass({ classId: deletingClass._id })
     setDeletingClass(null)
 
@@ -361,45 +305,11 @@ export function ClassList({
       })
   }
 
-  const handleArchive = () => {
-    if (!archivingClass) return
-
-    const mutationPromise = updateClass({
-      classId: archivingClass._id,
-      archived: true,
-    })
-    setArchivingClass(null)
-
-    void mutationPromise
-      .then(() => {
-        toast.success('Class archived')
-      })
-      .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : 'Failed to archive class',
-        )
-      })
-  }
-
-  const handleUnarchive = (classDoc: Doc<'classes'>) => {
-    void updateClass({ classId: classDoc._id, archived: false })
-      .then(() => {
-        toast.success('Class restored')
-      })
-      .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : 'Failed to restore class',
-        )
-      })
-  }
-
   if (isPending || classes === undefined) {
-    if (archivedOnly) return null
     return <ClassListSkeleton view={view} />
   }
 
-  if (displayedClasses.length === 0) {
-    if (archivedOnly) return null
+  if (classes.length === 0) {
     return <EmptyState onCreateClick={onCreateClick} />
   }
 
@@ -412,35 +322,19 @@ export function ClassList({
             : 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
         }
       >
-        {displayedClasses.map((classDoc) =>
+        {classes.map((classDoc) =>
           view === 'list' ? (
             <ClassRow
               key={classDoc._id}
               classDoc={classDoc}
-              onEdit={
-                archivedOnly ? undefined : () => onEdit?.(classDoc)
-              }
-              onArchive={
-                archivedOnly ? undefined : () => setArchivingClass(classDoc)
-              }
-              onUnarchive={
-                archivedOnly ? () => handleUnarchive(classDoc) : undefined
-              }
+              onEdit={() => onEdit?.(classDoc)}
               onDelete={() => setDeletingClass(classDoc)}
             />
           ) : (
             <ClassCard
               key={classDoc._id}
               classDoc={classDoc}
-              onEdit={
-                archivedOnly ? undefined : () => onEdit?.(classDoc)
-              }
-              onArchive={
-                archivedOnly ? undefined : () => setArchivingClass(classDoc)
-              }
-              onUnarchive={
-                archivedOnly ? () => handleUnarchive(classDoc) : undefined
-              }
+              onEdit={() => onEdit?.(classDoc)}
               onDelete={() => setDeletingClass(classDoc)}
             />
           ),
@@ -472,35 +366,6 @@ export function ClassList({
               }}
             >
               Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={archivingClass !== null}
-        onOpenChange={(open) => {
-          if (!open) setArchivingClass(null)
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Archive class?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {archivingClass
-                ? `Archive “${archivingClass.name}”? You can restore it from the Archived section later.`
-                : 'You can restore it from the Archived section later.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault()
-                handleArchive()
-              }}
-            >
-              Archive
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
