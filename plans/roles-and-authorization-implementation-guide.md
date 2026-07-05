@@ -32,10 +32,12 @@ Read top-to-bottom before writing code. Implement in **three phases** — do not
 
 ClassClarus has **two kinds of "membership"**:
 
-| Kind | Example | Stored in | In staff directory? |
-|------|---------|-----------|---------------------|
-| **Staff** (teachers, principals, team leaders) | Ms. Smith, 5th-grade team leader | `convex-tenants` org + team members | Yes |
+
+| Kind                                                 | Example                                 | Stored in                                    | In staff directory?                 |
+| ---------------------------------------------------- | --------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| **Staff** (teachers, principals, team leaders)       | Ms. Smith, 5th-grade team leader        | `convex-tenants` org + team members          | Yes                                 |
 | **Everyone else** (students, guardians, co-teachers) | Jamie (student), Jamie's mom (guardian) | authz scoped roles / ReBAC + your own tables | No — they are never tenants members |
+
 
 **Students are not org members.** A student in Period 1 Math is not staff. They should never appear in the principal's member list or receive staff invitations. Their permissions are class-scoped.
 
@@ -74,6 +76,7 @@ Target architecture:
 **What it does:** Permission checks with scoped roles. "Can user X do action Y on resource Z?" Plus ReBAC relations ("user A is guardian_of orgStudent B").
 
 **Why you need it:**
+
 - Class roles with inheritance (creator > classTeacher > assistantTeacher > student)
 - Guardians need **per-student** access (relationship-based), not class-wide roles
 - Permission checks happen on every function server-side — never trust the client
@@ -82,6 +85,7 @@ Target architecture:
 **Tradeoff:** Newer library (~2026), installed as a Convex **component**. Pin the version in `package.json`.
 
 **Key API facts you must know (verified against the installed v2.4.1 types):**
+
 - `can`, `hasRole`, `getUserRoles`, `hasRelation` work in **queries, mutations, and actions** (they call component queries under the hood).
 - `assignRole`, `revokeRole`, `addRelation`, `removeRelation`, `revokeAllRoles`, `offboardUser` require **mutation or action context** — you cannot assign roles from a query.
 - `syncRole` / `syncRoles` (re-materialize permissions after you edit role definitions) require an **action** context and are exposed by `makeTenantsAPI` as public actions. Run after every deploy that changes role definitions, or existing users keep their old materialized permissions.
@@ -117,39 +121,45 @@ Springfield District (organization)
 
 ### Concept → data model
 
-| Real world | Implementation |
-|------------|----------------|
-| School or district | tenants `organization` |
-| Grade/subject teacher group | tenants `team`, optional `parentTeamId` |
-| Team leader | team member with role string `"team_leader"` (custom, not built-in) |
-| Class | your `classes` table — **one document per academic year** (required `year` field), optional `teamId` + `organizationId` |
-| Student (in a school) | `orgStudents` row + one or more **active** `classEnrollments` rows (any number of classes/years) |
-| Student (solo class) | authz `student` role scoped to the class — no `orgStudents` row |
-| Guardian | ReBAC `guardian_of` → `orgStudent` + `guardianLinks` row (see §4) |
+
+| Real world                  | Implementation                                                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| School or district          | tenants `organization`                                                                                                  |
+| Grade/subject teacher group | tenants `team`, optional `parentTeamId`                                                                                 |
+| Team leader                 | team member with role string `"team_leader"` (custom, not built-in)                                                     |
+| Class                       | your `classes` table — **one document per academic year** (required `year` field), optional `teamId` + `organizationId` |
+| Student (in a school)       | `orgStudents` row + one or more **active** `classEnrollments` rows (any number of classes/years)                        |
+| Student (solo class)        | authz `student` role scoped to the class — no `orgStudents` row                                                         |
+| Guardian                    | ReBAC `guardian_of` → `orgStudent` + `guardianLinks` row (see §4)                                                       |
+
 
 ### Join codes (current schema)
 
 Classes already have `studentCode`, `teacherCode`, `assistantTeacherCode`. There is **no guardian code** — guardians are linked by teachers via an invite flow (§8.5).
 
-| Code | Role assigned on redemption |
-|------|------------------------------|
-| `studentCode` | `student` (solo class) / links account to `orgStudent` (org class) |
-| `teacherCode` | `classTeacher` |
-| `assistantTeacherCode` | `assistantTeacher` |
+
+| Code                   | Role assigned on redemption                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| `studentCode`          | `student` (solo class) / links account to `orgStudent` (org class) |
+| `teacherCode`          | `classTeacher`                                                     |
+| `assistantTeacherCode` | `assistantTeacher`                                                 |
+
 
 ### Academic year & class lifecycle (required design rule)
 
 **Every class belongs to exactly one academic year.** `createClass` must require `year` (e.g. `2025` for the 2025–26 school year — pick one convention and use it consistently in the UI).
 
-| Rule | Why |
-|------|-----|
-| New year → **new class row**, even if name matches last year's | Keeps assignments, grades, and rosters isolated per year; avoids overwriting history |
-| **No `transferStudent`** (or any "move between classes" mutation) | Movement is modeled as **enroll in the new class**; the old enrollment stays unless explicitly unenrolled |
-| A student may have **many active enrollments** at once | Same-year multi-subject, plus prior-year classes for historical access |
-| End of year: **archive** the class (`archivedTime`), do **not** bulk-withdraw enrollments or revoke student roles on that class | Students and guardians keep `class:read` / `viewOwnGrades` / `viewChildGrades` on completed years |
+
+| Rule                                                                                                                                                                                                                                  | Why                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New year → **new class row**, even if name matches last year's                                                                                                                                                                        | Keeps assignments, grades, and rosters isolated per year; avoids overwriting history                                                                                 |
+| **No `transferStudent`** (or any "move between classes" mutation)                                                                                                                                                                     | Movement is modeled as **enroll in the new class**; the old enrollment stays unless explicitly unenrolled                                                            |
+| A student may have **many active enrollments** at once                                                                                                                                                                                | Same-year multi-subject, plus prior-year classes for historical access                                                                                               |
+| End of year: **archive** the class (`archivedTime`), do **not** bulk-withdraw enrollments or revoke student roles on that class                                                                                                       | Students and guardians keep `class:read` / `viewOwnGrades` / `viewChildGrades` on completed years                                                                    |
 | **Archived classes are read-only.** Every content-writing mutation (submit work, grade, future assignments/points/incidents, `enrollStudent`, `redeemJoinCode`) loads the class and rejects if `archivedTime` is set. Reads stay open | Retention without tampering — a student keeps the `submit` permission via their role, so the archived guard is the only thing stopping writes into last year's class |
-| **`year` is immutable after creation** — `updateClass` must not accept a `year` change | Enrollments, grades, and history are year-bound; re-labeling a class silently corrupts records. Wrong year at creation → delete (if empty) and recreate |
-| Roster UI for the **current** year filters to non-archived classes; gradebook/history UI can include archived classes the user is enrolled in | Staff work in the current year; learners review past years |
+| `**year` is immutable after creation** — `updateClass` must not accept a `year` change                                                                                                                                                | Enrollments, grades, and history are year-bound; re-labeling a class silently corrupts records. Wrong year at creation → delete (if empty) and recreate              |
+| Roster UI for the **current** year filters to non-archived classes; gradebook/history UI can include archived classes the user is enrolled in                                                                                         | Staff work in the current year; learners review past years                                                                                                           |
+
 
 There is no special "promotion" operation — enrolling Jamie in "6th Grade ELA 2026" is the same `enrollStudent` call as adding them to a second subject this semester.
 
@@ -162,6 +172,7 @@ This section answers the design question directly: **guardians do not need org m
 ### The core invariant
 
 > A guardian may see content about student S in class C **iff**:
+>
 > 1. a ReBAC relation `guardian_of(guardianUser → orgStudent S)` exists, **and**
 > 2. S has an **active** `classEnrollments` row for class C.
 
@@ -175,24 +186,28 @@ Guardians see every class where the student has an **active** enrollment, across
 
 ### Why not org membership?
 
-| Concern | With org membership | ReBAC-only (chosen) |
-|---------|--------------------|--------------------|
-| Staff directory | Guardians pollute `listMembers`; every staff query must filter them | Not applicable — guardians never appear |
-| Permission risk | A guardian org role could accidentally inherit staff permissions via role-definition edits | Guardians hold **no roles at all**; nothing to inherit |
-| Enrollment changes | Same (relation is the stable link either way) | Same — new enrollments add access; unenroll removes it |
-| Cleanup | Must remove membership when last child leaves | Remove relation + link row only |
-| "Which schools am I connected to?" UI | From org memberships | Derived from `guardianLinks` rows (indexed by guardian) |
-| Suspending a guardian | tenants `suspendMember` | Remove/flag their `guardianLinks` + relations; or add a `status` field on `guardianLinks` |
+
+| Concern                               | With org membership                                                                        | ReBAC-only (chosen)                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Staff directory                       | Guardians pollute `listMembers`; every staff query must filter them                        | Not applicable — guardians never appear                                                   |
+| Permission risk                       | A guardian org role could accidentally inherit staff permissions via role-definition edits | Guardians hold **no roles at all**; nothing to inherit                                    |
+| Enrollment changes                    | Same (relation is the stable link either way)                                              | Same — new enrollments add access; unenroll removes it                                    |
+| Cleanup                               | Must remove membership when last child leaves                                              | Remove relation + link row only                                                           |
+| "Which schools am I connected to?" UI | From org memberships                                                                       | Derived from `guardianLinks` rows (indexed by guardian)                                   |
+| Suspending a guardian                 | tenants `suspendMember`                                                                    | Remove/flag their `guardianLinks` + relations; or add a `status` field on `guardianLinks` |
+
 
 What you give up: tenants' built-in invitation machinery and member-status plumbing for guardians. You compensate with a small `guardianInvites` table (§8.5) — which you want anyway, because guardian linking needs an **email-verified consent flow**, not an admin "add member" action (see security audit §14, item 4).
 
 ### The three data pieces
 
-| Piece | Purpose | Source of truth? |
-|-------|---------|-----------------|
-| ReBAC tuple `guardian_of` (user → orgStudent), stored in the authz component under the **org's tenant namespace** (`withTenant(organizationId)`) | The parent↔child link used in access checks | Yes |
-| `guardianLinks` table (your schema) | Denormalized mirror for fast list queries (`listMyChildren`, `listGuardiansForStudent`) without scanning component tables | No — mirror; keep in sync in the same mutations that write the relation |
-| `classEnrollments` (active/withdrawn) | Which classes the access currently applies to | Yes (for condition 2) |
+
+| Piece                                                                                                                                            | Purpose                                                                                                                   | Source of truth?                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| ReBAC tuple `guardian_of` (user → orgStudent), stored in the authz component under the **org's tenant namespace** (`withTenant(organizationId)`) | The parent↔child link used in access checks                                                                               | Yes                                                                     |
+| `guardianLinks` table (your schema)                                                                                                              | Denormalized mirror for fast list queries (`listMyChildren`, `listGuardiansForStudent`) without scanning component tables | No — mirror; keep in sync in the same mutations that write the relation |
+| `classEnrollments` (active/withdrawn)                                                                                                            | Which classes the access currently applies to                                                                             | Yes (for condition 2)                                                   |
+
 
 **Do not** use authz `relationPermissions` to gate class-scoped permission checks for guardians. A relation grants permissions on the **object of the relation** (the orgStudent), not on classes. A plain `can(user, "class:viewChildGrades", { type: "class", id })` will not pass via the relation. Instead, every guardian-facing function calls one shared helper that performs the explicit two-step check (relation + active enrollment). This is deliberate: the enrollment condition is what makes access follow the student.
 
@@ -214,11 +229,13 @@ Each layer answers a different question. Mixing them is the most common source o
 
 Extend the tenants defaults (`owner`, `admin`, `member`) with education roles. Define these in `convex/authz.ts` (§7.3):
 
-| Org role | organizations | members | teams | students | guardians |
-|----------|--------------|---------|-------|----------|-----------|
-| `owner` (tenants default) | all | all | all | all | link, unlink |
-| `principal` | read, update | add, remove, updateRole, list | create, update, delete, addMember, removeMember, list | create, list, enroll, unenroll, update | link, unlink |
-| `teacher` | read | — | — | create, list, enroll, unenroll, update | link, unlink |
+
+| Org role                  | organizations | members                       | teams                                                 | students                               | guardians    |
+| ------------------------- | ------------- | ----------------------------- | ----------------------------------------------------- | -------------------------------------- | ------------ |
+| `owner` (tenants default) | all           | all                           | all                                                   | all                                    | link, unlink |
+| `principal`               | read, update  | add, remove, updateRole, list | create, update, delete, addMember, removeMember, list | create, list, enroll, unenroll, update | link, unlink |
+| `teacher`                 | read          | —                             | —                                                     | create, list, enroll, unenroll, update | link, unlink |
+
 
 There is **no `guardian` org role** — guardians are not members (§4). To add more staff-like member types later (counselor, librarian, substitute, registrar…), follow the recipe in §10 — it is four edits, no schema change.
 
@@ -240,24 +257,28 @@ There is **no `guardian` org role** — guardians are not members (§4). To add 
 
 Class permissions to define: `class:read`, `class:manage` (edit settings/archive/delete), `class:manageMembers` (roster + guardian linking), `class:grade`, `class:submit`, `class:viewOwnGrades`, `class:viewChildGrades`.
 
-| Class role | Inherits | Adds |
-|-----------|----------|------|
-| `student` | — | read, submit, viewOwnGrades |
-| `assistantTeacher` | student | grade |
-| `classTeacher` | assistantTeacher | manageMembers |
-| `creator` | classTeacher | manage |
+
+| Class role         | Inherits         | Adds                        |
+| ------------------ | ---------------- | --------------------------- |
+| `student`          | —                | read, submit, viewOwnGrades |
+| `assistantTeacher` | student          | grade                       |
+| `classTeacher`     | assistantTeacher | manageMembers               |
+| `creator`          | classTeacher     | manage                      |
+
 
 Name it `classTeacher`, not `teacher` — the org role `teacher` already exists in the same role catalog and authz role names are global per definition set. Name it `creator`, not `owner` — `owner` is taken by tenants.
 
 **There is no `guardian` class role.** Guardian access is the two-step check from §4.
 
-| Role | How they get it |
-|------|-----------------|
-| creator | assigned inside `createClass` |
-| classTeacher | `redeemJoinCode` with `teacherCode` |
-| assistantTeacher | `redeemJoinCode` with `assistantTeacherCode` |
-| student (solo) | `redeemJoinCode` with `studentCode` |
-| student (org) | `enrollStudent` from roster; join code links a login account to the roster row |
+
+| Role             | How they get it                                                                |
+| ---------------- | ------------------------------------------------------------------------------ |
+| creator          | assigned inside `createClass`                                                  |
+| classTeacher     | `redeemJoinCode` with `teacherCode`                                            |
+| assistantTeacher | `redeemJoinCode` with `assistantTeacherCode`                                   |
+| student (solo)   | `redeemJoinCode` with `studentCode`                                            |
+| student (org)    | `enrollStudent` from roster; join code links a login account to the roster row |
+
 
 ---
 
@@ -265,14 +286,16 @@ Name it `classTeacher`, not `teacher` — the org role `teacher` already exists 
 
 What already exists in **this repo**:
 
-| File | Current behavior |
-|------|------------------|
-| `package.json` | `@djpanda/convex-authz` (2.4.1) and `@djpanda/convex-tenants` (0.5.0) already installed |
-| `convex/schema.ts` | `classes` table with `userId` owner, three join codes, `publicDisplayPin`, only a `by_user` index |
-| `convex/classes.ts` | `getOwnedClass` helper checks `classes.userId === currentUser`; `classDoc` return validator **includes all three join codes** |
-| `src/lib/auth.ts` | `getCurrentUser` / `requireUser` via `@convex-dev/auth` (Google) |
-| `convex/auth.ts` | Google OAuth only |
-| `src/routes/_account/c.$classId.tsx` | Class detail page using `api.classes.getClass` |
+
+| File                                 | Current behavior                                                                                                              |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `package.json`                       | `@djpanda/convex-authz` (2.4.1) and `@djpanda/convex-tenants` (0.5.0) already installed                                       |
+| `convex/schema.ts`                   | `classes` table with `userId` owner, three join codes, `publicDisplayPin`, only a `by_user` index                             |
+| `convex/classes.ts`                  | `getOwnedClass` helper checks `classes.userId === currentUser`; `classDoc` return validator **includes all three join codes** |
+| `src/lib/auth.ts`                    | `getCurrentUser` / `requireUser` via `@convex-dev/auth` (Google)                                                              |
+| `convex/auth.ts`                     | Google OAuth only                                                                                                             |
+| `src/routes/_account/c.$classId.tsx` | Class detail page using `api.classes.getClass`                                                                                |
+
 
 What you will create: `convex/convex.config.ts`, `convex/authz.ts`, `convex/tenants.ts`, `convex/memberships.ts`, `convex/students.ts`, `convex/guardians.ts`, `convex/permissions.ts`, `convex/lib/classAuth.ts`, `convex/lib/guardianAuth.ts`.
 
@@ -301,9 +324,9 @@ Both packages are already in `package.json`. Run your package manager's install 
 Single source of truth for permissions and roles. Contents, in order:
 
 1. **Permissions:** call `definePermissions` with two arguments — the tenants defaults (`TENANTS_PERMISSIONS` exported by the tenants package) merged with your app resources:
-   - `class`: read, manage, manageMembers, grade, submit, viewOwnGrades, viewChildGrades
-   - `students`: create, list, enroll, unenroll, update
-   - `guardians`: link, unlink, viewLinkedStudents
+  - `class`: read, manage, manageMembers, grade, submit, viewOwnGrades, viewChildGrades
+  - `students`: create, list, enroll, unenroll, update
+  - `guardians`: link, unlink, viewLinkedStudents
 2. **Roles:** call `defineRoles` with the permissions, the tenants defaults (`TENANTS_ROLES`), and your additions per the tables in §5 (org roles `principal`, `teacher`; class roles `student` → `assistantTeacher` → `classTeacher` → `creator` using the `inherits` field).
 3. **Client:** instantiate `Authz` with the component reference, permissions, roles, and `tenantId: "classclarus"`. This global namespace holds solo-class role assignments. Org-scoped calls in Phase 2 go through `withTenant(organizationId)`. Do **not** configure `relationPermissions` for guardians (see §4 — the enrollment condition can't be expressed there).
 4. Export the `authz` instance.
@@ -324,7 +347,7 @@ Type the `permission` parameter as a **union of your class permission string lit
 Edit the existing `classes` table (keep `authTables` spread untouched):
 
 - Add optional fields: `organizationId` (string — tenants org id) and `teamId` (string). `undefined` = solo class. Never use a sentinel string.
-- **`year` is required on every class** (see §3). If the schema still has `year` as optional, change it to required when you implement authz — `createClass` must reject missing `year`.
+- `**year` is required on every class** (see §3). If the schema still has `year` as optional, change it to required when you implement authz — `createClass` must reject missing `year`.
 - Add three indexes: `by_studentCode`, `by_teacherCode`, `by_assistantTeacherCode` — without them `redeemJoinCode` is a full table scan.
 
 **Code uniqueness requirement:** `generateJoinCode` currently just produces a random 6-char string. Before inserting a class (and in the regenerate mutation below), check each generated code against all three code indexes and regenerate on collision. This matters because redemption lookups use "exactly one match" semantics — a duplicate code would make redemption throw for both classes.
@@ -425,50 +448,58 @@ The exported functions are public Convex queries/mutations (and `syncRoles`/`syn
 
 ### Step 2.2 — Add tables to `convex/schema.ts`
 
-**`orgStudents`** — the stable per-school student record:
+`**orgStudents`** — the stable per-school student record:
 
-| Field | Type | Notes |
-|-------|------|-------|
-| organizationId | string | tenants org id |
-| displayName | string | roster name |
-| userId | optional id("users") | set when the student links a login |
-| externalId | optional string | SIS id |
+
+| Field          | Type                 | Notes                              |
+| -------------- | -------------------- | ---------------------------------- |
+| organizationId | string               | tenants org id                     |
+| displayName    | string               | roster name                        |
+| userId         | optional id("users") | set when the student links a login |
+| externalId     | optional string      | SIS id                             |
+
 
 Indexes: `by_organization`, `by_user`.
 
-**`classEnrollments`** — links student to class, never deleted:
+`**classEnrollments**` — links student to class, never deleted:
 
-| Field | Type | Notes |
-|-------|------|-------|
-| organizationId | string | denormalized for cheap same-org validation |
-| classId | id("classes") | |
-| orgStudentId | id("orgStudents") | |
-| status | "active" \| "withdrawn" | withdraw, don't delete — audit trail |
+
+| Field          | Type                   | Notes                                      |
+| -------------- | ---------------------- | ------------------------------------------ |
+| organizationId | string                 | denormalized for cheap same-org validation |
+| classId        | id("classes")          |                                            |
+| orgStudentId   | id("orgStudents")      |                                            |
+| status         | "active" | "withdrawn" | withdraw, don't delete — audit trail       |
+
 
 Indexes: `by_class`, `by_orgStudent`, `by_class_and_student` (compound).
 
-**`guardianLinks`** — denormalized mirror of the ReBAC relation:
+`**guardianLinks**` — denormalized mirror of the ReBAC relation:
 
-| Field | Type | Notes |
-|-------|------|-------|
-| organizationId | string | |
-| guardianUserId | id("users") | |
-| orgStudentId | id("orgStudents") | |
-| linkedByUserId | id("users") | audit |
-| linkedAt | number | ms timestamp (written in a mutation — allowed) |
+
+| Field          | Type              | Notes                                          |
+| -------------- | ----------------- | ---------------------------------------------- |
+| organizationId | string            |                                                |
+| guardianUserId | id("users")       |                                                |
+| orgStudentId   | id("orgStudents") |                                                |
+| linkedByUserId | id("users")       | audit                                          |
+| linkedAt       | number            | ms timestamp (written in a mutation — allowed) |
+
 
 Indexes: `by_guardian` (guardianUserId + organizationId), `by_orgStudent`, `by_guardian_and_student` (compound, used for idempotency).
 
-**`guardianInvites`** — consent flow (see Step 2.5 and §14 item 4):
+`**guardianInvites**` — consent flow (see Step 2.5 and §14 item 4):
 
-| Field | Type | Notes |
-|-------|------|-------|
-| organizationId | string | |
-| orgStudentId | id("orgStudents") | |
-| email | string | normalized lowercase |
-| invitedByUserId | id("users") | |
-| status | "pending" \| "accepted" \| "revoked" \| "expired" | |
-| expiresAt | number | e.g. 14 days |
+
+| Field           | Type                                           | Notes                |
+| --------------- | ---------------------------------------------- | -------------------- |
+| organizationId  | string                                         |                      |
+| orgStudentId    | id("orgStudents")                              |                      |
+| email           | string                                         | normalized lowercase |
+| invitedByUserId | id("users")                                    |                      |
+| status          | "pending" | "accepted" | "revoked" | "expired" |                      |
+| expiresAt       | number                                         | e.g. 14 days         |
+
 
 Indexes: `by_email_and_status`, `by_orgStudent`.
 
@@ -631,10 +662,10 @@ So "custom roles in tenants" and "custom roles in authz" are the **same thing**:
 
 To add, say, `counselor` (can view incidents and student records, cannot manage teams):
 
-1. **`convex/authz.ts`** — add the role to `defineRoles` with exactly the permission grants it needs (e.g. `organizations: ["read"]`, `students: ["list"]`, `incidents: ["read"]`). Use `inherits`/`includes` to build on existing roles when sensible.
-2. **`convex/tenants.ts`** — add `"counselor"` to `validRoles`, and to `roleHierarchy` if staff-UI role comparisons need it (pick a level; unknown roles default to 0).
+1. `**convex/authz.ts`** — add the role to `defineRoles` with exactly the permission grants it needs (e.g. `organizations: ["read"]`, `students: ["list"]`, `incidents: ["read"]`). Use `inherits`/`includes` to build on existing roles when sensible.
+2. `**convex/tenants.ts**` — add `"counselor"` to `validRoles`, and to `roleHierarchy` if staff-UI role comparisons need it (pick a level; unknown roles default to 0).
 3. **Deploy, then run `syncRoles`** (`npx convex run tenants:syncRoles`) so any pre-existing assignments re-materialize.
-4. **`convex/permissions.ts` / UI** — extend the closed permission unions if the UI needs to check the new permissions.
+4. `**convex/permissions.ts` / UI** — extend the closed permission unions if the UI needs to check the new permissions.
 
 No schema changes, no new tables. Invitations, suspension, member lists, and org-scoped permission checks all work immediately because the new role flows through the same machinery.
 
@@ -662,17 +693,20 @@ Everything after auth (assignments, tasks, grades, points, behavior incidents, a
 **1. Schema.** New table(s) always carry `classId`. Rows *about a specific student* also carry `orgStudentId` (org classes) or `studentUserId` (solo classes) — decide per feature whether solo is supported. Index `by_class`, plus `by_class_and_student` for per-student rows. Unbounded lists get pagination, never `.collect()`.
 
 **2. Permissions.** Add a resource (or actions) in `definePermissions`, grant to roles in `defineRoles`, deploy, run `syncRoles`. Two granularities:
-   - Piggyback on existing class permissions when the feature maps cleanly: assignments CRUD ≈ `class:manage` or a new `assignments:create`; submitting ≈ `class:submit`; grading ≈ `class:grade`.
-   - New resource when audiences differ from the existing roles — e.g. `incidents: { create, read, update, resolve }` where `assistantTeacher` may create but only `classTeacher`+ may read others' reports.
+
+- Piggyback on existing class permissions when the feature maps cleanly: assignments CRUD ≈ `class:manage` or a new `assignments:create`; submitting ≈ `class:submit`; grading ≈ `class:grade`.
+- New resource when audiences differ from the existing roles — e.g. `incidents: { create, read, update, resolve }` where `assistantTeacher` may create but only `classTeacher`+ may read others' reports.
 
 **3. Authorization per audience — every public function picks the right check:**
 
-| Caller | Check |
-|--------|-------|
-| Staff (creator/classTeacher/assistantTeacher) | `requireClassPermission(ctx, userId, row.classId, "<permission>")` |
-| Student acting on **own** rows | class permission (e.g. `class:submit`, `class:viewOwnGrades`) **AND ownership**: the row's `orgStudentId` resolves to an orgStudent whose `userId` is the caller (or `studentUserId === caller` for solo). Never let a student pass on the class permission alone — that is how student A reads student B's grades |
-| Guardian | `requireGuardianAccess(ctx, callerId, row.orgStudentId, row.classId)` — the §4 two-step check. Guardian reads are **per-student**: return only rows for their linked child, never class-wide data |
-| Org staff dashboards (principal viewing across classes) | org-scoped permission via `withTenant` (e.g. `incidents:read` on the org), deriving the org from the loaded row's class |
+
+| Caller                                                  | Check                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Staff (creator/classTeacher/assistantTeacher)           | `requireClassPermission(ctx, userId, row.classId, "<permission>")`                                                                                                                                                                                                                                                 |
+| Student acting on **own** rows                          | class permission (e.g. `class:submit`, `class:viewOwnGrades`) **AND ownership**: the row's `orgStudentId` resolves to an orgStudent whose `userId` is the caller (or `studentUserId === caller` for solo). Never let a student pass on the class permission alone — that is how student A reads student B's grades |
+| Guardian                                                | `requireGuardianAccess(ctx, callerId, row.orgStudentId, row.classId)` — the §4 two-step check. Guardian reads are **per-student**: return only rows for their linked child, never class-wide data                                                                                                                  |
+| Org staff dashboards (principal viewing across classes) | org-scoped permission via `withTenant` (e.g. `incidents:read` on the org), deriving the org from the loaded row's class                                                                                                                                                                                            |
+
 
 **4. The four universal invariants** (same as core, restated for content):
 
@@ -682,10 +716,11 @@ Everything after auth (assignments, tasks, grades, points, behavior incidents, a
 4. **Closed validators:** args and returns fully validated; permission strings in UI-facing check queries stay closed unions (extend the union when you add permissions).
 
 **5. Sensitive-feature notes.**
-   - **Grades:** store per (classId, orgStudentId, assignmentId). Students read via ownership check; guardians via `requireGuardianAccess`; a grade-change history (append rows, don't overwrite) gives you an audit trail teachers and parents will eventually demand.
-   - **Incidents:** often should be visible to staff only, or staff + that student's guardians — put a `visibility` field on the row and enforce it *in addition to* the audience checks. Never include other students' names in guardian-visible rows.
-   - **Points:** high write volume; consider an append-only ledger + a denormalized total on a summary row. All writes are mutations (atomic), so totals stay consistent.
-   - **Notifications/emails** about any of these follow the same rule as invites: schedule internal actions, minimal PII in the payload.
+
+- **Grades:** store per (classId, orgStudentId, assignmentId). Students read via ownership check; guardians via `requireGuardianAccess`; a grade-change history (append rows, don't overwrite) gives you an audit trail teachers and parents will eventually demand.
+- **Incidents:** often should be visible to staff only, or staff + that student's guardians — put a `visibility` field on the row and enforce it *in addition to* the audience checks. Never include other students' names in guardian-visible rows.
+- **Points:** high write volume; consider an append-only ledger + a denormalized total on a summary row. All writes are mutations (atomic), so totals stay consistent.
+- **Notifications/emails** about any of these follow the same rule as invites: schedule internal actions, minimal PII in the payload.
 
 **6. Where code lives.** One file per feature (`convex/assignments.ts`, `convex/grades.ts`, `convex/incidents.ts`, …); shared audience-check helpers stay in `convex/lib/`; wrappers thin, logic in plain functions — same file discipline as the core.
 
@@ -695,14 +730,16 @@ A feature built this way needs **no changes** to the auth core: roles, enrollmen
 
 ## 12. Convex function type reference
 
-| Function | Type | Why |
-|----------|------|-----|
-| `getClass`, `listClasses`, `listMyClasses`, `getJoinCodes`, `checkClassPermission`, `listOrgStudents`, `listMyChildren`, `listGuardiansForStudent` | **query** | reads only; authz `can`/`hasRole`/`hasRelation`/`getUserRoles` are query-safe |
-| `createClass`, `updateClass`, `removeClass`, `regenerateJoinCode`, `redeemJoinCode`, `assignClassesToTeam`, `createOrgStudent`, `enrollStudent`, `unenrollStudent`, `linkStudentUser`, `inviteGuardian`, `acceptGuardianInvite`, `unlinkGuardian` | **mutation** | db writes + authz `assignRole`/`revokeRole`/`addRelation`/`removeRelation` need mutation context; each is atomic |
-| Invitation / guardian-invite email sending | **internal action** (own file; `"use node"` only if the email SDK needs Node) | external network calls are forbidden in mutations; scheduled from the mutation via `ctx.scheduler.runAfter(0, internal.…)` — never schedule public `api.*` functions |
-| `syncRoles`, `syncRole` (from `makeTenantsAPI`) | **action** (provided) | pages through users, one mutation per user; run after any role-definition change: `npx convex run tenants:syncRoles` |
-| Invite-expiry sweep | **internal mutation** on a cron | time-based status updates belong in mutations, never queries |
-| `requireClassPermission`, `assignClassCreator`, `requireGuardianAccess`, `getCurrentUser`, `requireUser` | plain TypeScript helpers | shared logic; keep function wrappers thin |
+
+| Function                                                                                                                                                                                                                                          | Type                                                                          | Why                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getClass`, `listClasses`, `listMyClasses`, `getJoinCodes`, `checkClassPermission`, `listOrgStudents`, `listMyChildren`, `listGuardiansForStudent`                                                                                                | **query**                                                                     | reads only; authz `can`/`hasRole`/`hasRelation`/`getUserRoles` are query-safe                                                                                        |
+| `createClass`, `updateClass`, `removeClass`, `regenerateJoinCode`, `redeemJoinCode`, `assignClassesToTeam`, `createOrgStudent`, `enrollStudent`, `unenrollStudent`, `linkStudentUser`, `inviteGuardian`, `acceptGuardianInvite`, `unlinkGuardian` | **mutation**                                                                  | db writes + authz `assignRole`/`revokeRole`/`addRelation`/`removeRelation` need mutation context; each is atomic                                                     |
+| Invitation / guardian-invite email sending                                                                                                                                                                                                        | **internal action** (own file; `"use node"` only if the email SDK needs Node) | external network calls are forbidden in mutations; scheduled from the mutation via `ctx.scheduler.runAfter(0, internal.…)` — never schedule public `api.`* functions |
+| `syncRoles`, `syncRole` (from `makeTenantsAPI`)                                                                                                                                                                                                   | **action** (provided)                                                         | pages through users, one mutation per user; run after any role-definition change: `npx convex run tenants:syncRoles`                                                 |
+| Invite-expiry sweep                                                                                                                                                                                                                               | **internal mutation** on a cron                                               | time-based status updates belong in mutations, never queries                                                                                                         |
+| `requireClassPermission`, `assignClassCreator`, `requireGuardianAccess`, `getCurrentUser`, `requireUser`                                                                                                                                          | plain TypeScript helpers                                                      | shared logic; keep function wrappers thin                                                                                                                            |
+
 
 No `"use node"` anywhere except (possibly) the email action. Everything else uses the default Convex runtime.
 
@@ -710,21 +747,23 @@ No `"use node"` anywhere except (possibly) the email action. Everything else use
 
 ## 13. File reference
 
-| File | Responsibility |
-|------|----------------|
-| `convex/convex.config.ts` | Register authz + tenants components |
-| `convex/authz.ts` | Permission catalog, role catalog, `authz` client export |
-| `convex/tenants.ts` | `makeTenantsAPI` re-exports — staff org/team/member/invitation functions |
-| `convex/schema.ts` | `classes`, `orgStudents`, `classEnrollments`, `guardianLinks`, `guardianInvites` |
-| `convex/classes.ts` | Class CRUD, code redaction, `getJoinCodes`, `regenerateJoinCode` |
-| `convex/memberships.ts` | `redeemJoinCode`, `listMyClasses`, `assignClassesToTeam` |
-| `convex/students.ts` | Roster: create, enroll, unenroll, link account, list |
-| `convex/guardians.ts` | Invite, accept, unlink, list queries |
-| `convex/permissions.ts` | `checkClassPermission` for React hooks |
-| `convex/lib/classAuth.ts` | `requireClassPermission`, `assignClassCreator` |
-| `convex/lib/guardianAuth.ts` | `requireGuardianAccess` (relation + active-enrollment check) |
-| `convex/emails.ts` | internal action(s) for outbound email |
-| `src/lib/auth.ts` | `requireUser` (unchanged) |
+
+| File                         | Responsibility                                                                   |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| `convex/convex.config.ts`    | Register authz + tenants components                                              |
+| `convex/authz.ts`            | Permission catalog, role catalog, `authz` client export                          |
+| `convex/tenants.ts`          | `makeTenantsAPI` re-exports — staff org/team/member/invitation functions         |
+| `convex/schema.ts`           | `classes`, `orgStudents`, `classEnrollments`, `guardianLinks`, `guardianInvites` |
+| `convex/classes.ts`          | Class CRUD, code redaction, `getJoinCodes`, `regenerateJoinCode`                 |
+| `convex/memberships.ts`      | `redeemJoinCode`, `listMyClasses`, `assignClassesToTeam`                         |
+| `convex/students.ts`         | Roster: create, enroll, unenroll, link account, list                             |
+| `convex/guardians.ts`        | Invite, accept, unlink, list queries                                             |
+| `convex/permissions.ts`      | `checkClassPermission` for React hooks                                           |
+| `convex/lib/classAuth.ts`    | `requireClassPermission`, `assignClassCreator`                                   |
+| `convex/lib/guardianAuth.ts` | `requireGuardianAccess` (relation + active-enrollment check)                     |
+| `convex/emails.ts`           | internal action(s) for outbound email                                            |
+| `src/lib/auth.ts`            | `requireUser` (unchanged)                                                        |
+
 
 ---
 
@@ -742,7 +781,7 @@ Issues found in earlier drafts and in the current codebase, in priority order. E
 8. **Orphaned authz assignments on class delete (accepted residual).** No scope-wide revoke API exists; assignments to a deleted class id are inert but persistent. Queries must null-filter; optionally sweep (§7.6).
 9. **Existence leaks (hardening).** `getClass` returns null for both "not found" and "no access"; `redeemJoinCode` errors are generic. Keep it that way.
 10. **Role-definition drift (operational).** Editing `defineRoles` and deploying does **not** update already-assigned users until `syncRoles` runs. Make it a deploy-checklist item (§7.3, §12).
-11. **Scheduling discipline (workspace rule).** Only `internal.*` functions may be scheduled — scheduled functions bypass public auth. The email actions and cron sweeps are internal (§8.1, §8.5).
+11. **Scheduling discipline (workspace rule).** Only `internal.`* functions may be scheduled — scheduled functions bypass public auth. The email actions and cron sweeps are internal (§8.1, §8.5).
 12. **Guardian data minimization.** Guardian-facing queries return only the linked student's data, checked per (student, class) via `requireGuardianAccess` — never "all students in the class". Emails to guardians omit student names.
 13. **Archived classes writable (year-model gap, high).** Under the academic-year model, student roles on archived classes are deliberately kept, so the `class:submit` / `class:grade` permissions still pass. Without an explicit archived guard, anyone could keep writing into last year's class — grade tampering after the fact. **Fix:** every content-writing mutation, plus `enrollStudent` and `redeemJoinCode`, rejects archived classes (§3, §7.7, §8.3, §11 invariant 2).
 14. **Hard-deleting classes with history (high).** `removeClass` on an org class would orphan enrollments and any grade/content rows, destroying records students and guardians are entitled to retain. **Fix:** refuse deletion when dependent rows exist; archive instead (§7.6). `year` is likewise immutable to prevent re-labeling history (§3, §7.6).
@@ -840,25 +879,27 @@ Issues found in earlier drafts and in the current codebase, in priority order. E
 
 ## 17. Glossary
 
-| Term | Meaning |
-|------|---------|
-| **authz** | `@djpanda/convex-authz` — scoped-role + ReBAC permission engine |
-| **tenants** | `@djpanda/convex-tenants` — staff org/team/member management |
-| **Component** | Isolated Convex sub-backend with its own tables, registered in `convex.config.ts` |
-| **Scope** | Resource context for a permission, e.g. `{ type: "class", id }` |
-| **RBAC / ReBAC** | Role-based / relationship-based access control |
-| **Tenant namespace** | authz partition; `"classclarus"` global for class roles, `withTenant(orgId)` per school |
-| **orgStudent** | Stable student record within an organization |
-| **classEnrollment** | orgStudent ↔ class link, active or withdrawn; a student may have many active rows; drives guardian access |
-| **Academic-year class** | Class with required `year`; new year = new class document, not an update to last year's row |
-| **guardian_of** | ReBAC relation user → orgStudent; the stable parent↔child link |
-| **guardianLinks** | Denormalized mirror of guardian_of for fast list queries |
-| **guardianInvites** | Email-verified consent flow for creating guardian links |
-| **Solo class** | `organizationId` undefined — independent of any school |
-| **team_leader** | Custom team-member role string, not a tenants built-in |
-| **Structural owner** | tenants `ownerId` on the org — removable only via ownership transfer |
-| **Archived guard** | Rule that content-writing mutations reject classes with `archivedTime` set; the sole write barrier on completed years |
+
+| Term                    | Meaning                                                                                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **authz**               | `@djpanda/convex-authz` — scoped-role + ReBAC permission engine                                                                               |
+| **tenants**             | `@djpanda/convex-tenants` — staff org/team/member management                                                                                  |
+| **Component**           | Isolated Convex sub-backend with its own tables, registered in `convex.config.ts`                                                             |
+| **Scope**               | Resource context for a permission, e.g. `{ type: "class", id }`                                                                               |
+| **RBAC / ReBAC**        | Role-based / relationship-based access control                                                                                                |
+| **Tenant namespace**    | authz partition; `"classclarus"` global for class roles, `withTenant(orgId)` per school                                                       |
+| **orgStudent**          | Stable student record within an organization                                                                                                  |
+| **classEnrollment**     | orgStudent ↔ class link, active or withdrawn; a student may have many active rows; drives guardian access                                     |
+| **Academic-year class** | Class with required `year`; new year = new class document, not an update to last year's row                                                   |
+| **guardian_of**         | ReBAC relation user → orgStudent; the stable parent↔child link                                                                                |
+| **guardianLinks**       | Denormalized mirror of guardian_of for fast list queries                                                                                      |
+| **guardianInvites**     | Email-verified consent flow for creating guardian links                                                                                       |
+| **Solo class**          | `organizationId` undefined — independent of any school                                                                                        |
+| **team_leader**         | Custom team-member role string, not a tenants built-in                                                                                        |
+| **Structural owner**    | tenants `ownerId` on the org — removable only via ownership transfer                                                                          |
+| **Archived guard**      | Rule that content-writing mutations reject classes with `archivedTime` set; the sole write barrier on completed years                         |
 | **customRoles (authz)** | Optional runtime feature letting org admins compose roles from a provider-defined permission whitelist; escape hatch for school-defined roles |
+
 
 ---
 
