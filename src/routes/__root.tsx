@@ -10,6 +10,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '#/components/theme/theme-provider'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { ErrorPage } from '@/components/errors/ErrorPage'
+import { AuthzProvider } from '@djpanda/convex-authz/react'
+import { api } from '../../convex/_generated/api'
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
@@ -36,9 +38,16 @@ function RootComponent() {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
             <RequireAuth>
-              <div vaul-drawer-wrapper="" className="bg-background">
-                <Outlet />
-              </div>
+              <AuthzProvider
+                queryRefs={{
+                  checkPermission: api.app.checkPermission,
+                  getUserRoles: api.app.getUserRoles,
+                }}
+              >
+                <div vaul-drawer-wrapper="" className="bg-background">
+                  <Outlet />
+                </div>
+              </AuthzProvider>
             </RequireAuth>
           </ThemeProvider>
           <Toaster />
