@@ -46,10 +46,12 @@ async function getOwnedClass(
 export const listClasses = query({
   args: {
     includeArchived: v.optional(v.boolean()),
+    archivedOnly: v.optional(v.boolean()),
   },
   returns: v.array(classDoc),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
+    const archivedOnly = args.archivedOnly ?? false
     const includeArchived = args.includeArchived ?? false
 
     const classes = await ctx.db
@@ -57,6 +59,10 @@ export const listClasses = query({
       .withIndex('by_user', (q) => q.eq('userId', user._id))
       .order('desc')
       .take(100)
+
+    if (archivedOnly) {
+      return classes.filter((c) => c.archivedTime !== undefined)
+    }
 
     if (includeArchived) {
       return classes

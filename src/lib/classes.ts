@@ -4,6 +4,15 @@ import type { Doc, Id } from '../../convex/_generated/dataModel'
 
 const PENDING_CODE = 'PENDING'
 
+function listQueryMode(queryArgs: {
+  includeArchived?: boolean
+  archivedOnly?: boolean
+}): 'active' | 'archived' | 'all' {
+  if (queryArgs.archivedOnly) return 'archived'
+  if (queryArgs.includeArchived) return 'all'
+  return 'active'
+}
+
 function applyClassPatch(
   doc: Doc<'classes'>,
   args: {
@@ -62,6 +71,9 @@ export function useCreateClass() {
         api.classes.listClasses,
       )) {
         if (value === undefined) continue
+        // New classes are active; only insert into active (or "all") lists.
+        const mode = listQueryMode(queryArgs)
+        if (mode === 'archived') continue
         localStore.setQuery(api.classes.listClasses, queryArgs, [
           optimisticClass,
           ...value,
@@ -108,10 +120,14 @@ export function useUpdateClass() {
       )) {
         if (value === undefined) continue
 
-        const includeArchived = queryArgs.includeArchived ?? false
+        const mode = listQueryMode(queryArgs)
         const index = value.findIndex((c) => c._id === args.classId)
+        const belongsInList =
+          mode === 'all' ||
+          (mode === 'archived' && isArchived) ||
+          (mode === 'active' && !isArchived)
 
-        if (!includeArchived && isArchived) {
+        if (!belongsInList) {
           if (index === -1) continue
           localStore.setQuery(
             api.classes.listClasses,
@@ -122,19 +138,10 @@ export function useUpdateClass() {
         }
 
         if (index === -1) {
-          if (!includeArchived && !isArchived) {
-            // Unarchived class should reappear in active lists.
-            localStore.setQuery(api.classes.listClasses, queryArgs, [
-              updated,
-              ...value,
-            ])
-          } else if (includeArchived && isArchived) {
-            // Archived class should appear in the includeArchived list.
-            localStore.setQuery(api.classes.listClasses, queryArgs, [
-              updated,
-              ...value,
-            ])
-          }
+          localStore.setQuery(api.classes.listClasses, queryArgs, [
+            updated,
+            ...value,
+          ])
           continue
         }
 

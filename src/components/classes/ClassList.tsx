@@ -2,10 +2,18 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
-import { BookText, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  Archive,
+  ArchiveRestore,
+  BookText,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Trash2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useRemoveClass } from '#/lib/classes'
+import { useRemoveClass, useUpdateClass } from '#/lib/classes'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
 import type { Doc } from '../../../convex/_generated/dataModel'
@@ -38,6 +46,7 @@ export type ClassListView = 'grid' | 'list'
 
 type ClassListProps = {
   view?: ClassListView
+  archivedOnly?: boolean
   onCreateClick?: () => void
   onEdit?: (classDoc: Doc<'classes'>) => void
 }
@@ -66,10 +75,14 @@ function ClassTimestamps({ classDoc }: { classDoc: Doc<'classes'> }) {
 }
 
 function ClassActionsMenu({
+  isArchived,
   onEdit,
+  onArchiveToggle,
   onDelete,
 }: {
+  isArchived: boolean
   onEdit: () => void
+  onArchiveToggle: () => void
   onDelete: () => void
 }) {
   return (
@@ -91,6 +104,10 @@ function ClassActionsMenu({
           <Pencil />
           Edit
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onArchiveToggle}>
+          {isArchived ? <ArchiveRestore /> : <Archive />}
+          {isArchived ? 'Unarchive' : 'Archive'}
+        </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onSelect={onDelete}>
           <Trash2 />
           Delete
@@ -103,12 +120,16 @@ function ClassActionsMenu({
 function ClassCard({
   classDoc,
   onEdit,
+  onArchiveToggle,
   onDelete,
 }: {
   classDoc: Doc<'classes'>
   onEdit: () => void
+  onArchiveToggle: () => void
   onDelete: () => void
 }) {
+  const isArchived = classDoc.archivedTime !== undefined
+
   return (
     <Card
       size="sm"
@@ -131,7 +152,12 @@ function ClassCard({
                 {classDoc.name}
               </CardTitle>
               <div className="pointer-events-auto">
-                <ClassActionsMenu onEdit={onEdit} onDelete={onDelete} />
+                <ClassActionsMenu
+                  isArchived={isArchived}
+                  onEdit={onEdit}
+                  onArchiveToggle={onArchiveToggle}
+                  onDelete={onDelete}
+                />
               </div>
             </div>
             {classDoc.description ? (
@@ -154,12 +180,16 @@ function ClassCard({
 function ClassRow({
   classDoc,
   onEdit,
+  onArchiveToggle,
   onDelete,
 }: {
   classDoc: Doc<'classes'>
   onEdit: () => void
+  onArchiveToggle: () => void
   onDelete: () => void
 }) {
+  const isArchived = classDoc.archivedTime !== undefined
+
   return (
     <Card
       size="sm"
@@ -193,7 +223,12 @@ function ClassRow({
                 )}
               </div>
               <div className="pointer-events-auto">
-                <ClassActionsMenu onEdit={onEdit} onDelete={onDelete} />
+                <ClassActionsMenu
+                  isArchived={isArchived}
+                  onEdit={onEdit}
+                  onArchiveToggle={onArchiveToggle}
+                  onDelete={onDelete}
+                />
               </div>
             </div>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-2xs text-muted-foreground">
@@ -252,17 +287,27 @@ function ClassListSkeleton({ view }: { view: ClassListView }) {
   )
 }
 
-function EmptyState({ onCreateClick }: { onCreateClick?: () => void }) {
+function EmptyState({
+  archivedOnly,
+  onCreateClick,
+}: {
+  archivedOnly?: boolean
+  onCreateClick?: () => void
+}) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
       <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <BookText className="size-6" />
       </div>
-      <h2 className="text-lg font-semibold">No classes yet</h2>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        Create your first class to unlock the power of ClassClarus!
-      </p>
-      {onCreateClick && (
+      <h2 className="text-lg font-semibold">
+        {archivedOnly ? 'No archived classes' : 'No classes yet'}
+      </h2>
+      {!archivedOnly && (
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          Create your first class to unlock the power of ClassClarus!
+        </p>
+      )}
+      {!archivedOnly && onCreateClick && (
         <Button className="mt-6" onClick={onCreateClick}>
           <Plus data-icon="inline-start" />
           Create Class
@@ -274,18 +319,40 @@ function EmptyState({ onCreateClick }: { onCreateClick?: () => void }) {
 
 export function ClassList({
   view = 'grid',
+  archivedOnly = false,
   onCreateClick,
   onEdit,
 }: ClassListProps) {
   const { data: classes, isPending } = useQuery({
-    ...convexQuery(api.classes.listClasses, {}),
+    ...convexQuery(
+      api.classes.listClasses,
+      archivedOnly ? { archivedOnly: true } : {},
+    ),
     gcTime: ONE_HOUR,
   })
   const removeClass = useRemoveClass()
+  const updateClass = useUpdateClass()
 
   const [deletingClass, setDeletingClass] = useState<Doc<'classes'> | null>(
     null,
   )
+
+  const handleArchiveToggle = (classDoc: Doc<'classes'>) => {
+    const archive = classDoc.archivedTime === undefined
+    void updateClass({ classId: classDoc._id, archived: archive })
+      .then(() => {
+        toast.success(archive ? 'Class archived' : 'Class unarchived')
+      })
+      .catch((error: unknown) => {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : archive
+              ? 'Failed to archive class'
+              : 'Failed to unarchive class',
+        )
+      })
+  }
 
   const handleDelete = () => {
     if (!deletingClass) return
@@ -310,7 +377,9 @@ export function ClassList({
   }
 
   if (classes.length === 0) {
-    return <EmptyState onCreateClick={onCreateClick} />
+    return (
+      <EmptyState archivedOnly={archivedOnly} onCreateClick={onCreateClick} />
+    )
   }
 
   return (
@@ -328,6 +397,7 @@ export function ClassList({
               key={classDoc._id}
               classDoc={classDoc}
               onEdit={() => onEdit?.(classDoc)}
+              onArchiveToggle={() => handleArchiveToggle(classDoc)}
               onDelete={() => setDeletingClass(classDoc)}
             />
           ) : (
@@ -335,6 +405,7 @@ export function ClassList({
               key={classDoc._id}
               classDoc={classDoc}
               onEdit={() => onEdit?.(classDoc)}
+              onArchiveToggle={() => handleArchiveToggle(classDoc)}
               onDelete={() => setDeletingClass(classDoc)}
             />
           ),
