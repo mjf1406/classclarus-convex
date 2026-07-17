@@ -10,6 +10,7 @@ import '../styles.css'
 import { ConvexAuthProvider } from '@convex-dev/auth/react'
 import { useQuery } from 'convex/react'
 import { Toaster } from '@/components/ui/sonner'
+import { PwaUpdatePrompt } from '@/components/pwa/PwaUpdatePrompt'
 import { ThemeProvider } from '#/components/theme/theme-provider'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { ErrorPage } from '@/components/errors/ErrorPage'
@@ -60,6 +61,7 @@ function RootComponent() {
             </RequireAuth>
           </ThemeProvider>
           <Toaster />
+          <PwaUpdatePrompt />
         </QueryClientProvider>
       </ConvexAuthProvider>
       <TanStackDevtools
