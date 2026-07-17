@@ -97,7 +97,7 @@ function Home() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl p-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:p-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-4xl font-bold tracking-tight">My Classes</h1>
         <div className="flex flex-wrap items-center gap-2">

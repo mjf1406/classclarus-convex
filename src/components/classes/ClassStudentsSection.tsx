@@ -204,7 +204,7 @@ export function ClassStudentsSection({
   return (
     <>
       <section className="mt-10">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold tracking-tight">Students</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -217,7 +217,7 @@ export function ClassStudentsSection({
             type="button"
             size="sm"
             variant="default"
-            className="shrink-0"
+            className="w-full shrink-0 sm:w-auto"
             aria-label="Download guardian codes PDF"
             disabled={data === undefined || isGenerating}
             onClick={() => void handleDownload()}
@@ -265,7 +265,7 @@ export function ClassStudentsSection({
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon-sm"
+                          size="icon"
                           aria-label={`Copy code for ${student.displayName}`}
                           onClick={() =>
                             handleCopyCode(
@@ -279,7 +279,7 @@ export function ClassStudentsSection({
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon-sm"
+                          size="icon"
                           aria-label={`Copy join link for ${student.displayName}`}
                           onClick={() =>
                             handleCopyLink(
@@ -293,7 +293,7 @@ export function ClassStudentsSection({
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon-sm"
+                          size="icon"
                           aria-label={`Regenerate guardian code for ${student.displayName}`}
                           disabled={isRegenerating}
                           onClick={() =>

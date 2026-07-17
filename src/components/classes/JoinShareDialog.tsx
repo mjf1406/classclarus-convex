@@ -172,6 +172,7 @@ type JoinShareDialogProps = {
   onOpenChange: (open: boolean) => void
   code: string
   role: ClassRole
+  qrOnly?: boolean
 }
 
 export function JoinShareDialog({
@@ -179,22 +180,58 @@ export function JoinShareDialog({
   onOpenChange,
   code,
   role,
+  qrOnly = false,
 }: JoinShareDialogProps) {
-  const roleLabel = CLASS_ROLE_BADGE_CONFIG[role].label
+  const roleConfig = CLASS_ROLE_BADGE_CONFIG[role]
+  const roleLabel = roleConfig.label
+  const joinUrl = getJoinUrl(code)
+
+  if (qrOnly) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-xs gap-0 p-4 sm:max-w-sm">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{roleLabel} join QR code</DialogTitle>
+            <DialogDescription>
+              Scan this QR code to join as {roleLabel.toLowerCase()}.
+            </DialogDescription>
+          </DialogHeader>
+          <div
+            className={cn(
+              'flex items-center justify-center rounded-2xl border p-4',
+              roleConfig.className,
+            )}
+          >
+            <QRCode
+              value={joinUrl}
+              size={280}
+              bgColor="transparent"
+              fgColor="currentColor"
+              className="h-auto w-full"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="top-4 left-4 h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-none translate-x-0 translate-y-0 gap-0 overflow-y-auto rounded-3xl p-6 sm:max-w-none sm:p-8"
-        showCloseButton
+        className={cn(
+          'top-4 left-4 h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-none translate-x-0 translate-y-0 gap-0 overflow-y-auto rounded-3xl p-6 sm:max-w-none sm:p-8',
+        )}
       >
         <DialogHeader className="sr-only">
-          <DialogTitle>Share {roleLabel.toLowerCase()} join code</DialogTitle>
+          <DialogTitle>
+            Share {roleLabel.toLowerCase()} join code
+          </DialogTitle>
           <DialogDescription>
             Display this for your class, or share the code / link so others can
             join as {roleLabel.toLowerCase()}.
           </DialogDescription>
         </DialogHeader>
+
         <JoinSharePanel code={code} role={role} />
       </DialogContent>
     </Dialog>

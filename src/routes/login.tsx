@@ -28,7 +28,7 @@ function RouteComponent() {
   const [termsAccepted, setTermsAccepted] = useState(false)
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <ModeToggle className="absolute top-4 right-4" />
       <Card className="w-full max-w-md bg-input/30">
         <CardHeader className="text-center space-y-3">

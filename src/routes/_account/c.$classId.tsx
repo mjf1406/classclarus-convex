@@ -116,7 +116,10 @@ function JoinCodesSection({
 }) {
   const regenerate = useMutation(api.classes.regenerateJoinCode)
   const [regenerating, setRegenerating] = useState<JoinCodeType | null>(null)
-  const [sharing, setSharing] = useState<JoinCodeType | null>(null)
+  const [sharing, setSharing] = useState<{
+    type: JoinCodeType
+    qrOnly: boolean
+  } | null>(null)
 
   const codeFor = (type: JoinCodeType): string | undefined | null => {
     if (codes === undefined) return undefined
@@ -134,10 +137,10 @@ function JoinCodesSection({
     return codeFor(type) !== null
   })
 
-  const sharingCodeRaw = sharing ? codeFor(sharing) : null
+  const sharingCodeRaw = sharing ? codeFor(sharing.type) : null
   const sharingCode =
     typeof sharingCodeRaw === 'string' ? sharingCodeRaw : undefined
-  const sharingRole = sharing ? JOIN_CODE_ROLE[sharing] : null
+  const sharingRole = sharing ? JOIN_CODE_ROLE[sharing.type] : null
 
   const handleCopy = (type: JoinCodeType) => {
     const code = codeFor(type)
@@ -212,7 +215,7 @@ function JoinCodesSection({
                   <button
                     type="button"
                     className="rounded-md font-mono text-lg font-semibold tracking-widest text-left hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onClick={() => setSharing(type)}
+                    onClick={() => setSharing({ type, qrOnly: false })}
                     aria-label={`Show ${roleConfig.label} join QR`}
                   >
                     {formatJoinCodeDisplay(code)}
@@ -222,17 +225,17 @@ function JoinCodesSection({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     aria-label={`Show ${roleConfig.label} join QR`}
                     disabled={!code}
-                    onClick={() => setSharing(type)}
+                    onClick={() => setSharing({ type, qrOnly: true })}
                   >
                     <QrCode />
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     aria-label={`Open ${roleConfig.label} join QR in a new window`}
                     disabled={!code}
                     onClick={() => handleOpenShareWindow(type)}
@@ -242,7 +245,7 @@ function JoinCodesSection({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     aria-label={`Copy ${roleConfig.label} code`}
                     disabled={!code}
                     onClick={() => handleCopy(type)}
@@ -255,7 +258,7 @@ function JoinCodesSection({
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon-sm"
+                          size="icon"
                           aria-label={`${roleConfig.label} code actions`}
                           disabled={!code}
                         >
@@ -292,6 +295,7 @@ function JoinCodesSection({
           }}
           code={sharingCode}
           role={sharingRole}
+          qrOnly={sharing.qrOnly}
         />
       ) : null}
     </section>
@@ -517,7 +521,7 @@ function ClassPage() {
   })
 
   return (
-    <div className="mx-auto max-w-5xl p-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:p-8">
       <div className="mb-8">
         <Button variant="ghost" size="sm" className="mb-4 -ml-2" asChild>
           <Link to="/">

@@ -31,7 +31,7 @@ export function PwaUpdatePrompt() {
 
     toast.custom(
       () => (
-        <div className="flex w-[92vw] max-w-md flex-col items-center gap-5 rounded-2xl border border-blue-300 bg-blue-50 p-7 text-center shadow-2xl dark:border-blue-600 dark:bg-blue-950">
+        <div className="mt-[max(0.5rem,env(safe-area-inset-top))] flex w-[92vw] max-w-md flex-col items-center gap-5 rounded-2xl border border-blue-300 bg-blue-50 p-7 text-center shadow-2xl dark:border-blue-600 dark:bg-blue-950">
           <div className="flex size-16 items-center justify-center rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-300">
             <RocketIcon className="size-9" />
           </div>

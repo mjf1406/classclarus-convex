@@ -206,7 +206,7 @@ export function ClassFormCredenza({
     <Credenza open={open} onOpenChange={handleOpenChange}>
       {showCreateTrigger && (
         <CredenzaTrigger asChild>
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus data-icon="inline-start" />
             Create Class
           </Button>
@@ -304,7 +304,7 @@ export function ClassFormCredenza({
           </form>
         </CredenzaBody>
         <CredenzaFooter className="flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <p className="hidden flex-wrap items-center gap-1.5 text-xs text-muted-foreground md:flex">
             <span>In description,</span>
             <KbdGroup>
               <Kbd>Ctrl</Kbd> + <Kbd>Enter</Kbd>
