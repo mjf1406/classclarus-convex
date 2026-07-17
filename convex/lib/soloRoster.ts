@@ -1,6 +1,7 @@
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx } from '../_generated/server'
 import { generateUniqueJoinCode } from './joinCodes'
+import { revokeGuardiansAndRotateCode } from './guardianLinks'
 
 const MAX_SOLO_STUDENT_RECORDS = 200
 
@@ -59,10 +60,15 @@ export async function ensureSoloStudentEnrollment(
   return orgStudentId
 }
 
+/**
+ * Withdraw enrollment and revoke guardian access for this class's solo record.
+ * Caller id is used for authz relation audit on unlink.
+ */
 export async function withdrawSoloStudentEnrollment(
   ctx: MutationCtx,
   userId: Id<'users'>,
   classId: Id<'classes'>,
+  callerId: Id<'users'>,
 ): Promise<void> {
   const studentRecords = await ctx.db
     .query('orgStudents')
@@ -82,6 +88,7 @@ export async function withdrawSoloStudentEnrollment(
       await ctx.db.patch('classEnrollments', enrollment._id, {
         status: 'withdrawn',
       })
+      await revokeGuardiansAndRotateCode(ctx, callerId, student)
     }
   }
 }

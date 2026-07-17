@@ -18,6 +18,9 @@ const permissions = definePermissions(TENANTS_PERMISSIONS, {
     grade: true,
     submit: true,
     viewOwnGrades: true,
+    // Defined for the permission catalog / UI closed union only.
+    // NEVER grant class:viewChildGrades on any class role — that would be
+    // class-wide. Guardians use requireGuardianAccess / requireStudentContentAccess.
     viewChildGrades: true,
   },
   students: {
@@ -90,7 +93,8 @@ const roles = defineRoles(permissions, TENANTS_ROLES, {
 // Step 3: The authz client. The "classclarus" tenant namespace holds solo-class
 // role assignments; org-scoped calls in Phase 2 go through withTenant(orgId).
 // No relationPermissions — guardian access uses an explicit two-step check
-// (relation + active enrollment), see guide §4.
+// (relation + active enrollment), see guide §4. Do not assign
+// class:viewChildGrades to any role; use requireStudentContentAccess instead.
 export const authz = new Authz(components.authz, {
   permissions,
   roles,

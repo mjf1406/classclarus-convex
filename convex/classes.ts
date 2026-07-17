@@ -15,8 +15,9 @@ import { generateUniqueJoinCode } from './lib/joinCodes'
 import { hasGuardianAccessToClass } from './lib/guardianAuth'
 
 // Public class shape: join codes and the display pin are redacted. Codes are
-// only available via getJoinCodes (gated on class:manageMembers) — otherwise a
-// student who can read the class could read teacherCode and escalate.
+// only available via getJoinCodes — student code gated on class:manageMembers;
+// teacher/assistant codes only when the caller also has class:manage.
+// Otherwise a student who can read the class could read teacherCode and escalate.
 export const classDocPublic = v.object({
   _id: v.id('classes'),
   _creationTime: v.number(),
@@ -252,8 +253,9 @@ export const getJoinCodes = query({
   },
   returns: v.object({
     studentCode: v.string(),
-    teacherCode: v.string(),
-    assistantTeacherCode: v.string(),
+    /** Only present when caller has class:manage (creator). */
+    teacherCode: v.union(v.string(), v.null()),
+    assistantTeacherCode: v.union(v.string(), v.null()),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
@@ -269,10 +271,17 @@ export const getJoinCodes = query({
       throw new Error('Class not found')
     }
 
+    const canManage = await hasClassPermission(
+      ctx,
+      user._id,
+      args.classId,
+      'class:manage',
+    )
+
     return {
       studentCode: doc.studentCode,
-      teacherCode: doc.teacherCode,
-      assistantTeacherCode: doc.assistantTeacherCode,
+      teacherCode: canManage ? doc.teacherCode : null,
+      assistantTeacherCode: canManage ? doc.assistantTeacherCode : null,
     }
   },
 })

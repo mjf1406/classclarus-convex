@@ -3,6 +3,7 @@ import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { authz } from '../authz'
 
 const GUARDIAN_RELATION = 'guardian_of'
+const MAX_GUARDIAN_LINKS_FOR_CLASS_CHECK = 100
 
 export function guardianAuthz(organizationId: string | undefined) {
   return organizationId ? authz.withTenant(organizationId) : authz
@@ -57,25 +58,26 @@ export async function hasGuardianAccess(
 
 /**
  * True when the user is guardian_of any student with an active enrollment
- * in this class.
+ * in this class. Starts from the guardian's links (not the class roster).
  */
 export async function hasGuardianAccessToClass(
   ctx: QueryCtx | MutationCtx,
   guardianUserId: Id<'users'>,
   classId: Id<'classes'>,
 ): Promise<boolean> {
-  const enrollments = await ctx.db
-    .query('classEnrollments')
-    .withIndex('by_classId', (query) => query.eq('classId', classId))
-    .take(501)
+  const links = await ctx.db
+    .query('guardianLinks')
+    .withIndex('by_guardianUserId', (query) =>
+      query.eq('guardianUserId', guardianUserId),
+    )
+    .take(MAX_GUARDIAN_LINKS_FOR_CLASS_CHECK)
 
-  for (const enrollment of enrollments) {
-    if (enrollment.status !== 'active') continue
+  for (const link of links) {
     if (
       await hasGuardianAccess(
         ctx,
         guardianUserId,
-        enrollment.orgStudentId,
+        link.orgStudentId,
         classId,
       )
     ) {

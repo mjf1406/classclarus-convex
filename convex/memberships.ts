@@ -23,7 +23,9 @@ import {
   classSort,
   toPublicClass,
 } from './classes'
+import { tryRedeemGuardianCode } from './lib/guardianLinks'
 import { rateLimiter } from './rateLimiter'
+import { JOIN_CODE_LENGTH } from './lib/joinCodes'
 
 type RedeemableRole = 'student' | 'classTeacher' | 'assistantTeacher'
 
@@ -60,6 +62,81 @@ const INVALID_CODE_ERROR = 'Invalid join code'
 const RATE_LIMITED_ERROR = 'Too many attempts. Please try again later.'
 const SOLO_BACKFILL_USERS_PER_BATCH = 20
 
+const redeemableRoleValidator = v.union(
+  v.literal('student'),
+  v.literal('classTeacher'),
+  v.literal('assistantTeacher'),
+)
+
+/**
+ * Redeem a class join code without rate limiting (caller applies limits once).
+ */
+async function tryRedeemJoinCode(
+  ctx: MutationCtx,
+  user: Doc<'users'>,
+  rawCode: string,
+): Promise<
+  | { ok: true; classId: Id<'classes'>; role: RedeemableRole }
+  | { ok: false; error: string }
+> {
+  const code = rawCode.replace(/[\s\u2013-]/g, '').toUpperCase()
+  if (code.length !== JOIN_CODE_LENGTH) {
+    return { ok: false, error: INVALID_CODE_ERROR }
+  }
+
+  const match = await findClassByCode(ctx, code)
+  // Generic error for both "no match" and "archived": never confirm that a
+  // code was (once) valid.
+  if (!match) {
+    return { ok: false, error: INVALID_CODE_ERROR }
+  }
+  if (match.doc.archivedTime !== undefined) {
+    return { ok: false, error: INVALID_CODE_ERROR }
+  }
+
+  // Org-class guard: org students go through the roster-linking path
+  // (Phase 2, linkStudentUser). Same generic error — never confirm a valid
+  // org student code to unauthenticated-to-roster callers.
+  if (match.doc.organizationId !== undefined && match.role === 'student') {
+    console.error('Org student join blocked (roster path required)', {
+      classId: match.doc._id,
+    })
+    return { ok: false, error: INVALID_CODE_ERROR }
+  }
+
+  const scope = classScope(match.doc._id)
+
+  // Idempotent: redeeming a code for a role you already hold succeeds
+  // without double-assigning. Roles are additive — a creator redeeming a
+  // teacher code keeps creator.
+  const alreadyHasRole = await authz.hasRole(ctx, user._id, match.role, scope)
+  if (!alreadyHasRole) {
+    await authz.assignRole(ctx, user._id, match.role, scope)
+  }
+  if (match.role === 'student' && match.doc.organizationId === undefined) {
+    await ensureSoloStudentEnrollment(ctx, user, match.doc._id)
+  }
+
+  return { ok: true, classId: match.doc._id, role: match.role }
+}
+
+async function applyJoinCodeRateLimits(
+  ctx: MutationCtx,
+  userId: Id<'users'>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const perUser = await rateLimiter.limit(ctx, 'joinCodePerUser', {
+    key: userId,
+  })
+  if (!perUser.ok) {
+    return { ok: false, error: RATE_LIMITED_ERROR }
+  }
+  const global = await rateLimiter.limit(ctx, 'joinCodeGlobal')
+  if (!global.ok) {
+    return { ok: false, error: RATE_LIMITED_ERROR }
+  }
+  return { ok: true }
+}
+
 // Failures are returned (not thrown) so rate-limit consumption commits — a
 // thrown error would roll back the whole mutation, including the rate-limit
 // write, making brute-force attempts free.
@@ -71,11 +148,7 @@ export const redeemJoinCode = mutation({
     v.object({
       ok: v.literal(true),
       classId: v.id('classes'),
-      role: v.union(
-        v.literal('student'),
-        v.literal('classTeacher'),
-        v.literal('assistantTeacher'),
-      ),
+      role: redeemableRoleValidator,
     }),
     v.object({
       ok: v.literal(false),
@@ -84,56 +157,69 @@ export const redeemJoinCode = mutation({
   ),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
-
-    const perUser = await rateLimiter.limit(ctx, 'joinCodePerUser', {
-      key: user._id,
-    })
-    if (!perUser.ok) {
-      // Generic message — don't reveal the throttling threshold.
-      return { ok: false as const, error: RATE_LIMITED_ERROR }
+    const limited = await applyJoinCodeRateLimits(ctx, user._id)
+    if (!limited.ok) {
+      return { ok: false as const, error: limited.error }
     }
-    const global = await rateLimiter.limit(ctx, 'joinCodeGlobal')
-    if (!global.ok) {
-      return { ok: false as const, error: RATE_LIMITED_ERROR }
-    }
+    return await tryRedeemJoinCode(ctx, user, args.code)
+  },
+})
 
-    // Accept pasted codes that include spaces or an en/hyphen dash.
-    const code = args.code.replace(/[\s\u2013-]/g, '').toUpperCase()
-
-    const match = await findClassByCode(ctx, code)
-    // Generic error for both "no match" and "archived": never confirm that a
-    // code was (once) valid.
-    if (!match) {
-      return { ok: false as const, error: INVALID_CODE_ERROR }
-    }
-    if (match.doc.archivedTime !== undefined) {
-      return { ok: false as const, error: INVALID_CODE_ERROR }
-    }
-
-    // Org-class guard: org students go through the roster-linking path
-    // (Phase 2, linkStudentUser). Same generic error — never confirm a valid
-    // org student code to unauthenticated-to-roster callers.
-    if (match.doc.organizationId !== undefined && match.role === 'student') {
-      console.error('Org student join blocked (roster path required)', {
-        classId: match.doc._id,
-      })
-      return { ok: false as const, error: INVALID_CODE_ERROR }
-    }
-
-    const scope = classScope(match.doc._id)
-
-    // Idempotent: redeeming a code for a role you already hold succeeds
-    // without double-assigning. Roles are additive — a creator redeeming a
-    // teacher code keeps creator.
-    const alreadyHasRole = await authz.hasRole(ctx, user._id, match.role, scope)
-    if (!alreadyHasRole) {
-      await authz.assignRole(ctx, user._id, match.role, scope)
-    }
-    if (match.role === 'student' && match.doc.organizationId === undefined) {
-      await ensureSoloStudentEnrollment(ctx, user, match.doc._id)
+/**
+ * Single rate-limit budget: try class join codes, then guardian codes.
+ */
+export const redeemJoinOrGuardianCode = mutation({
+  args: {
+    code: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      ok: v.literal(true),
+      kind: v.literal('class'),
+      classId: v.id('classes'),
+      role: redeemableRoleValidator,
+    }),
+    v.object({
+      ok: v.literal(true),
+      kind: v.literal('guardian'),
+      orgStudentId: v.id('orgStudents'),
+    }),
+    v.object({
+      ok: v.literal(false),
+      error: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    const limited = await applyJoinCodeRateLimits(ctx, user._id)
+    if (!limited.ok) {
+      return { ok: false as const, error: limited.error }
     }
 
-    return { ok: true as const, classId: match.doc._id, role: match.role }
+    const classResult = await tryRedeemJoinCode(ctx, user, args.code)
+    if (classResult.ok) {
+      return {
+        ok: true as const,
+        kind: 'class' as const,
+        classId: classResult.classId,
+        role: classResult.role,
+      }
+    }
+
+    // Only fall through on "invalid code" — preserve guardian-cap messages etc.
+    if (classResult.error !== INVALID_CODE_ERROR) {
+      return { ok: false as const, error: classResult.error }
+    }
+
+    const guardianResult = await tryRedeemGuardianCode(ctx, user._id, args.code)
+    if (guardianResult.ok) {
+      return {
+        ok: true as const,
+        kind: 'guardian' as const,
+        orgStudentId: guardianResult.orgStudentId,
+      }
+    }
+    return { ok: false as const, error: guardianResult.error }
   },
 })
 
@@ -311,7 +397,12 @@ export const removeMember = mutation({
       throw new Error('User is not a member of this class')
     }
     if (targetIsStudent && classDoc.organizationId === undefined) {
-      await withdrawSoloStudentEnrollment(ctx, args.userId, args.classId)
+      await withdrawSoloStudentEnrollment(
+        ctx,
+        args.userId,
+        args.classId,
+        caller._id,
+      )
     }
 
     return null

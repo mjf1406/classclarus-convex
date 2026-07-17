@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useMutation } from 'convex/react'
-import { ChevronDown, Copy, Download, Link2, UserMinus } from 'lucide-react'
+import {
+  ChevronDown,
+  Copy,
+  Download,
+  Link2,
+  RefreshCw,
+  UserMinus,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '../../../convex/_generated/api'
@@ -30,7 +37,6 @@ import { TEN_MINUTES } from '@/lib/queryCache'
 type ListedGuardian = {
   guardianUserId: Id<'users'>
   name?: string
-  email?: string
   linkedAt: number
 }
 
@@ -50,11 +56,7 @@ type PendingUnlink =
     }
 
 function formatGuardianName(guardian: ListedGuardian): string {
-  return (
-    guardian.name ??
-    guardian.email ??
-    `User ${guardian.guardianUserId.slice(-6)}`
-  )
+  return guardian.name ?? `User ${guardian.guardianUserId.slice(-6)}`
 }
 
 function formatGuardianSummary(guardianCount: number): string {
@@ -73,9 +75,14 @@ export function ClassStudentsSection({ classId }: { classId: Id<'classes'> }) {
   const unlinkAllGuardiansForStudent = useMutation(
     api.guardians.unlinkAllGuardiansForStudent,
   )
+  const regenerateGuardianCode = useMutation(
+    api.guardians.regenerateGuardianCode,
+  )
   const [isGenerating, setIsGenerating] = useState(false)
   const [pendingUnlink, setPendingUnlink] = useState<PendingUnlink | null>(null)
   const [unlinkingStudentId, setUnlinkingStudentId] =
+    useState<Id<'orgStudents'> | null>(null)
+  const [regeneratingStudentId, setRegeneratingStudentId] =
     useState<Id<'orgStudents'> | null>(null)
 
   const handleDownload = async () => {
@@ -109,6 +116,28 @@ export function ClassStudentsSection({ classId }: { classId: Id<'classes'> }) {
       .writeText(getJoinUrl(code))
       .then(() => toast.success(`Join link for ${displayName} copied`))
       .catch(() => toast.error('Failed to copy link'))
+  }
+
+  const handleRegenerate = (
+    orgStudentId: Id<'orgStudents'>,
+    displayName: string,
+  ) => {
+    setRegeneratingStudentId(orgStudentId)
+    void regenerateGuardianCode({ orgStudentId, classId })
+      .then((newCode) => {
+        toast.success(`Guardian code regenerated for ${displayName}`)
+        void navigator.clipboard.writeText(newCode).catch(() => {
+          /* clipboard optional */
+        })
+      })
+      .catch((error: unknown) => {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : 'Failed to regenerate guardian code',
+        )
+      })
+      .finally(() => setRegeneratingStudentId(null))
   }
 
   const handleConfirmUnlink = () => {
@@ -168,9 +197,9 @@ export function ClassStudentsSection({ classId }: { classId: Id<'classes'> }) {
           <div className="min-w-0">
             <h2 className="text-xl font-semibold tracking-tight">Students</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each enrolled student has a private guardian join code. Copy a
-              code or link to share, or download print-ready QR slips for the
-              whole class.
+              Each enrolled student has a private guardian join code (max 5
+              guardians). Copy a code or link to share, regenerate if it leaks,
+              or download print-ready QR slips for the whole class.
             </p>
           </div>
           <Button
@@ -199,6 +228,8 @@ export function ClassStudentsSection({ classId }: { classId: Id<'classes'> }) {
           ) : (
             data.students.map((student) => {
               const isUnlinking = unlinkingStudentId === student.orgStudentId
+              const isRegenerating =
+                regeneratingStudentId === student.orgStudentId
               return (
                 <li key={student.orgStudentId} className="px-4 py-3">
                   <Collapsible>
@@ -247,6 +278,25 @@ export function ClassStudentsSection({ classId }: { classId: Id<'classes'> }) {
                           }
                         >
                           <Link2 />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Regenerate guardian code for ${student.displayName}`}
+                          disabled={isRegenerating}
+                          onClick={() =>
+                            handleRegenerate(
+                              student.orgStudentId,
+                              student.displayName,
+                            )
+                          }
+                        >
+                          <RefreshCw
+                            className={
+                              isRegenerating ? 'animate-spin' : undefined
+                            }
+                          />
                         </Button>
                       </div>
                     </div>

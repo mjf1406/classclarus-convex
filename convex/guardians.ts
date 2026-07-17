@@ -1,6 +1,6 @@
 import { requireUser } from '#/lib/auth'
 import { v } from 'convex/values'
-import type { Doc, Id } from './_generated/dataModel'
+import type { Id } from './_generated/dataModel'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
 import { authz } from './authz'
@@ -12,15 +12,19 @@ import {
   guardianSubject,
   hasGuardianAccess,
 } from './lib/guardianAuth'
-import { generateUniqueJoinCode, JOIN_CODE_LENGTH } from './lib/joinCodes'
+import {
+  listGuardianLinksForStudent,
+  rotateGuardianCode,
+  unlinkAllGuardiansForOrgStudent,
+  unlinkGuardianLinkInternal,
+  tryRedeemGuardianCode,
+} from './lib/guardianLinks'
 import { rateLimiter } from './rateLimiter'
 
-const INVALID_CODE_ERROR = 'Invalid join code'
 const RATE_LIMITED_ERROR = 'Too many attempts. Please try again later.'
 const MAX_GUARDIAN_LINKS = 100
 const MAX_STUDENT_ENROLLMENTS = 200
 const MAX_CLASS_STUDENTS = 500
-const MAX_STUDENT_GUARDIANS = 20
 
 const guardianClassValidator = v.object({
   classId: v.id('classes'),
@@ -36,10 +40,10 @@ const childValidator = v.object({
   classes: v.array(guardianClassValidator),
 })
 
+/** No email — name + user id only for unlink UI. */
 const listedGuardianValidator = v.object({
   guardianUserId: v.id('users'),
   name: v.optional(v.string()),
-  email: v.optional(v.string()),
   linkedAt: v.number(),
 })
 
@@ -127,34 +131,6 @@ async function canManageGuardianLink(
   )
 }
 
-async function unlinkGuardianLinkInternal(
-  ctx: MutationCtx,
-  callerId: Id<'users'>,
-  orgStudent: Doc<'orgStudents'>,
-  guardianUserId: Id<'users'>,
-): Promise<void> {
-  const tenantAuthz = guardianAuthz(orgStudent.organizationId)
-  await tenantAuthz.removeRelation(
-    ctx,
-    guardianSubject(guardianUserId),
-    GUARDIAN_RELATION,
-    guardianObject(orgStudent._id),
-    callerId,
-  )
-
-  const link = await ctx.db
-    .query('guardianLinks')
-    .withIndex('by_guardianUserId_and_orgStudentId', (index) =>
-      index
-        .eq('guardianUserId', guardianUserId)
-        .eq('orgStudentId', orgStudent._id),
-    )
-    .unique()
-  if (link) {
-    await ctx.db.delete('guardianLinks', link._id)
-  }
-}
-
 export const redeemGuardianCode = mutation({
   args: {
     code: v.string(),
@@ -183,51 +159,7 @@ export const redeemGuardianCode = mutation({
       return { ok: false as const, error: RATE_LIMITED_ERROR }
     }
 
-    const code = args.code.replace(/[\s\u2013-]/g, '').toUpperCase()
-    if (code.length !== JOIN_CODE_LENGTH) {
-      return { ok: false as const, error: INVALID_CODE_ERROR }
-    }
-
-    const orgStudent = await ctx.db
-      .query('orgStudents')
-      .withIndex('by_guardianCode', (index) => index.eq('guardianCode', code))
-      .unique()
-    if (!orgStudent) {
-      return { ok: false as const, error: INVALID_CODE_ERROR }
-    }
-
-    const tenantAuthz = guardianAuthz(orgStudent.organizationId)
-    const subject = guardianSubject(user._id)
-    const object = guardianObject(orgStudent._id)
-    const relationExists = await tenantAuthz.hasRelation(
-      ctx,
-      subject,
-      GUARDIAN_RELATION,
-      object,
-    )
-    if (!relationExists) {
-      await tenantAuthz.addRelation(ctx, subject, GUARDIAN_RELATION, object, {
-        createdBy: user._id,
-      })
-    }
-
-    const existingLink = await ctx.db
-      .query('guardianLinks')
-      .withIndex('by_guardianUserId_and_orgStudentId', (index) =>
-        index.eq('guardianUserId', user._id).eq('orgStudentId', orgStudent._id),
-      )
-      .unique()
-    if (!existingLink) {
-      await ctx.db.insert('guardianLinks', {
-        organizationId: orgStudent.organizationId,
-        guardianUserId: user._id,
-        orgStudentId: orgStudent._id,
-        linkedByUserId: user._id,
-        linkedAt: Date.now(),
-      })
-    }
-
-    return { ok: true as const, orgStudentId: orgStudent._id }
+    return await tryRedeemGuardianCode(ctx, user._id, args.code)
   },
 })
 
@@ -256,9 +188,7 @@ export const regenerateGuardianCode = mutation({
       throw new Error('Not authorized to regenerate this guardian code')
     }
 
-    const guardianCode = await generateUniqueJoinCode(ctx)
-    await ctx.db.patch('orgStudents', orgStudent._id, { guardianCode })
-    return guardianCode
+    return await rotateGuardianCode(ctx, orgStudent._id)
   },
 })
 
@@ -343,27 +273,7 @@ export const unlinkAllGuardiansForStudent = mutation({
       throw new Error('Not authorized to unlink guardians for this student')
     }
 
-    const links = await ctx.db
-      .query('guardianLinks')
-      .withIndex('by_orgStudentId', (index) =>
-        index.eq('orgStudentId', orgStudent._id),
-      )
-      .take(MAX_STUDENT_GUARDIANS)
-    let removed = 0
-    for (const link of links) {
-      if (link.organizationId !== orgStudent.organizationId) {
-        continue
-      }
-      await unlinkGuardianLinkInternal(
-        ctx,
-        caller._id,
-        orgStudent,
-        link.guardianUserId,
-      )
-      removed += 1
-    }
-
-    return removed
+    return await unlinkAllGuardiansForOrgStudent(ctx, caller._id, orgStudent)
   },
 })
 
@@ -423,6 +333,7 @@ export const listMyChildren = query({
 
       for (const enrollment of enrollments) {
         if (enrollment.status !== 'active') continue
+        if (enrollment.organizationId !== orgStudent.organizationId) continue
         const allowed = await hasGuardianAccess(
           ctx,
           user._id,
@@ -496,19 +407,17 @@ export const listGuardiansForStudent = query({
       throw new Error('Student is not actively enrolled in this class')
     }
 
-    const links = await ctx.db
-      .query('guardianLinks')
-      .withIndex('by_orgStudentId', (index) =>
-        index.eq('orgStudentId', orgStudent._id),
-      )
-      .take(MAX_STUDENT_GUARDIANS)
+    const links = await listGuardianLinksForStudent(
+      ctx,
+      orgStudent._id,
+      orgStudent.organizationId,
+    )
     const guardians = await Promise.all(
       links.map(async (link) => {
         const guardian = await ctx.db.get('users', link.guardianUserId)
         return {
           guardianUserId: link.guardianUserId,
           name: guardian?.name,
-          email: guardian?.email,
           linkedAt: link.linkedAt,
         }
       }),
@@ -563,7 +472,6 @@ export const listGuardianCodesForClass = query({
       guardians: Array<{
         guardianUserId: Id<'users'>
         name?: string
-        email?: string
         linkedAt: number
       }>
     }> = []
@@ -582,19 +490,17 @@ export const listGuardianCodesForClass = query({
         const studentUser = orgStudent.userId
           ? await ctx.db.get('users', orgStudent.userId)
           : null
-        const links = await ctx.db
-          .query('guardianLinks')
-          .withIndex('by_orgStudentId', (index) =>
-            index.eq('orgStudentId', orgStudent._id),
-          )
-          .take(MAX_STUDENT_GUARDIANS)
+        const links = await listGuardianLinksForStudent(
+          ctx,
+          orgStudent._id,
+          orgStudent.organizationId,
+        )
         const guardians = await Promise.all(
           links.map(async (link) => {
             const guardian = await ctx.db.get('users', link.guardianUserId)
             return {
               guardianUserId: link.guardianUserId,
               name: guardian?.name,
-              email: guardian?.email,
               linkedAt: link.linkedAt,
             }
           }),

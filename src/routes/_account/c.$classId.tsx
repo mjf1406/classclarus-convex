@@ -114,16 +114,25 @@ function JoinCodesSection({
   const [regenerating, setRegenerating] = useState<JoinCodeType | null>(null)
   const [sharing, setSharing] = useState<JoinCodeType | null>(null)
 
-  const codeFor = (type: JoinCodeType) =>
-    codes === undefined
-      ? undefined
-      : type === 'student'
-        ? codes.studentCode
-        : type === 'teacher'
-          ? codes.teacherCode
-          : codes.assistantTeacherCode
+  const codeFor = (type: JoinCodeType): string | undefined | null => {
+    if (codes === undefined) return undefined
+    if (type === 'student') return codes.studentCode
+    if (type === 'teacher') return codes.teacherCode
+    return codes.assistantTeacherCode
+  }
 
-  const sharingCode = sharing ? codeFor(sharing) : undefined
+  const visibleTypes = (
+    ['student', 'teacher', 'assistantTeacher'] as const
+  ).filter((type) => {
+    if (type === 'student') return true
+    // Hide staff codes until loaded; null means redacted (no class:manage).
+    if (codes === undefined) return false
+    return codeFor(type) !== null
+  })
+
+  const sharingCodeRaw = sharing ? codeFor(sharing) : null
+  const sharingCode =
+    typeof sharingCodeRaw === 'string' ? sharingCodeRaw : undefined
   const sharingRole = sharing ? JOIN_CODE_ROLE[sharing] : null
 
   const handleCopy = (type: JoinCodeType) => {
@@ -172,8 +181,13 @@ function JoinCodesSection({
         code to show a QR for the classroom. Regenerate a code if it leaks —
         existing members keep their access until removed.
       </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        {(['student', 'teacher', 'assistantTeacher'] as const).map((type) => {
+      <div
+        className={cn(
+          'mt-4 grid gap-3',
+          visibleTypes.length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
+        )}
+      >
+        {visibleTypes.map((type) => {
           const code = codeFor(type)
           const role = JOIN_CODE_ROLE[type]
           const roleConfig = CLASS_ROLE_BADGE_CONFIG[role]
@@ -188,7 +202,7 @@ function JoinCodesSection({
                 {roleConfig.label}
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
-                {code === undefined ? (
+                {code === undefined || code === null ? (
                   <Skeleton className="h-7 w-24" />
                 ) : (
                   <button
@@ -206,7 +220,7 @@ function JoinCodesSection({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={`Show ${roleConfig.label} join QR`}
-                    disabled={code === undefined}
+                    disabled={!code}
                     onClick={() => setSharing(type)}
                   >
                     <QrCode />
@@ -216,7 +230,7 @@ function JoinCodesSection({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={`Open ${roleConfig.label} join QR in a new window`}
-                    disabled={code === undefined}
+                    disabled={!code}
                     onClick={() => handleOpenShareWindow(type)}
                   >
                     <ExternalLink />
@@ -226,7 +240,7 @@ function JoinCodesSection({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={`Copy ${roleConfig.label} code`}
-                    disabled={code === undefined}
+                    disabled={!code}
                     onClick={() => handleCopy(type)}
                   >
                     <Copy />
@@ -239,7 +253,7 @@ function JoinCodesSection({
                           variant="ghost"
                           size="icon-sm"
                           aria-label={`${roleConfig.label} code actions`}
-                          disabled={code === undefined}
+                          disabled={!code}
                         >
                           <MoreVertical />
                         </Button>

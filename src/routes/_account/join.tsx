@@ -53,8 +53,9 @@ const ROLE_LABELS: Record<string, string> = {
 function JoinPage() {
   const navigate = useNavigate()
   const { joinCode: prefilledCode } = Route.useSearch()
-  const redeemJoinCode = useMutation(api.memberships.redeemJoinCode)
-  const redeemGuardianCode = useMutation(api.guardians.redeemGuardianCode)
+  const redeemJoinOrGuardianCode = useMutation(
+    api.memberships.redeemJoinOrGuardianCode,
+  )
 
   const [code, setCode] = useState(prefilledCode ?? '')
   const [error, setError] = useState<string | null>(null)
@@ -71,38 +72,31 @@ function JoinPage() {
     setIsSubmitting(true)
 
     try {
-      const classResult = await redeemJoinCode({ code })
-      if (classResult.ok) {
+      const result = await redeemJoinOrGuardianCode({ code })
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
+
+      if (result.kind === 'class') {
         toast.success(
-          `Joined as ${ROLE_LABELS[classResult.role] ?? classResult.role}`,
+          `Joined as ${ROLE_LABELS[result.role] ?? result.role}`,
         )
         await navigate({
           to: '/c/$classId',
-          params: { classId: classResult.classId },
+          params: { classId: result.classId },
         })
         return
       }
 
-      if (classResult.error.startsWith('Too many attempts')) {
-        setError(classResult.error)
-        return
-      }
-
-      const guardianResult = await redeemGuardianCode({ code })
-      if (guardianResult.ok) {
-        toast.success('Guardian access linked')
-        await navigate({ to: '/' })
-        return
-      }
-
-      // One generic error for both code namespaces prevents type leakage.
-      setError(guardianResult.error)
+      toast.success('Guardian access linked')
+      await navigate({ to: '/' })
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
-  }, [code, navigate, redeemGuardianCode, redeemJoinCode])
+  }, [code, navigate, redeemJoinOrGuardianCode])
 
   // Auto-redeem when arriving from a share/login redirect with a full code.
   useEffect(() => {
