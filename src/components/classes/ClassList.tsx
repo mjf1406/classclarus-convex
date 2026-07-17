@@ -18,11 +18,11 @@ import {
   useRemoveClass,
   useUpdateClass,
 } from '#/lib/classes'
-import type { ClassSort } from '#/lib/classes'
+import type { ClassPublic, ClassSort } from '#/lib/classes'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
 import { ONE_HOUR } from '#/lib/queryCache'
+import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
 import { api } from '../../../convex/_generated/api'
-import type { Doc } from '../../../convex/_generated/dataModel'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +55,7 @@ type ClassListProps = {
   sort?: ClassSort
   archivedOnly?: boolean
   onCreateClick?: () => void
-  onEdit?: (classDoc: Doc<'classes'>) => void
+  onEdit?: (classDoc: ClassPublic) => void
 }
 
 function formatClassTimestamp(timestamp: number) {
@@ -72,7 +72,7 @@ function formatUpdatedLabel(updatedTime: number | undefined) {
   return updatedTime === undefined ? 'N/A' : formatClassTimestamp(updatedTime)
 }
 
-function ClassTimestamps({ classDoc }: { classDoc: Doc<'classes'> }) {
+function ClassTimestamps({ classDoc }: { classDoc: ClassPublic }) {
   return (
     <div className="mt-2 space-y-0.5 text-2xs text-muted-foreground">
       <p>Created {formatClassTimestamp(classDoc._creationTime)}</p>
@@ -130,13 +130,14 @@ function ClassCard({
   onArchiveToggle,
   onDelete,
 }: {
-  classDoc: Doc<'classes'>
+  classDoc: ClassPublic
   onEdit: () => void
   onArchiveToggle: () => void
   onDelete: () => void
 }) {
   const isArchived = classDoc.archivedTime !== undefined
   const isPending = isPendingClass(classDoc)
+  const canManage = classDoc.myRole === 'creator'
 
   return (
     <Card
@@ -155,23 +156,29 @@ function ClassCard({
           aria-label={`Open ${classDoc.name}`}
         />
       )}
-      <CardHeader className="relative z-10 pointer-events-none">
-        <div className="flex items-start gap-3">
+      <CardHeader className="relative z-10 min-w-0 pointer-events-none">
+        <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <BookText className="size-5" />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <CardTitle className="truncate text-base font-semibold">
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="flex min-w-0 items-start justify-between gap-2">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <CardTitle
+                  className="truncate text-base font-semibold"
+                  title={classDoc.name}
+                >
                   {classDoc.name}
                 </CardTitle>
-                <p className="mt-0.5 text-xs font-medium text-muted-foreground">
-                  {isPending ? 'Creating…' : classDoc.year}
-                </p>
+                <div className="mt-0.5 flex items-center gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {isPending ? 'Creating…' : classDoc.year}
+                  </p>
+                  <ClassRoleBadge role={classDoc.myRole} />
+                </div>
               </div>
-              {isPending ? null : (
-                <div className="pointer-events-auto">
+              {!isPending && canManage ? (
+                <div className="pointer-events-auto shrink-0">
                   <ClassActionsMenu
                     isArchived={isArchived}
                     onEdit={onEdit}
@@ -179,7 +186,7 @@ function ClassCard({
                     onDelete={onDelete}
                   />
                 </div>
-              )}
+              ) : null}
             </div>
             {classDoc.description ? (
               <CardDescription className="mt-1 line-clamp-2">
@@ -204,13 +211,14 @@ function ClassRow({
   onArchiveToggle,
   onDelete,
 }: {
-  classDoc: Doc<'classes'>
+  classDoc: ClassPublic
   onEdit: () => void
   onArchiveToggle: () => void
   onDelete: () => void
 }) {
   const isArchived = classDoc.archivedTime !== undefined
   const isPending = isPendingClass(classDoc)
+  const canManage = classDoc.myRole === 'creator'
 
   return (
     <Card
@@ -229,21 +237,25 @@ function ClassRow({
           aria-label={`Open ${classDoc.name}`}
         />
       )}
-      <CardHeader className="relative z-10 pointer-events-none py-0">
-        <div className="flex items-center gap-3">
+      <CardHeader className="relative z-10 min-w-0 pointer-events-none py-0">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <BookText className="size-5" />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <CardTitle className="truncate text-base font-semibold">
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="flex min-w-0 items-start justify-between gap-2">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="flex min-w-0 items-baseline gap-2">
+                  <CardTitle
+                    className="min-w-0 truncate text-base font-semibold"
+                    title={classDoc.name}
+                  >
                     {classDoc.name}
                   </CardTitle>
                   <span className="shrink-0 text-xs font-medium text-muted-foreground">
                     {isPending ? 'Creating…' : classDoc.year}
                   </span>
+                  <ClassRoleBadge role={classDoc.myRole} />
                 </div>
                 {classDoc.description ? (
                   <CardDescription className="mt-0.5 line-clamp-1">
@@ -255,8 +267,8 @@ function ClassRow({
                   </CardDescription>
                 )}
               </div>
-              {isPending ? null : (
-                <div className="pointer-events-auto">
+              {!isPending && canManage ? (
+                <div className="pointer-events-auto shrink-0">
                   <ClassActionsMenu
                     isArchived={isArchived}
                     onEdit={onEdit}
@@ -264,7 +276,7 @@ function ClassRow({
                     onDelete={onDelete}
                   />
                 </div>
-              )}
+              ) : null}
             </div>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-2xs text-muted-foreground">
               <span>
@@ -396,7 +408,7 @@ export function ClassList({
 }: ClassListProps) {
   const { data: classes } = useQuery({
     ...convexQuery(
-      api.classes.listClasses,
+      api.memberships.listMyClasses,
       archivedOnly ? { archivedOnly: true, sort } : { sort },
     ),
     placeholderData: (previousData) => previousData,
@@ -406,11 +418,11 @@ export function ClassList({
   const removeClass = useRemoveClass()
   const updateClass = useUpdateClass()
 
-  const [deletingClass, setDeletingClass] = useState<Doc<'classes'> | null>(
+  const [deletingClass, setDeletingClass] = useState<ClassPublic | null>(
     null,
   )
 
-  const handleArchiveToggle = (classDoc: Doc<'classes'>) => {
+  const handleArchiveToggle = (classDoc: ClassPublic) => {
     const archive = classDoc.archivedTime === undefined
     void updateClass({ classId: classDoc._id, archived: archive })
       .then(() => {

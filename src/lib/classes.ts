@@ -1,18 +1,35 @@
 import { useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import type { Doc, Id } from '../../convex/_generated/dataModel'
-import {
-  compareClasses,
-  DEFAULT_CLASS_SORT,
-} from './classSort'
+import { compareClasses, DEFAULT_CLASS_SORT } from './classSort'
 import type { ClassSort } from './classSort'
 
 export type { ClassSort } from './classSort'
 
-const PENDING_CODE = 'PENDING'
+/** Class roster roles, as returned in `myRole` by the class queries. */
+export type ClassRole =
+  | 'creator'
+  | 'classTeacher'
+  | 'assistantTeacher'
+  | 'student'
 
-export function isPendingClass(classDoc: Doc<'classes'>): boolean {
-  return classDoc.studentCode === PENDING_CODE
+/**
+ * The class shape returned by public queries: join codes and the display pin
+ * are redacted server-side (codes are only available via getJoinCodes).
+ * `myRole` is the caller's highest roster role in the class; absent when
+ * access comes from a non-roster grant.
+ */
+export type ClassPublic = Omit<
+  Doc<'classes'>,
+  'studentCode' | 'teacherCode' | 'assistantTeacherCode' | 'publicDisplayPin'
+> & {
+  myRole: ClassRole | undefined
+}
+
+const PENDING_ID_PREFIX = 'PENDING-'
+
+export function isPendingClass(classDoc: ClassPublic): boolean {
+  return String(classDoc._id).startsWith(PENDING_ID_PREFIX)
 }
 
 function listQueryMode(queryArgs: {
@@ -25,12 +42,12 @@ function listQueryMode(queryArgs: {
   return 'active'
 }
 
-/** Insert using the same ordering as the Convex `listClasses` query. */
+/** Insert using the same ordering as the Convex list queries. */
 function insertSorted(
-  list: Doc<'classes'>[],
-  doc: Doc<'classes'>,
+  list: ClassPublic[],
+  doc: ClassPublic,
   sort: ClassSort,
-): Doc<'classes'>[] {
+): ClassPublic[] {
   const next = [...list]
   const insertAt = next.findIndex(
     (existing) => compareClasses(doc, existing, sort) < 0,
@@ -40,17 +57,16 @@ function insertSorted(
 }
 
 function applyClassPatch(
-  doc: Doc<'classes'>,
+  doc: ClassPublic,
   args: {
     name?: string
     description?: string
     icon?: string
-    publicDisplayPin?: string
     archived?: boolean
   },
   now: number,
-): Doc<'classes'> {
-  const updated: Doc<'classes'> = {
+): ClassPublic {
+  const updated: ClassPublic = {
     ...doc,
     updatedTime: now,
   }
@@ -58,9 +74,6 @@ function applyClassPatch(
   if (args.name !== undefined) updated.name = args.name
   if (args.description !== undefined) updated.description = args.description
   if (args.icon !== undefined) updated.icon = args.icon
-  if (args.publicDisplayPin !== undefined) {
-    updated.publicDisplayPin = args.publicDisplayPin
-  }
   if (args.archived === true) {
     updated.archivedTime = now
   } else if (args.archived === false) {
@@ -77,29 +90,26 @@ export function useCreateClass() {
       if (!user) return
 
       const now = Date.now()
-      const optimisticClass: Doc<'classes'> = {
-        _id: crypto.randomUUID() as Id<'classes'>,
+      const optimisticClass: ClassPublic = {
+        _id: `${PENDING_ID_PREFIX}${crypto.randomUUID()}` as Id<'classes'>,
         _creationTime: now,
         userId: user._id,
         name: args.name,
         description: args.description,
         icon: args.icon,
         year: args.year,
-        publicDisplayPin: args.publicDisplayPin,
-        studentCode: PENDING_CODE,
-        teacherCode: PENDING_CODE,
-        assistantTeacherCode: PENDING_CODE,
+        myRole: 'creator',
       }
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(
-        api.classes.listClasses,
+        api.memberships.listMyClasses,
       )) {
         if (value === undefined) continue
         // New classes are active; only insert into active (or "all") lists.
         const mode = listQueryMode(queryArgs)
         if (mode === 'archived') continue
         localStore.setQuery(
-          api.classes.listClasses,
+          api.memberships.listMyClasses,
           queryArgs,
           insertSorted(
             value,
@@ -121,10 +131,10 @@ export function useUpdateClass() {
         classId: args.classId,
       })
 
-      let source: Doc<'classes'> | undefined = fromGet ?? undefined
+      let source: ClassPublic | undefined = fromGet ?? undefined
       if (!source) {
         for (const { value } of localStore.getAllQueries(
-          api.classes.listClasses,
+          api.memberships.listMyClasses,
         )) {
           const match = value?.find((c) => c._id === args.classId)
           if (match) {
@@ -145,7 +155,7 @@ export function useUpdateClass() {
       )
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(
-        api.classes.listClasses,
+        api.memberships.listMyClasses,
       )) {
         if (value === undefined) continue
 
@@ -159,7 +169,7 @@ export function useUpdateClass() {
         if (!belongsInList) {
           if (index === -1) continue
           localStore.setQuery(
-            api.classes.listClasses,
+            api.memberships.listMyClasses,
             queryArgs,
             value.filter((c) => c._id !== args.classId),
           )
@@ -168,7 +178,7 @@ export function useUpdateClass() {
 
         if (index === -1) {
           localStore.setQuery(
-            api.classes.listClasses,
+            api.memberships.listMyClasses,
             queryArgs,
             insertSorted(value, updated, queryArgs.sort ?? DEFAULT_CLASS_SORT),
           )
@@ -179,7 +189,7 @@ export function useUpdateClass() {
           (classDoc) => classDoc._id !== args.classId,
         )
         localStore.setQuery(
-          api.classes.listClasses,
+          api.memberships.listMyClasses,
           queryArgs,
           insertSorted(
             withoutUpdatedClass,
@@ -202,11 +212,11 @@ export function useRemoveClass() {
       )
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(
-        api.classes.listClasses,
+        api.memberships.listMyClasses,
       )) {
         if (value === undefined) continue
         localStore.setQuery(
-          api.classes.listClasses,
+          api.memberships.listMyClasses,
           queryArgs,
           value.filter((c) => c._id !== args.classId),
         )

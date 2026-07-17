@@ -1,8 +1,10 @@
 import { Link } from '@tanstack/react-router'
+import { LogIn } from 'lucide-react'
 
 import { UserMenu } from '#/components/auth/UserMenu'
 import { Logo } from '#/components/brand/logo'
 import { ModeToggle } from '#/components/theme/mode-toggle'
+import { Button } from '@/components/ui/button'
 
 export function AccountNavbar() {
   return (
@@ -16,6 +18,12 @@ export function AccountNavbar() {
           <Logo />
         </Link>
         <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/join">
+              <LogIn data-icon="inline-start" />
+              Join a class
+            </Link>
+          </Button>
           <UserMenu />
           <ModeToggle />
         </div>

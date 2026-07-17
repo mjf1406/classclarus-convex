@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useCreateClass, useUpdateClass } from '#/lib/classes'
-import type { Doc } from '../../../convex/_generated/dataModel'
+import type { ClassPublic } from '#/lib/classes'
 import { Button } from '@/components/ui/button'
 import {
   Credenza,
@@ -62,7 +62,7 @@ type ClassFormCredenzaProps = {
   /** Controls title/actions immediately; classDoc may arrive a frame later on edit. */
   mode?: ClassFormMode
   /** When set in edit mode, form fields are prefilled and update targets this class */
-  classDoc?: Doc<'classes'> | null
+  classDoc?: ClassPublic | null
 }
 
 export function ClassFormCredenza({

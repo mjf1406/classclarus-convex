@@ -13,6 +13,10 @@ import type * as auth from "../auth.js";
 import type * as authz from "../authz.js";
 import type * as classes from "../classes.js";
 import type * as http from "../http.js";
+import type * as lib_classAuth from "../lib/classAuth.js";
+import type * as memberships from "../memberships.js";
+import type * as permissions from "../permissions.js";
+import type * as rateLimiter from "../rateLimiter.js";
 import type * as tenants from "../tenants.js";
 import type * as users from "../users.js";
 
@@ -28,6 +32,10 @@ declare const fullApi: ApiFromModules<{
   authz: typeof authz;
   classes: typeof classes;
   http: typeof http;
+  "lib/classAuth": typeof lib_classAuth;
+  memberships: typeof memberships;
+  permissions: typeof permissions;
+  rateLimiter: typeof rateLimiter;
   tenants: typeof tenants;
   users: typeof users;
 }>;
@@ -61,4 +69,5 @@ export declare const internal: FilterApi<
 export declare const components: {
   authz: import("@djpanda/convex-authz/_generated/component.js").ComponentApi<"authz">;
   tenants: import("@djpanda/convex-tenants/_generated/component.js").ComponentApi<"tenants">;
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
 };

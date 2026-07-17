@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-router'
 import PendingComponent from '@/components/loading/PendingComponent'
 
-const PUBLIC_PATHS = new Set(['/login', '/unauthorized'])
+const PUBLIC_PATHS = new Set(['/login', '/unauthorized', '/join-share'])
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { isLoading, isAuthenticated } = useConvexAuth()
@@ -16,8 +16,15 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const router = useRouter()
   const wasAuthLoading = useRef(true)
+  const wasAuthenticatedRef = useRef(false)
+
+  if (isAuthenticated) {
+    wasAuthenticatedRef.current = true
+  }
 
   const isPublicPath = PUBLIC_PATHS.has(pathname)
+  const shouldRedirectToLogin =
+    !isAuthenticated && !isPublicPath && !wasAuthenticatedRef.current
 
   // Re-run route loaders once auth is ready so Convex queries in loaders succeed.
   useEffect(() => {
@@ -33,7 +40,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoading) return
 
-    if (!isAuthenticated && !isPublicPath) {
+    if (shouldRedirectToLogin) {
       void navigate({ to: '/login', replace: true })
       return
     }
@@ -41,13 +48,13 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     if (isAuthenticated && pathname === '/login') {
       void navigate({ to: '/', replace: true })
     }
-  }, [isLoading, isAuthenticated, isPublicPath, pathname, navigate])
+  }, [isLoading, isAuthenticated, shouldRedirectToLogin, pathname, navigate])
 
   if (isLoading) {
     return <PendingComponent />
   }
 
-  if (!isAuthenticated && !isPublicPath) {
+  if (shouldRedirectToLogin) {
     return <PendingComponent />
   }
 

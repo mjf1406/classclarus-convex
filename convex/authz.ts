@@ -1,59 +1,96 @@
 // convex/authz.ts
+// Single source of truth for the permission catalog, role catalog, and the
+// authz client. See plans/roles-and-authorization-implementation-guide.md §5/§7.3.
+//
+// Operational rule: after editing role definitions and deploying, run
+// `npx convex run tenants:syncRoles` so users who already hold a role get the
+// new materialized permission set.
 import { Authz, definePermissions, defineRoles } from '@djpanda/convex-authz'
 import { TENANTS_PERMISSIONS, TENANTS_ROLES } from '@djpanda/convex-tenants'
 import { components } from './_generated/api'
 
-// Step 1: Define permissions
-const permissions = definePermissions(
-  TENANTS_PERMISSIONS, 
-  {
-    "org-settings": {
-      read: true,
-      update: true,
-    },
-    "class-settings": {
-      read: true,
-      update: true,
-    },
-    class: {
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      "manage-members": true,
-      
-    }
-  }
-)
+// Step 1: Permissions — tenants defaults merged with app resources.
+const permissions = definePermissions(TENANTS_PERMISSIONS, {
+  class: {
+    read: true,
+    manage: true, // edit settings, archive, delete, remove members
+    manageMembers: true, // can add members via join codes
+    grade: true,
+    submit: true,
+    viewOwnGrades: true,
+    viewChildGrades: true,
+  },
+  students: {
+    create: true,
+    list: true,
+    enroll: true,
+    unenroll: true,
+    update: true,
+  },
+  guardians: {
+    link: true,
+    unlink: true,
+    viewLinkedStudents: true,
+  },
+})
 
-// Step 2: Define roles
-const roles = defineRoles(
-  permissions, 
-  TENANTS_ROLES,
-  {
-    admin: { // this is me, the website developer
-      "org-settings": ['read', 'update'],
-      "class-settings": ['read', 'update'],
-      class: ['create', 'read', 'update', 'delete']
-    },
-    // Organization Roles
-    "principal": {},
-    "vice-principal": {},
-    "administration": {},
-    "teacher": {},
-    // Class Roles
-    "class-teacher": {},
-    "class-owner": {
-      class: ['create', 'read', 'update', 'delete'],
-      "class-settings": ['read', 'update']
-    },
-    "class-assistant-teacher": {},
-    "class-student": {},
-    "guardian": {}
-  }
-)
+// Step 2: Roles — tenants defaults (owner/admin/member) merged with education
+// org roles and class-scoped roster roles.
+//
+// Naming notes (guide §5): the class role is `classTeacher` (org role `teacher`
+// already exists in the same catalog) and the top class role is `creator`
+// (`owner` is taken by tenants).
+const roles = defineRoles(permissions, TENANTS_ROLES, {
+  // --- Org roles (school/district STAFF only; used from Phase 2) ---
+  // Extend the tenants `owner` default with the education resources.
+  owner: {
+    students: ['create', 'list', 'enroll', 'unenroll', 'update'],
+    guardians: ['link', 'unlink', 'viewLinkedStudents'],
+  },
+  principal: {
+    organizations: ['read', 'update'],
+    members: ['add', 'remove', 'updateRole', 'list'],
+    teams: [
+      'create',
+      'update',
+      'delete',
+      'addMember',
+      'removeMember',
+      'list',
+      'listMembers',
+    ],
+    invitations: ['create', 'cancel', 'resend', 'list'],
+    students: ['create', 'list', 'enroll', 'unenroll', 'update'],
+    guardians: ['link', 'unlink', 'viewLinkedStudents'],
+  },
+  teacher: {
+    organizations: ['read'],
+    students: ['create', 'list', 'enroll', 'unenroll', 'update'],
+    guardians: ['link', 'unlink', 'viewLinkedStudents'],
+  },
 
-// Step 3: Create the authz client
+  // --- Class roles (roster; scoped to { type: "class", id }) ---
+  student: {
+    class: ['read', 'submit', 'viewOwnGrades'],
+  },
+  assistantTeacher: {
+    inherits: 'student',
+    class: ['grade'],
+  },
+  classTeacher: {
+    inherits: 'assistantTeacher',
+    class: ['manageMembers'],
+  },
+  creator: {
+    inherits: 'classTeacher',
+    class: ['manage'],
+  },
+})
+
+// Step 3: The authz client. The "classclarus" tenant namespace holds solo-class
+// role assignments; org-scoped calls in Phase 2 go through withTenant(orgId).
+// No relationPermissions — guardian access uses an explicit two-step check
+// (relation + active enrollment), see guide §4.
 export const authz = new Authz(components.authz, {
   permissions,
   roles,

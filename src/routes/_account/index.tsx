@@ -14,7 +14,7 @@ import {
   toggleClassSort,
 } from '#/lib/classSort'
 import type { ClassSort, ClassSortField } from '#/lib/classSort'
-import type { Doc } from '../../../convex/_generated/dataModel'
+import type { ClassPublic } from '#/lib/classes'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export const Route = createFileRoute('/_account/')({
@@ -43,7 +43,7 @@ const SORT_FIELD_LABELS: Record<ClassSortField, string> = {
 function Home() {
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<FormMode>('create')
-  const [editingClass, setEditingClass] = useState<Doc<'classes'> | null>(null)
+  const [editingClass, setEditingClass] = useState<ClassPublic | null>(null)
   const [view, setView] = useState<ClassListView>('grid')
   const [sort, setSort] = useState<ClassSort>(DEFAULT_CLASS_SORT)
   const editFrameRef = useRef<number | null>(null)

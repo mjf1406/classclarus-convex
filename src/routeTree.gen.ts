@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as JoinShareRouteImport } from './routes/join-share'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AccountRouteRouteImport } from './routes/_account/route'
 import { Route as AccountIndexRouteImport } from './routes/_account/index'
+import { Route as AccountJoinRouteImport } from './routes/_account/join'
 import { Route as AccountCClassIdRouteImport } from './routes/_account/c.$classId'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -24,6 +26,11 @@ const UnauthorizedRoute = UnauthorizedRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinShareRoute = JoinShareRouteImport.update({
+  id: '/join-share',
+  path: '/join-share',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -40,6 +47,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRouteRoute,
 } as any)
+const AccountJoinRoute = AccountJoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => AccountRouteRoute,
+} as any)
 const AccountCClassIdRoute = AccountCClassIdRouteImport.update({
   id: '/c/$classId',
   path: '/c/$classId',
@@ -49,14 +61,18 @@ const AccountCClassIdRoute = AccountCClassIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AccountIndexRoute
   '/$': typeof SplatRoute
+  '/join-share': typeof JoinShareRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/join': typeof AccountJoinRoute
   '/c/$classId': typeof AccountCClassIdRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
+  '/join-share': typeof JoinShareRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/join': typeof AccountJoinRoute
   '/': typeof AccountIndexRoute
   '/c/$classId': typeof AccountCClassIdRoute
 }
@@ -64,22 +80,40 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_account': typeof AccountRouteRouteWithChildren
   '/$': typeof SplatRoute
+  '/join-share': typeof JoinShareRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/_account/join': typeof AccountJoinRoute
   '/_account/': typeof AccountIndexRoute
   '/_account/c/$classId': typeof AccountCClassIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$' | '/login' | '/unauthorized' | '/c/$classId'
+  fullPaths:
+    | '/'
+    | '/$'
+    | '/join-share'
+    | '/login'
+    | '/unauthorized'
+    | '/join'
+    | '/c/$classId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/login' | '/unauthorized' | '/' | '/c/$classId'
+  to:
+    | '/$'
+    | '/join-share'
+    | '/login'
+    | '/unauthorized'
+    | '/join'
+    | '/'
+    | '/c/$classId'
   id:
     | '__root__'
     | '/_account'
     | '/$'
+    | '/join-share'
     | '/login'
     | '/unauthorized'
+    | '/_account/join'
     | '/_account/'
     | '/_account/c/$classId'
   fileRoutesById: FileRoutesById
@@ -87,6 +121,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AccountRouteRoute: typeof AccountRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
+  JoinShareRoute: typeof JoinShareRoute
   LoginRoute: typeof LoginRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
@@ -105,6 +140,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join-share': {
+      id: '/join-share'
+      path: '/join-share'
+      fullPath: '/join-share'
+      preLoaderRoute: typeof JoinShareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -128,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRouteRoute
     }
+    '/_account/join': {
+      id: '/_account/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof AccountJoinRouteImport
+      parentRoute: typeof AccountRouteRoute
+    }
     '/_account/c/$classId': {
       id: '/_account/c/$classId'
       path: '/c/$classId'
@@ -139,11 +188,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteRouteChildren {
+  AccountJoinRoute: typeof AccountJoinRoute
   AccountIndexRoute: typeof AccountIndexRoute
   AccountCClassIdRoute: typeof AccountCClassIdRoute
 }
 
 const AccountRouteRouteChildren: AccountRouteRouteChildren = {
+  AccountJoinRoute: AccountJoinRoute,
   AccountIndexRoute: AccountIndexRoute,
   AccountCClassIdRoute: AccountCClassIdRoute,
 }
@@ -155,6 +206,7 @@ const AccountRouteRouteWithChildren = AccountRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AccountRouteRoute: AccountRouteRouteWithChildren,
   SplatRoute: SplatRoute,
+  JoinShareRoute: JoinShareRoute,
   LoginRoute: LoginRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }
