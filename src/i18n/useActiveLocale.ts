@@ -1,9 +1,11 @@
 import { useRouterState } from '@tanstack/react-router'
 import { useConvexAuth } from '@convex-dev/auth/react'
-import { useQuery } from 'convex/react'
+import { useQuery } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
 
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
+import { TEN_MINUTES } from '@/lib/queryCache'
 import { coerceAppLanguage } from './locales'
 import type { AppLanguage } from './locales'
 
@@ -30,10 +32,13 @@ export function useActiveLocale(personalLanguage: AppLanguage): {
     },
   })
 
-  const classDoc = useQuery(
-    api.classes.getClass,
-    isAuthenticated && classId ? { classId } : 'skip',
-  )
+  const classDoc = useQuery({
+    ...convexQuery(
+      api.classes.getClass,
+      isAuthenticated && classId ? { classId } : 'skip',
+    ),
+    gcTime: TEN_MINUTES,
+  }).data
 
   const isGuardian = classDoc?.myRole === 'guardian'
   const isStudentInClass =

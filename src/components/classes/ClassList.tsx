@@ -163,6 +163,7 @@ function ClassCard({
           params={{ classId: classDoc._id }}
           className="absolute inset-0 z-0 rounded-[inherit]"
           aria-label={t('openClass', { name: classDoc.name })}
+          preload={false}
         />
       )}
       <CardHeader className="relative z-10 min-w-0 pointer-events-none">
@@ -245,6 +246,7 @@ function ClassRow({
           params={{ classId: classDoc._id }}
           className="absolute inset-0 z-0 rounded-[inherit]"
           aria-label={t('openClass', { name: classDoc.name })}
+          preload={false}
         />
       )}
       <CardHeader className="relative z-10 min-w-0 pointer-events-none py-0">

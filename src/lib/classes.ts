@@ -86,16 +86,6 @@ export function isPendingClass(classDoc: ClassPublic): boolean {
   return String(classDoc._id).startsWith(PENDING_ID_PREFIX)
 }
 
-function listQueryMode(queryArgs: {
-  includeArchived?: boolean
-  archivedOnly?: boolean
-  sort?: ClassSort
-}): 'active' | 'archived' | 'all' {
-  if (queryArgs.archivedOnly) return 'archived'
-  if (queryArgs.includeArchived) return 'all'
-  return 'active'
-}
-
 /** Insert using the same ordering as the Convex list queries. */
 function insertSorted(
   list: ListMyClass[],
@@ -160,23 +150,17 @@ export function useCreateClass() {
         canManage: true,
       }
 
-      for (const { args: queryArgs, value } of localStore.getAllQueries(
-        api.memberships.listMyClasses,
-      )) {
-        if (value === undefined) continue
-        // New classes are active; only insert into active (or "all") lists.
-        const mode = listQueryMode(queryArgs)
-        if (mode === 'archived') continue
-        localStore.setQuery(
-          api.memberships.listMyClasses,
-          queryArgs,
-          insertSorted(
-            value,
-            optimisticClass,
-            queryArgs.sort ?? DEFAULT_CLASS_SORT,
-          ),
-        )
-      }
+      const home = localStore.getQuery(api.memberships.getAccountHome, {})
+      if (!home) return
+
+      const currentList = home.classes.map((c) => toListMyClass(c))
+      const nextClasses = insertSorted(
+        currentList,
+        optimisticClass,
+        DEFAULT_CLASS_SORT,
+      )
+
+      localStore.setQuery(api.memberships.getAccountHome, {}, { ...home, classes: nextClasses })
     },
   )
 }
@@ -205,7 +189,6 @@ export function useUpdateClass() {
       if (!source) return
 
       const updated = applyClassPatch(source, args, now)
-      const isArchived = updated.archivedTime !== undefined
 
       // getClass always returns permission flags; preserve them when patching.
       localStore.setQuery(api.classes.getClass, { classId: args.classId }, {
@@ -214,50 +197,20 @@ export function useUpdateClass() {
         canManageMembers: updated.canManageMembers ?? false,
       })
 
-      for (const { args: queryArgs, value } of localStore.getAllQueries(
-        api.memberships.listMyClasses,
-      )) {
-        if (value === undefined) continue
+      const home = localStore.getQuery(api.memberships.getAccountHome, {})
+      if (!home) return
 
-        const mode = listQueryMode(queryArgs)
-        const index = value.findIndex((c) => c._id === args.classId)
-        const belongsInList =
-          mode === 'all' ||
-          (mode === 'archived' && isArchived) ||
-          (mode === 'active' && !isArchived)
+      const currentList = home.classes.map((c) => toListMyClass(c))
+      const withoutUpdatedClass = currentList.filter(
+        (classDoc) => classDoc._id !== args.classId,
+      )
+      const nextClasses = insertSorted(
+        withoutUpdatedClass,
+        updated,
+        DEFAULT_CLASS_SORT,
+      )
 
-        if (!belongsInList) {
-          if (index === -1) continue
-          localStore.setQuery(
-            api.memberships.listMyClasses,
-            queryArgs,
-            value.filter((c) => c._id !== args.classId),
-          )
-          continue
-        }
-
-        if (index === -1) {
-          localStore.setQuery(
-            api.memberships.listMyClasses,
-            queryArgs,
-            insertSorted(value, updated, queryArgs.sort ?? DEFAULT_CLASS_SORT),
-          )
-          continue
-        }
-
-        const withoutUpdatedClass = value.filter(
-          (classDoc) => classDoc._id !== args.classId,
-        )
-        localStore.setQuery(
-          api.memberships.listMyClasses,
-          queryArgs,
-          insertSorted(
-            withoutUpdatedClass,
-            updated,
-            queryArgs.sort ?? DEFAULT_CLASS_SORT,
-          ),
-        )
-      }
+      localStore.setQuery(api.memberships.getAccountHome, {}, { ...home, classes: nextClasses })
     },
   )
 }
@@ -267,16 +220,12 @@ export function useRemoveClass() {
     (localStore, args) => {
       localStore.setQuery(api.classes.getClass, { classId: args.classId }, null)
 
-      for (const { args: queryArgs, value } of localStore.getAllQueries(
-        api.memberships.listMyClasses,
-      )) {
-        if (value === undefined) continue
-        localStore.setQuery(
-          api.memberships.listMyClasses,
-          queryArgs,
-          value.filter((c) => c._id !== args.classId),
-        )
-      }
+      const home = localStore.getQuery(api.memberships.getAccountHome, {})
+      if (!home) return
+      const nextClasses = home.classes.filter(
+        (c) => c._id !== args.classId,
+      )
+      localStore.setQuery(api.memberships.getAccountHome, {}, { ...home, classes: nextClasses })
     },
   )
 }

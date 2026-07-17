@@ -21,7 +21,6 @@ import {
 } from '#/lib/classSort'
 import type { ClassSort, ClassSortField } from '#/lib/classSort'
 import type { ClassPublic } from '#/lib/classes'
-import { LIST_MY_CLASSES_ARGS } from '#/lib/classes'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -59,14 +58,17 @@ function Home() {
   const [sort, setSort] = useState<ClassSort>(DEFAULT_CLASS_SORT)
   const editFrameRef = useRef<number | null>(null)
 
-  const { data: allClasses } = useQuery({
+  const { data: accountHome } = useQuery({
     ...convexQuery(
-      api.memberships.listMyClasses,
-      isAuthenticated ? LIST_MY_CLASSES_ARGS : 'skip',
+      api.memberships.getAccountHome,
+      isAuthenticated ? {} : 'skip',
     ),
     placeholderData: (previousData) => previousData,
     gcTime: ONE_HOUR,
   })
+
+  const allClasses = accountHome?.classes
+  const children = accountHome?.children
 
   const activeClasses =
     allClasses === undefined
@@ -209,7 +211,7 @@ function Home() {
         }}
       />
 
-      <LinkedStudentsSection />
+      <LinkedStudentsSection children={children} />
 
       <section className="mt-12">
         <h2 className="mb-4 text-xl font-semibold tracking-tight">

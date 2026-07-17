@@ -1,6 +1,11 @@
 import { requireUser } from '#/lib/auth'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
-import { internalMutation, mutation, query } from './_generated/server'
+import {
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
+} from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
@@ -28,6 +33,12 @@ import { loadGuardianCodesForClass } from './guardians'
 import { tryRedeemGuardianCode } from './lib/guardianLinks'
 import { rateLimiter } from './rateLimiter'
 import { JOIN_CODE_LENGTH } from './lib/joinCodes'
+import {
+  GUARDIAN_RELATION,
+  guardianAuthz,
+  guardianObject,
+  guardianSubject,
+} from './lib/guardianAuth'
 
 type RedeemableRole = 'student' | 'classTeacher' | 'assistantTeacher'
 
@@ -286,6 +297,179 @@ export const listMyClasses = query({
   },
 })
 
+const accountChildClassValidator = v.object({
+  classId: v.id('classes'),
+  name: v.string(),
+  year: v.number(),
+  archivedTime: v.optional(v.number()),
+})
+
+const accountChildValidator = v.object({
+  orgStudentId: v.id('orgStudents'),
+  organizationId: v.optional(v.string()),
+  displayName: v.string(),
+  classes: v.array(accountChildClassValidator),
+})
+
+async function listMyChildrenForAccountHome(
+  ctx: QueryCtx,
+  userId: Id<'users'>,
+): Promise<Array<{
+  orgStudentId: Id<'orgStudents'>
+  organizationId?: string
+  displayName: string
+  classes: Array<{
+    classId: Id<'classes'>
+    name: string
+    year: number
+    archivedTime?: number
+  }>
+}>> {
+  // Keep these mirrored with `convex/guardians.ts` since we embed the “list
+  // children” logic into a single home bundle query.
+  const MAX_GUARDIAN_LINKS = 100
+  const MAX_STUDENT_ENROLLMENTS = 200
+
+  const children: Array<{
+    orgStudentId: Id<'orgStudents'>
+    organizationId?: string
+    displayName: string
+    classes: Array<{
+      classId: Id<'classes'>
+      name: string
+      year: number
+      archivedTime?: number
+    }>
+  }> = []
+
+  const links = await ctx.db
+    .query('guardianLinks')
+    .withIndex('by_guardianUserId', (index) =>
+      index.eq('guardianUserId', userId),
+    )
+    .take(MAX_GUARDIAN_LINKS)
+
+  for (const link of links) {
+    const orgStudent = await ctx.db.get('orgStudents', link.orgStudentId)
+    if (!orgStudent || orgStudent.organizationId !== link.organizationId) {
+      continue
+    }
+
+    const relationExists = await guardianAuthz(orgStudent.organizationId).hasRelation(
+      ctx,
+      guardianSubject(userId),
+      GUARDIAN_RELATION,
+      guardianObject(orgStudent._id),
+    )
+    if (!relationExists) continue
+
+    const enrollments = await ctx.db
+      .query('classEnrollments')
+      .withIndex('by_orgStudentId', (index) => index.eq('orgStudentId', orgStudent._id))
+      .take(MAX_STUDENT_ENROLLMENTS)
+
+    const classes: Array<{
+      classId: Id<'classes'>
+      name: string
+      year: number
+      archivedTime?: number
+    }> = []
+
+    for (const enrollment of enrollments) {
+      if (enrollment.status !== 'active') continue
+      if (enrollment.organizationId !== orgStudent.organizationId) continue
+
+      // Relation already verified for this orgStudent; only need the class
+      // document.
+      const classDoc = await ctx.db.get('classes', enrollment.classId)
+      if (!classDoc) continue
+
+      classes.push({
+        classId: classDoc._id,
+        name: classDoc.name,
+        year: classDoc.year,
+        archivedTime: classDoc.archivedTime,
+      })
+    }
+
+    classes.sort(
+      (left, right) =>
+        right.year - left.year || left.name.localeCompare(right.name),
+    )
+
+    children.push({
+      orgStudentId: orgStudent._id,
+      organizationId: orgStudent.organizationId,
+      displayName: orgStudent.displayName,
+      classes,
+    })
+  }
+
+  children.sort((left, right) =>
+    left.displayName.localeCompare(right.displayName),
+  )
+
+  return children
+}
+
+// One subscription for the authenticated “home” surface:
+// - classes (active + archived) for the ClassList
+// - linked student children for the LinkedStudentsSection
+export const getAccountHome = query({
+  args: {},
+  returns: v.object({
+    user: v.object({
+      _id: v.id('users'),
+    }),
+    classes: v.array(classDocWithMyRole),
+    children: v.array(accountChildValidator),
+  }),
+  handler: async (ctx) => {
+    const user = await requireUser(ctx)
+
+    const roles = await authz.getUserRoles(ctx, user._id)
+
+    // Roles are additive (e.g. creator + student). Collect per class.
+    const rolesByClassId = new Map<string, Array<string>>()
+    const classIds: Array<Id<'classes'>> = []
+
+    for (const entry of roles) {
+      if (entry.scope?.type !== 'class') continue
+      const held = rolesByClassId.get(entry.scope.id)
+      if (held) {
+        held.push(entry.role)
+        continue
+      }
+
+      if (classIds.length >= MAX_CLASS_ROLES) continue
+      rolesByClassId.set(entry.scope.id, [entry.role])
+      classIds.push(entry.scope.id as Id<'classes'>)
+    }
+
+    const docs = await Promise.all(classIds.map((id) => ctx.db.get(id)))
+
+    const classes = sortClasses(
+      docs.filter((doc): doc is Doc<'classes'> => doc !== null),
+      DEFAULT_CLASS_SORT,
+    ).map((doc) => {
+      const held = rolesByClassId.get(doc._id) ?? []
+      const myRole = highestClassRole(held) ?? undefined
+      const canManage = held.includes('creator') || held.includes('classTeacher')
+      return {
+        ...toPublicClass(doc),
+        myRole,
+        canManage,
+      }
+    })
+
+    return {
+      user: { _id: user._id },
+      classes,
+      children: await listMyChildrenForAccountHome(ctx, user._id),
+    }
+  },
+})
+
 const memberValidator = v.object({
   userId: v.id('users'),
   name: v.optional(v.string()),
@@ -354,7 +538,7 @@ export async function loadClassMembers(
 }
 
 /** Roster members for a class. Gated on class:manage. */
-export const listClassMembers = query({
+export const listClassMembers = internalQuery({
   args: {
     classId: v.id('classes'),
   },
@@ -419,25 +603,18 @@ export const getClassAdminBundle = query({
       throw new Error('Class not found')
     }
 
-    const canManage = await hasClassPermission(
-      ctx,
-      user._id,
-      args.classId,
-      'class:manage',
-    )
-
+    // `class:manageMembers` is granted only by `creator` and `classTeacher`
+    // roles, and those roles also include `class:manage`.
     const [members, guardianRoster] = await Promise.all([
-      canManage
-        ? loadClassMembers(ctx, args.classId)
-        : Promise.resolve([] as Array<ClassMember>),
+      loadClassMembers(ctx, args.classId),
       loadGuardianCodesForClass(ctx, args.classId),
     ])
 
     return {
       joinCodes: {
         studentCode: doc.studentCode,
-        teacherCode: canManage ? doc.teacherCode : null,
-        assistantTeacherCode: canManage ? doc.assistantTeacherCode : null,
+        teacherCode: doc.teacherCode,
+        assistantTeacherCode: doc.assistantTeacherCode,
       },
       members,
       guardianRoster,

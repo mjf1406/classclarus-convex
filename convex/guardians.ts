@@ -2,7 +2,7 @@ import { requireUser } from '#/lib/auth'
 import { v } from 'convex/values'
 import type { Id } from './_generated/dataModel'
 import type { MutationCtx, QueryCtx } from './_generated/server'
-import { mutation, query } from './_generated/server'
+import { internalQuery, mutation, query } from './_generated/server'
 import { authz } from './authz'
 import { hasClassPermission, requireClassPermission } from './lib/classAuth'
 import {
@@ -419,7 +419,7 @@ export const listGuardiansForStudent = query({
   },
 })
 
-export const listGuardianCodesForClass = query({
+export const listGuardianCodesForClass = internalQuery({
   args: {
     classId: v.id('classes'),
   },

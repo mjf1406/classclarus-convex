@@ -1,11 +1,11 @@
 import { requireUser } from '#/lib/auth'
-import { internalMutation, mutation, query } from './_generated/server'
+import { internalMutation, internalQuery, mutation, query } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { v } from 'convex/values'
 import {
   assignClassCreator,
   classScope,
-  getMyClassRole,
+  highestClassRole,
   hasClassPermission,
   requireClassPermission,
 } from './lib/classAuth'
@@ -132,14 +132,22 @@ export const getClass = query({
       'class:read',
     )
     if (canRead) {
-      const [myRole, canManage, canManageMembers] = await Promise.all([
-        getMyClassRole(ctx, user._id, args.classId),
-        hasClassPermission(ctx, user._id, args.classId, 'class:manage'),
-        hasClassPermission(ctx, user._id, args.classId, 'class:manageMembers'),
-      ])
+      const entries = await authz.getUserRoles(
+        ctx,
+        user._id,
+        classScope(args.classId),
+      )
+      const heldRoles = entries.map((entry) => entry.role)
+      const myRole = highestClassRole(heldRoles) ?? undefined
+
+      // `class:manage` and `class:manageMembers` are granted only by
+      // `creator` and `classTeacher` class roles in `convex/authz.ts`.
+      const canManage =
+        heldRoles.includes('creator') || heldRoles.includes('classTeacher')
+      const canManageMembers = canManage
       return {
         ...toPublicClass(doc),
-        myRole: myRole ?? undefined,
+        myRole,
         canManage,
         canManageMembers,
       }
@@ -293,7 +301,7 @@ export const removeClass = mutation({
   },
 })
 
-export const getJoinCodes = query({
+export const getJoinCodes = internalQuery({
   args: {
     classId: v.id('classes'),
   },

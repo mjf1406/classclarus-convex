@@ -1,23 +1,28 @@
 import { Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { convexQuery } from '@convex-dev/react-query'
-import { useConvexAuth } from '@convex-dev/auth/react'
 import { useTranslation } from 'react-i18next'
 
 import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
-import { api } from '../../../convex/_generated/api'
-import { TEN_MINUTES } from '@/lib/queryCache'
+import type { Id } from '../../../convex/_generated/dataModel'
 
-export function LinkedStudentsSection() {
+type LinkedChildClass = {
+  classId: Id<'classes'>
+  name: string
+  year: number
+  archivedTime?: number
+}
+
+type LinkedChild = {
+  orgStudentId: Id<'orgStudents'>
+  displayName: string
+  classes: LinkedChildClass[]
+}
+
+export function LinkedStudentsSection({
+  children,
+}: {
+  children?: LinkedChild[]
+}) {
   const { t } = useTranslation('home')
-  const { isAuthenticated } = useConvexAuth()
-  const { data: children } = useQuery({
-    ...convexQuery(
-      api.guardians.listMyChildren,
-      isAuthenticated ? {} : 'skip',
-    ),
-    gcTime: TEN_MINUTES,
-  })
 
   if (children === undefined || children.length === 0) {
     return null
@@ -48,6 +53,7 @@ export function LinkedStudentsSection() {
                       to="/c/$classId"
                       params={{ classId: classDoc.classId }}
                       className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm hover:bg-muted/50"
+                      preload={false}
                     >
                       <span className="min-w-0 truncate font-medium">
                         ({classDoc.year}) {classDoc.name}

@@ -68,17 +68,12 @@ function classLabel(
 
 export const Route = createFileRoute('/_account/c/$classId')({
   loader: async ({ context, params }) => {
-    try {
-      const classDoc = await context.queryClient.ensureQueryData(
-        convexQuery(api.classes.getClass, {
-          classId: params.classId as Id<'classes'>,
-        }),
-      )
-      return { classDoc }
-    } catch {
-      // Auth may not be ready on cold load; useQuery retries after auth.
-      return { classDoc: undefined }
-    }
+    // Keep this loader “cheap”: avoid prefetching `getClass` during intent
+    // preloads/hover navigation (that can multiply subscriptions for many
+    // class links on the home page).
+    void context
+    void params
+    return { classDoc: undefined }
   },
   head: ({ loaderData }) => {
     const label = classLabel(
@@ -378,7 +373,7 @@ function ClassMembersSection({
                 id: member.userId.slice(-6),
               })
             const roleKey =
-              MEMBER_ROLE_KEYS[member.role as keyof typeof MEMBER_ROLE_KEYS]
+              MEMBER_ROLE_KEYS[member.role]
             return (
               <li
                 key={member.userId}
@@ -387,7 +382,7 @@ function ClassMembersSection({
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {roleKey ? t(roleKey) : member.role}
+                    {t(roleKey)}
                     {member.email && member.name ? ` · ${member.email}` : null}
                   </p>
                 </div>
