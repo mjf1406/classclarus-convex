@@ -2,12 +2,14 @@ import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useConvexAuth } from '@convex-dev/auth/react'
+import { useTranslation } from 'react-i18next'
 
 import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
 import { api } from '../../../convex/_generated/api'
 import { TEN_MINUTES } from '@/lib/queryCache'
 
 export function LinkedStudentsSection() {
+  const { t } = useTranslation('home')
   const { isAuthenticated } = useConvexAuth()
   const { data: children } = useQuery({
     ...convexQuery(
@@ -23,9 +25,9 @@ export function LinkedStudentsSection() {
 
   return (
     <section className="mt-12">
-      <h2 className="text-xl font-semibold tracking-tight">My children</h2>
+      <h2 className="text-xl font-semibold tracking-tight">{t('myChildren')}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Classes for your children
+        {t('childrenClasses')}
       </p>
       <ul className="mt-4 space-y-4">
         {children.map((child) => (
@@ -36,7 +38,7 @@ export function LinkedStudentsSection() {
             <p className="text-sm font-medium">{child.displayName}</p>
             {child.classes.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">
-                No active classes yet.
+                {t('noActiveClassesYet')}
               </p>
             ) : (
               <ul className="mt-3 divide-y divide-border rounded-lg border border-border">

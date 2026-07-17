@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import i18n from '#/i18n'
 import { api } from '../../../convex/_generated/api'
 import { JoinCodeInput } from '@/components/classes/JoinCodeInput'
 import { Button } from '@/components/ui/button'
@@ -35,22 +37,17 @@ export const Route = createFileRoute('/_account/join')({
     meta: [
       {
         name: 'description',
-        content: 'Join a class with a join code on ClassClarus',
+        content: i18n.t('join:docDescription'),
       },
       {
-        title: 'Join a Class | ClassClarus',
+        title: i18n.t('join:docTitle'),
       },
     ],
   }),
 })
 
-const ROLE_LABELS: Record<string, string> = {
-  student: 'student',
-  classTeacher: 'teacher',
-  assistantTeacher: 'assistant teacher',
-}
-
 function JoinPage() {
+  const { t } = useTranslation(['join', 'common'])
   const navigate = useNavigate()
   const { joinCode: prefilledCode } = Route.useSearch()
   const redeemJoinOrGuardianCode = useMutation(
@@ -64,7 +61,7 @@ function JoinPage() {
 
   const handleJoin = useCallback(async () => {
     if (code.length !== JOIN_CODE_LENGTH) {
-      setError('Enter a complete 8-character join code.')
+      setError(t('codeIncomplete'))
       return
     }
 
@@ -79,9 +76,15 @@ function JoinPage() {
       }
 
       if (result.kind === 'class') {
-        toast.success(
-          `Joined as ${ROLE_LABELS[result.role] ?? result.role}`,
-        )
+        const roleLabel =
+          result.role === 'student'
+            ? t('roleStudent')
+            : result.role === 'classTeacher'
+              ? t('roleTeacher')
+              : result.role === 'assistantTeacher'
+                ? t('roleAssistant')
+                : result.role
+        toast.success(t('joinedAs', { role: roleLabel }))
         await navigate({
           to: '/c/$classId',
           params: { classId: result.classId },
@@ -89,14 +92,14 @@ function JoinPage() {
         return
       }
 
-      toast.success('Guardian access linked')
+      toast.success(t('guardianLinked'))
       await navigate({ to: '/' })
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('somethingWrong'))
     } finally {
       setIsSubmitting(false)
     }
-  }, [code, navigate, redeemJoinOrGuardianCode])
+  }, [code, navigate, redeemJoinOrGuardianCode, t])
 
   // Auto-redeem when arriving from a share/login redirect with a full code.
   useEffect(() => {
@@ -116,14 +119,12 @@ function JoinPage() {
     <main className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-lg items-center px-6 py-10">
       <Card className="w-full border-primary/20">
         <CardHeader>
-          <CardTitle>Enter join code</CardTitle>
-          <CardDescription>
-            Enter the 8-character class or guardian code your teacher shared.
-          </CardDescription>
+          <CardTitle>{t('enterCode')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="join-code">Join code</Label>
+            <Label htmlFor="join-code">{t('enterCode')}</Label>
             <JoinCodeInput
               id="join-code"
               value={code}
@@ -144,7 +145,7 @@ function JoinPage() {
             disabled={isSubmitting || code.length !== JOIN_CODE_LENGTH}
             onClick={() => void handleJoin()}
           >
-            {isSubmitting ? 'Joining…' : 'Join'}
+            {isSubmitting ? t('common:loading') : t('submit')}
           </Button>
 
           {error ? (

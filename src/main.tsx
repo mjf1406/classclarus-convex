@@ -4,6 +4,8 @@ import { routeTree } from './routeTree.gen'
 import PendingComponent from './components/loading/PendingComponent'
 import { ErrorPage } from './components/errors/ErrorPage'
 import { queryClient } from '#/lib/convex'
+// Side-effect: detect locale, persist classclarus-language, set <html lang>.
+import '#/i18n'
 
 const router = createRouter({
   routeTree,

@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react'
+import { useTranslation } from 'react-i18next'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { Button } from '../ui/button'
 import { api } from '../../../convex/_generated/api'
@@ -20,7 +21,7 @@ function getInitials(user: Doc<'users'>) {
   if (user.name && user.name.trim()) {
     const parts = user.name.trim().split(/\s+/).filter(Boolean)
     if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+      return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase()
     }
     return user.name.trim().slice(0, 2).toUpperCase()
   }
@@ -28,7 +29,7 @@ function getInitials(user: Doc<'users'>) {
   const localStr = local ?? ''
   const parts = localStr.split(/[._-]/).filter(Boolean)
   if (parts.length >= 2) {
-    return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase()
+    return `${parts[0]!.charAt(0)}${parts[1]!.charAt(0)}`.toUpperCase()
   }
   return local ?? ''
 }
@@ -52,6 +53,7 @@ function getDisplayName(user: Doc<'users'>) {
 }
 
 export function UserMenu() {
+  const { t } = useTranslation('common')
   const { isLoading, isAuthenticated } = useConvexAuth()
   const { data: user } = useQuery({
     ...convexQuery(api.users.current, isAuthenticated ? {} : 'skip'),
@@ -70,7 +72,7 @@ export function UserMenu() {
   if (!user?.email) {
     return (
       <Button variant="ghost" size="sm" asChild>
-        <Link to="/login">Sign in</Link>
+        <Link to="/login">{t('signIn')}</Link>
       </Button>
     )
   }
@@ -86,7 +88,7 @@ export function UserMenu() {
           variant="ghost"
           size="icon"
           className="rounded-full"
-          aria-label="Open user menu"
+          aria-label={t('openUserMenu')}
         >
           <Avatar>
             {user.image ? (

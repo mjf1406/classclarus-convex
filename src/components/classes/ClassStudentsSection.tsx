@@ -8,6 +8,7 @@ import {
   RefreshCw,
   UserMinus,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { api } from '../../../convex/_generated/api'
@@ -52,17 +53,6 @@ type PendingUnlink =
       guardianCount: number
     }
 
-function formatGuardianName(guardian: ListedGuardian): string {
-  return guardian.name ?? `User ${guardian.guardianUserId.slice(-6)}`
-}
-
-function formatGuardianSummary(guardianCount: number): string {
-  if (guardianCount === 0) {
-    return 'No guardian linked yet'
-  }
-  return guardianCount === 1 ? '1 guardian' : `${guardianCount} guardians`
-}
-
 export function ClassStudentsSection({
   classId,
   data,
@@ -82,6 +72,7 @@ export function ClassStudentsSection({
       }
     | undefined
 }) {
+  const { t } = useTranslation(['classes', 'common'])
   const unlinkGuardian = useMutation(api.guardians.unlinkGuardian)
   const unlinkAllGuardiansForStudent = useMutation(
     api.guardians.unlinkAllGuardiansForStudent,
@@ -96,6 +87,17 @@ export function ClassStudentsSection({
   const [regeneratingStudentId, setRegeneratingStudentId] =
     useState<Id<'orgStudents'> | null>(null)
 
+  const formatGuardianName = (guardian: ListedGuardian): string =>
+    guardian.name ??
+    t('common:userFallback', {
+      id: guardian.guardianUserId.slice(-6),
+    })
+
+  const formatGuardianSummary = (guardianCount: number): string => {
+    if (guardianCount === 0) return t('noGuardianLinked')
+    return t('guardianCount', { count: guardianCount })
+  }
+
   const handleDownload = async () => {
     if (!data) return
 
@@ -106,9 +108,7 @@ export function ClassStudentsSection({
       await downloadGuardianCodesPdf(data)
     } catch (error: unknown) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Failed to generate guardian codes PDF',
+        error instanceof Error ? error.message : t('downloadPdfFailed'),
       )
     } finally {
       setIsGenerating(false)
@@ -118,15 +118,15 @@ export function ClassStudentsSection({
   const handleCopyCode = (code: string, displayName: string) => {
     void navigator.clipboard
       .writeText(code)
-      .then(() => toast.success(`Code for ${displayName} copied`))
-      .catch(() => toast.error('Failed to copy code'))
+      .then(() => toast.success(t('codeForCopied', { name: displayName })))
+      .catch(() => toast.error(t('codeCopyFailed')))
   }
 
   const handleCopyLink = (code: string, displayName: string) => {
     void navigator.clipboard
       .writeText(getJoinUrl(code))
-      .then(() => toast.success(`Join link for ${displayName} copied`))
-      .catch(() => toast.error('Failed to copy link'))
+      .then(() => toast.success(t('linkForCopied', { name: displayName })))
+      .catch(() => toast.error(t('linkCopyFailed')))
   }
 
   const handleRegenerate = (
@@ -136,7 +136,7 @@ export function ClassStudentsSection({
     setRegeneratingStudentId(orgStudentId)
     void regenerateGuardianCode({ orgStudentId, classId })
       .then((newCode) => {
-        toast.success(`Guardian code regenerated for ${displayName}`)
+        toast.success(t('guardianCodeRegenerated', { name: displayName }))
         void navigator.clipboard.writeText(newCode).catch(() => {
           /* clipboard optional */
         })
@@ -145,7 +145,7 @@ export function ClassStudentsSection({
         toast.error(
           error instanceof Error
             ? error.message
-            : 'Failed to regenerate guardian code',
+            : t('guardianCodeRegenerateFailed'),
         )
       })
       .finally(() => setRegeneratingStudentId(null))
@@ -174,8 +174,8 @@ export function ClassStudentsSection({
       .then((removed) => {
         toast.success(
           unlinking.kind === 'one'
-            ? `${unlinking.guardianName} removed as guardian`
-            : `${removed} guardian${removed === 1 ? '' : 's'} removed`,
+            ? t('guardianRemoved', { name: unlinking.guardianName })
+            : t('guardiansRemoved', { count: removed }),
         )
       })
       .catch((error: unknown) => {
@@ -183,8 +183,8 @@ export function ClassStudentsSection({
           error instanceof Error
             ? error.message
             : unlinking.kind === 'one'
-              ? 'Failed to remove guardian'
-              : 'Failed to remove guardians',
+              ? t('removeGuardianFailed')
+              : t('removeGuardiansFailed'),
         )
       })
       .finally(() => setUnlinkingStudentId(null))
@@ -192,13 +192,19 @@ export function ClassStudentsSection({
 
   const dialogTitle =
     pendingUnlink?.kind === 'one'
-      ? 'Remove guardian?'
-      : 'Remove all guardians?'
+      ? t('removeGuardianTitle')
+      : t('removeAllGuardiansTitle')
   const dialogDescription =
     pendingUnlink?.kind === 'one'
-      ? `Remove ${pendingUnlink.guardianName} as guardian for ${pendingUnlink.studentName}?`
+      ? t('removeGuardianDescription', {
+          guardian: pendingUnlink.guardianName,
+          student: pendingUnlink.studentName,
+        })
       : pendingUnlink
-        ? `Remove all ${pendingUnlink.guardianCount} guardians from ${pendingUnlink.studentName}?`
+        ? t('removeAllGuardiansDescription', {
+            count: pendingUnlink.guardianCount,
+            student: pendingUnlink.studentName,
+          })
         : ''
 
   return (
@@ -206,11 +212,11 @@ export function ClassStudentsSection({
       <section className="mt-10">
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <h2 className="text-xl font-semibold tracking-tight">Students</h2>
+            <h2 className="text-xl font-semibold tracking-tight">
+              {t('students')}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each enrolled student has a private guardian join code (max 5
-              guardians). Copy a code or link to share, regenerate if it leaks,
-              or download print-ready QR slips for the whole class.
+              {t('studentsDescription')}
             </p>
           </div>
           <Button
@@ -218,11 +224,11 @@ export function ClassStudentsSection({
             size="sm"
             variant="default"
             className="w-full shrink-0 sm:w-auto"
-            aria-label="Download guardian codes PDF"
+            aria-label={t('downloadPdfAria')}
             disabled={data === undefined || isGenerating}
             onClick={() => void handleDownload()}
           >
-            <Download /> Download PDF
+            <Download /> {t('downloadPdf')}
           </Button>
         </div>
 
@@ -233,8 +239,7 @@ export function ClassStudentsSection({
             </li>
           ) : data.students.length === 0 ? (
             <li className="p-4 text-sm text-muted-foreground">
-              No students yet. Students appear here after they join with the
-              student code.
+              {t('noStudentsYet')}
             </li>
           ) : (
             data.students.map((student) => {
@@ -266,7 +271,9 @@ export function ClassStudentsSection({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label={`Copy code for ${student.displayName}`}
+                          aria-label={t('copyCodeFor', {
+                            name: student.displayName,
+                          })}
                           onClick={() =>
                             handleCopyCode(
                               student.guardianCode,
@@ -280,7 +287,9 @@ export function ClassStudentsSection({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label={`Copy join link for ${student.displayName}`}
+                          aria-label={t('copyLinkFor', {
+                            name: student.displayName,
+                          })}
                           onClick={() =>
                             handleCopyLink(
                               student.guardianCode,
@@ -294,7 +303,9 @@ export function ClassStudentsSection({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label={`Regenerate guardian code for ${student.displayName}`}
+                          aria-label={t('regenerateGuardianFor', {
+                            name: student.displayName,
+                          })}
                           disabled={isRegenerating}
                           onClick={() =>
                             handleRegenerate(
@@ -315,12 +326,12 @@ export function ClassStudentsSection({
                     <CollapsibleContent className="mt-2">
                       {student.guardians.length === 0 ? (
                         <p className="text-xs text-muted-foreground">
-                          No guardian linked yet
+                          {t('noGuardianLinked')}
                         </p>
                       ) : (
                         <div className="space-y-2 text-xs">
                           <p className="font-medium text-muted-foreground">
-                            Guardians
+                            {t('guardians')}
                           </p>
                           <ul className="space-y-1">
                             {student.guardians.map((guardian) => {
@@ -350,7 +361,7 @@ export function ClassStudentsSection({
                                     }
                                   >
                                     <UserMinus data-icon="inline-start" />
-                                    Remove
+                                    {t('common:remove')}
                                   </Button>
                                 </li>
                               )
@@ -372,7 +383,7 @@ export function ClassStudentsSection({
                             }
                           >
                             <UserMinus data-icon="inline-start" />
-                            Remove all guardians
+                            {t('removeAllGuardians')}
                           </Button>
                         </div>
                       )}
@@ -397,7 +408,7 @@ export function ClassStudentsSection({
             <AlertDialogDescription>{dialogDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={(event) => {
@@ -405,7 +416,7 @@ export function ClassStudentsSection({
                 handleConfirmUnlink()
               }}
             >
-              Remove
+              {t('common:remove')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

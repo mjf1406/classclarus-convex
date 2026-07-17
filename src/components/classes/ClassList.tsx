@@ -9,6 +9,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import {
@@ -19,6 +20,7 @@ import {
 import type { ClassPublic, ClassSort } from '#/lib/classes'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
 import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
+import { formatLocalizedDateTime } from '#/i18n/formatDate'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,25 +58,32 @@ type ClassListProps = {
   onEdit?: (classDoc: ClassPublic) => void
 }
 
-function formatClassTimestamp(timestamp: number) {
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(timestamp))
-}
-
-function formatUpdatedLabel(updatedTime: number | undefined) {
-  return updatedTime === undefined ? 'N/A' : formatClassTimestamp(updatedTime)
+function formatUpdatedLabel(
+  updatedTime: number | undefined,
+  notAvailable: string,
+) {
+  return updatedTime === undefined
+    ? notAvailable
+    : formatLocalizedDateTime(updatedTime)
 }
 
 function ClassTimestamps({ classDoc }: { classDoc: ClassPublic }) {
+  const { t } = useTranslation(['home', 'common'])
   return (
     <div className="mt-2 space-y-0.5 text-2xs text-muted-foreground">
-      <p>Created {formatClassTimestamp(classDoc._creationTime)}</p>
-      <p>Updated {formatUpdatedLabel(classDoc.updatedTime)}</p>
+      <p>
+        {t('createdAt', {
+          date: formatLocalizedDateTime(classDoc._creationTime),
+        })}
+      </p>
+      <p>
+        {t('updatedAt', {
+          date: formatUpdatedLabel(
+            classDoc.updatedTime,
+            t('common:notAvailable'),
+          ),
+        })}
+      </p>
     </div>
   )
 }
@@ -90,6 +99,7 @@ function ClassActionsMenu({
   onArchiveToggle: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation(['classes', 'common'])
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -98,7 +108,7 @@ function ClassActionsMenu({
           variant="ghost"
           size="icon-sm"
           className="shrink-0"
-          aria-label="Class actions"
+          aria-label={t('classActions')}
           onClick={(e) => e.stopPropagation()}
         >
           <MoreVertical />
@@ -107,15 +117,15 @@ function ClassActionsMenu({
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem onSelect={onEdit}>
           <Pencil />
-          Edit
+          {t('edit')}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={onArchiveToggle}>
           {isArchived ? <ArchiveRestore /> : <Archive />}
-          {isArchived ? 'Unarchive' : 'Archive'}
+          {isArchived ? t('unarchive') : t('archive')}
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onSelect={onDelete}>
           <Trash2 />
-          Delete
+          {t('common:delete')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -133,6 +143,7 @@ function ClassCard({
   onArchiveToggle: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation('home')
   const isArchived = classDoc.archivedTime !== undefined
   const isPending = isPendingClass(classDoc)
   const canManage = classDoc.canManage === true
@@ -151,7 +162,7 @@ function ClassCard({
           to="/c/$classId"
           params={{ classId: classDoc._id }}
           className="absolute inset-0 z-0 rounded-[inherit]"
-          aria-label={`Open ${classDoc.name}`}
+          aria-label={t('openClass', { name: classDoc.name })}
         />
       )}
       <CardHeader className="relative z-10 min-w-0 pointer-events-none">
@@ -170,7 +181,7 @@ function ClassCard({
                 </CardTitle>
                 <div className="mt-0.5 flex items-center gap-2">
                   <p className="text-xs font-medium text-muted-foreground">
-                    {isPending ? 'Creating…' : classDoc.year}
+                    {isPending ? t('creating') : classDoc.year}
                   </p>
                   <ClassRoleBadge role={classDoc.myRole} />
                 </div>
@@ -192,7 +203,7 @@ function ClassCard({
               </CardDescription>
             ) : (
               <CardDescription className="mt-1 italic">
-                No description
+                {t('noDescription')}
               </CardDescription>
             )}
             <ClassTimestamps classDoc={classDoc} />
@@ -214,6 +225,7 @@ function ClassRow({
   onArchiveToggle: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation(['home', 'common'])
   const isArchived = classDoc.archivedTime !== undefined
   const isPending = isPendingClass(classDoc)
   const canManage = classDoc.canManage === true
@@ -232,7 +244,7 @@ function ClassRow({
           to="/c/$classId"
           params={{ classId: classDoc._id }}
           className="absolute inset-0 z-0 rounded-[inherit]"
-          aria-label={`Open ${classDoc.name}`}
+          aria-label={t('openClass', { name: classDoc.name })}
         />
       )}
       <CardHeader className="relative z-10 min-w-0 pointer-events-none py-0">
@@ -251,7 +263,7 @@ function ClassRow({
                     {classDoc.name}
                   </CardTitle>
                   <span className="shrink-0 text-xs font-medium text-muted-foreground">
-                    {isPending ? 'Creating…' : classDoc.year}
+                    {isPending ? t('creating') : classDoc.year}
                   </span>
                   <ClassRoleBadge role={classDoc.myRole} />
                 </div>
@@ -261,7 +273,7 @@ function ClassRow({
                   </CardDescription>
                 ) : (
                   <CardDescription className="mt-0.5 italic">
-                    No description
+                    {t('noDescription')}
                   </CardDescription>
                 )}
               </div>
@@ -278,9 +290,18 @@ function ClassRow({
             </div>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-2xs text-muted-foreground">
               <span>
-                Created {formatClassTimestamp(classDoc._creationTime)}
+                {t('createdAt', {
+                  date: formatLocalizedDateTime(classDoc._creationTime),
+                })}
               </span>
-              <span>Updated {formatUpdatedLabel(classDoc.updatedTime)}</span>
+              <span>
+                {t('updatedAt', {
+                  date: formatUpdatedLabel(
+                    classDoc.updatedTime,
+                    t('common:notAvailable'),
+                  ),
+                })}
+              </span>
             </div>
           </div>
         </div>
@@ -374,23 +395,24 @@ function EmptyState({
   archivedOnly?: boolean
   onCreateClick?: () => void
 }) {
+  const { t } = useTranslation('home')
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
       <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <BookText className="size-6" />
       </div>
       <h2 className="text-lg font-semibold">
-        {archivedOnly ? 'No archived classes' : 'No classes yet'}
+        {archivedOnly ? t('noArchivedClasses') : t('noClasses')}
       </h2>
       {!archivedOnly && (
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          Create your first class to unlock the power of ClassClarus!
+          {t('emptyCta')}
         </p>
       )}
       {!archivedOnly && onCreateClick && (
         <Button className="mt-6" onClick={onCreateClick}>
           <Plus data-icon="inline-start" />
-          Create Class
+          {t('createClass')}
         </Button>
       )}
     </div>
@@ -405,6 +427,7 @@ export function ClassList({
   onCreateClick,
   onEdit,
 }: ClassListProps) {
+  const { t } = useTranslation(['home', 'classes', 'common'])
   const sortedClasses = classes ? sortClasses(classes, sort) : undefined
   const removeClass = useRemoveClass()
   const updateClass = useUpdateClass()
@@ -417,15 +440,15 @@ export function ClassList({
     const archive = classDoc.archivedTime === undefined
     void updateClass({ classId: classDoc._id, archived: archive })
       .then(() => {
-        toast.success(archive ? 'Class archived' : 'Class unarchived')
+        toast.success(archive ? t('classArchived') : t('classUnarchived'))
       })
       .catch((error: unknown) => {
         toast.error(
           error instanceof Error
             ? error.message
             : archive
-              ? 'Failed to archive class'
-              : 'Failed to unarchive class',
+              ? t('archiveFailed')
+              : t('unarchiveFailed'),
         )
       })
   }
@@ -433,17 +456,18 @@ export function ClassList({
   const handleDelete = () => {
     if (!deletingClass) return
 
-    // Fire mutation first so optimistic updates apply, then close immediately.
     const mutationPromise = removeClass({ classId: deletingClass._id })
     setDeletingClass(null)
 
     void mutationPromise
       .then(() => {
-        toast.success('Class deleted')
+        toast.success(t('classDeleted'))
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error ? error.message : 'Failed to delete class',
+          error instanceof Error
+            ? error.message
+            : t('classes:deleteFailed'),
         )
       })
   }
@@ -496,15 +520,17 @@ export function ClassList({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete class?</AlertDialogTitle>
+            <AlertDialogTitle>{t('classes:deleteClassTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {deletingClass
-                ? `Delete “${deletingClass.name}”? This cannot be undone.`
-                : 'This cannot be undone.'}
+                ? t('classes:deleteClassDescription', {
+                    name: deletingClass.name,
+                  })
+                : t('common:cannotUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={(e) => {
@@ -512,7 +538,7 @@ export function ClassList({
                 handleDelete()
               }}
             >
-              Delete
+              {t('common:delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

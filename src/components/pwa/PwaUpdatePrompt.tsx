@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { RocketIcon } from 'lucide-react'
 
@@ -9,6 +10,7 @@ import { SparklesText } from '@/components/ui/sparkles-text'
 const UPDATE_TOAST_ID = 'pwa-update'
 
 export function PwaUpdatePrompt() {
+  const { t } = useTranslation('pwa')
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
@@ -41,12 +43,11 @@ export function PwaUpdatePrompt() {
             colors={{ first: '#3b82f6', second: '#f43f7f' }}
             sparklesCount={12}
           >
-            New version available
+            {t('updateTitle')}
           </SparklesText>
 
           <p className="text-base text-blue-900/80 dark:text-blue-100/80">
-            A fresh update to ClassClarus is ready. Refresh now to get the
-            latest features and fixes.
+            {t('updateBody')}
           </p>
 
           <PulsatingButton
@@ -58,7 +59,7 @@ export function PwaUpdatePrompt() {
             }}
             className="w-full bg-blue-600 px-8 py-5 text-lg font-semibold text-white hover:bg-blue-700"
           >
-            Refresh now
+            {t('refreshNow')}
           </PulsatingButton>
         </div>
       ),
@@ -69,7 +70,7 @@ export function PwaUpdatePrompt() {
         dismissible: false,
       },
     )
-  }, [needRefresh, updateServiceWorker])
+  }, [needRefresh, updateServiceWorker, t])
 
   return null
 }

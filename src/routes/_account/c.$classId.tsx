@@ -16,6 +16,7 @@ import {
   UserMinus,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 import { TEN_MINUTES } from '#/lib/queryCache'
 import { useRemoveClass, useUpdateClass } from '#/lib/classes'
@@ -32,6 +33,8 @@ import {
   ClassRoleBadge,
 } from '#/components/classes/ClassRoleBadge'
 import { JoinShareDialog } from '#/components/classes/JoinShareDialog'
+import i18n from '#/i18n'
+import { translateClassRole } from '#/i18n/roleLabels'
 import { api } from '../../../convex/_generated/api'
 import type { Id } from '../../../convex/_generated/dataModel'
 import { useMutation } from 'convex/react'
@@ -55,8 +58,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
-function classLabel(classDoc: ClassPublic | null | undefined) {
-  if (classDoc == null) return 'Class'
+function classLabel(
+  classDoc: ClassPublic | null | undefined,
+  fallback: string,
+) {
+  if (classDoc == null) return fallback
   return `(${classDoc.year}) ${classDoc.name}`
 }
 
@@ -75,15 +81,18 @@ export const Route = createFileRoute('/_account/c/$classId')({
     }
   },
   head: ({ loaderData }) => {
-    const label = classLabel(loaderData?.classDoc)
+    const label = classLabel(
+      loaderData?.classDoc,
+      i18n.t('classes:classFallback'),
+    )
     return {
       meta: [
         {
           name: 'description',
-          content: `Manage ${label} for the ClassClarus webapp`,
+          content: i18n.t('classes:docDescription', { label }),
         },
         {
-          title: `${label} | ClassClarus`,
+          title: i18n.t('classes:docTitle', { label }),
         },
       ],
     }
@@ -114,6 +123,7 @@ function JoinCodesSection({
     | undefined
   canRegenerate: boolean
 }) {
+  const { t } = useTranslation('classes')
   const regenerate = useMutation(api.classes.regenerateJoinCode)
   const [regenerating, setRegenerating] = useState<JoinCodeType | null>(null)
   const [sharing, setSharing] = useState<{
@@ -132,7 +142,6 @@ function JoinCodesSection({
     ['student', 'teacher', 'assistantTeacher'] as const
   ).filter((type) => {
     if (type === 'student') return true
-    // Hide staff codes until loaded; null means redacted (no class:manage).
     if (codes === undefined) return false
     return codeFor(type) !== null
   })
@@ -142,26 +151,31 @@ function JoinCodesSection({
     typeof sharingCodeRaw === 'string' ? sharingCodeRaw : undefined
   const sharingRole = sharing ? JOIN_CODE_ROLE[sharing.type] : null
 
+  const roleLabelFor = (type: JoinCodeType) =>
+    translateClassRole(t, JOIN_CODE_ROLE[type])
+
   const handleCopy = (type: JoinCodeType) => {
     const code = codeFor(type)
     if (!code) return
-    const label = CLASS_ROLE_BADGE_CONFIG[JOIN_CODE_ROLE[type]].label
+    const label = roleLabelFor(type)
     void navigator.clipboard
       .writeText(code)
-      .then(() => toast.success(`${label} code copied`))
-      .catch(() => toast.error('Failed to copy code'))
+      .then(() => toast.success(t('codeCopied', { role: label })))
+      .catch(() => toast.error(t('codeCopyFailed')))
   }
 
   const handleRegenerate = (type: JoinCodeType) => {
     setRegenerating(type)
-    const label = CLASS_ROLE_BADGE_CONFIG[JOIN_CODE_ROLE[type]].label
+    const label = roleLabelFor(type)
     void regenerate({ classId, codeType: type })
       .then(() => {
-        toast.success(`${label} code regenerated`)
+        toast.success(t('codeRegenerated', { role: label }))
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error ? error.message : 'Failed to regenerate code',
+          error instanceof Error
+            ? error.message
+            : t('codeRegenerateFailed'),
         )
       })
       .finally(() => setRegenerating(null))
@@ -171,8 +185,6 @@ function JoinCodesSection({
     const code = codeFor(type)
     if (!code || code.length !== JOIN_CODE_LENGTH) return
 
-    // With `noopener` the browser returns null even on success, so we can't
-    // use the return value to detect a blocked popup.
     window.open(
       new URL(getJoinShareUrl(code, JOIN_CODE_ROLE[type])).href,
       '_blank',
@@ -182,11 +194,9 @@ function JoinCodesSection({
 
   return (
     <section className="mt-10">
-      <h2 className="text-xl font-semibold tracking-tight">Join codes</h2>
+      <h2 className="text-xl font-semibold tracking-tight">{t('joinCodes')}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Share a code to let others join this class with the matching role. Tap a
-        code to show a QR for the classroom. Regenerate a code if it leaks —
-        existing members keep their access until removed.
+        {t('joinCodesDescription')}
       </p>
       <div
         className={cn(
@@ -199,6 +209,7 @@ function JoinCodesSection({
           const role = JOIN_CODE_ROLE[type]
           const roleConfig = CLASS_ROLE_BADGE_CONFIG[role]
           const RoleIcon = roleConfig.icon
+          const label = roleLabelFor(type)
           return (
             <div
               key={type}
@@ -206,7 +217,7 @@ function JoinCodesSection({
             >
               <div className="flex items-center gap-1.5 text-xs font-medium">
                 <RoleIcon className="size-3.5" />
-                {roleConfig.label}
+                {label}
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
                 {code === undefined || code === null ? (
@@ -216,7 +227,7 @@ function JoinCodesSection({
                     type="button"
                     className="rounded-md font-mono text-lg font-semibold tracking-widest text-left hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onClick={() => setSharing({ type, qrOnly: false })}
-                    aria-label={`Show ${roleConfig.label} join QR`}
+                    aria-label={t('showJoinQr', { role: label })}
                   >
                     {formatJoinCodeDisplay(code)}
                   </button>
@@ -226,7 +237,7 @@ function JoinCodesSection({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={`Show ${roleConfig.label} join QR`}
+                    aria-label={t('showJoinQr', { role: label })}
                     disabled={!code}
                     onClick={() => setSharing({ type, qrOnly: true })}
                   >
@@ -236,7 +247,7 @@ function JoinCodesSection({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={`Open ${roleConfig.label} join QR in a new window`}
+                    aria-label={t('openJoinQrWindow', { role: label })}
                     disabled={!code}
                     onClick={() => handleOpenShareWindow(type)}
                   >
@@ -246,7 +257,7 @@ function JoinCodesSection({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={`Copy ${roleConfig.label} code`}
+                    aria-label={t('copyRoleCode', { role: label })}
                     disabled={!code}
                     onClick={() => handleCopy(type)}
                   >
@@ -259,7 +270,7 @@ function JoinCodesSection({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label={`${roleConfig.label} code actions`}
+                          aria-label={t('roleCodeActions', { role: label })}
                           disabled={!code}
                         >
                           <MoreVertical />
@@ -275,7 +286,7 @@ function JoinCodesSection({
                               regenerating === type ? 'animate-spin' : undefined
                             }
                           />
-                          Regenerate code
+                          {t('regenerateCode')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -287,7 +298,7 @@ function JoinCodesSection({
         })}
       </div>
 
-      {sharingCode !== undefined && sharingRole !== null ? (
+      {sharing && sharingCode !== undefined && sharingRole !== null ? (
         <JoinShareDialog
           open
           onOpenChange={(open) => {
@@ -302,12 +313,12 @@ function JoinCodesSection({
   )
 }
 
-const MEMBER_ROLE_LABELS: Record<string, string> = {
-  creator: 'Creator',
-  classTeacher: 'Teacher',
-  assistantTeacher: 'Assistant',
-  student: 'Student',
-}
+const MEMBER_ROLE_KEYS = {
+  creator: 'roleCreator',
+  classTeacher: 'roleClassTeacher',
+  assistantTeacher: 'roleAssistantShort',
+  student: 'roleStudent',
+} as const
 
 type ClassMember = {
   userId: Id<'users'>
@@ -323,6 +334,7 @@ function ClassMembersSection({
   classId: Id<'classes'>
   members: Array<ClassMember> | undefined
 }) {
+  const { t } = useTranslation(['classes', 'common'])
   const removeMember = useMutation(api.memberships.removeMember)
   const [removingUserId, setRemovingUserId] = useState<Id<'users'> | null>(null)
 
@@ -330,11 +342,13 @@ function ClassMembersSection({
     setRemovingUserId(userId)
     void removeMember({ classId, userId })
       .then(() => {
-        toast.success('Member removed')
+        toast.success(t('memberRemoved'))
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error ? error.message : 'Failed to remove member',
+          error instanceof Error
+            ? error.message
+            : t('memberRemoveFailed'),
         )
       })
       .finally(() => setRemovingUserId(null))
@@ -342,10 +356,9 @@ function ClassMembersSection({
 
   return (
     <section className="mt-10">
-      <h2 className="text-xl font-semibold tracking-tight">Members</h2>
+      <h2 className="text-xl font-semibold tracking-tight">{t('members')}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Remove access for anyone who joined with a leaked code. Regenerating a
-        code does not revoke existing members.
+        {t('membersDescription')}
       </p>
       <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
         {members === undefined ? (
@@ -353,11 +366,19 @@ function ClassMembersSection({
             <Skeleton className="h-5 w-48" />
           </li>
         ) : members.length === 0 ? (
-          <li className="p-4 text-sm text-muted-foreground">No members yet.</li>
+          <li className="p-4 text-sm text-muted-foreground">
+            {t('noMembersYet')}
+          </li>
         ) : (
           members.map((member) => {
             const label =
-              member.name ?? member.email ?? `User ${member.userId.slice(-6)}`
+              member.name ??
+              member.email ??
+              t('common:userFallback', {
+                id: member.userId.slice(-6),
+              })
+            const roleKey =
+              MEMBER_ROLE_KEYS[member.role as keyof typeof MEMBER_ROLE_KEYS]
             return (
               <li
                 key={member.userId}
@@ -366,7 +387,7 @@ function ClassMembersSection({
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {MEMBER_ROLE_LABELS[member.role] ?? member.role}
+                    {roleKey ? t(roleKey) : member.role}
                     {member.email && member.name ? ` · ${member.email}` : null}
                   </p>
                 </div>
@@ -378,7 +399,7 @@ function ClassMembersSection({
                   onClick={() => handleRemove(member.userId)}
                 >
                   <UserMinus data-icon="inline-start" />
-                  Remove
+                  {t('common:remove')}
                 </Button>
               </li>
             )
@@ -390,6 +411,7 @@ function ClassMembersSection({
 }
 
 function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
+  const { t } = useTranslation(['classes', 'common'])
   const navigate = useNavigate()
   const updateClass = useUpdateClass()
   const removeClass = useRemoveClass()
@@ -402,15 +424,15 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
     const archive = !isArchived
     void updateClass({ classId: classDoc._id, archived: archive })
       .then(() => {
-        toast.success(archive ? 'Class archived' : 'Class unarchived')
+        toast.success(archive ? t('archive') : t('unarchive'))
       })
       .catch((error: unknown) => {
         toast.error(
           error instanceof Error
             ? error.message
             : archive
-              ? 'Failed to archive class'
-              : 'Failed to unarchive class',
+              ? t('updateFailed')
+              : t('updateFailed'),
         )
       })
   }
@@ -421,12 +443,12 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
 
     void mutationPromise
       .then(() => {
-        toast.success('Class deleted')
+        toast.success(t('deleteClass'))
         void navigate({ to: '/' })
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error ? error.message : 'Failed to delete class',
+          error instanceof Error ? error.message : t('deleteFailed'),
         )
       })
   }
@@ -440,7 +462,7 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
             variant="ghost"
             size="icon"
             className="ml-auto shrink-0"
-            aria-label="Class actions"
+            aria-label={t('classActions')}
           >
             <MoreVertical />
           </Button>
@@ -448,18 +470,18 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => setEditOpen(true)}>
             <Pencil />
-            Edit
+            {t('edit')}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleArchiveToggle}>
             {isArchived ? <ArchiveRestore /> : <Archive />}
-            {isArchived ? 'Unarchive' : 'Archive'}
+            {isArchived ? t('unarchive') : t('archive')}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onSelect={() => setConfirmingDelete(true)}
           >
             <Trash2 />
-            Delete
+            {t('common:delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -474,13 +496,13 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
       <AlertDialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete class?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteClassTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {`Delete “${classDoc.name}”? This cannot be undone.`}
+              {t('deleteClassDescription', { name: classDoc.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={(e) => {
@@ -488,7 +510,7 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
                 handleDelete()
               }}
             >
-              Delete
+              {t('common:delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -498,6 +520,7 @@ function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
 }
 
 function ClassPage() {
+  const { t } = useTranslation(['classes', 'common'])
   const { classId } = Route.useParams()
   const typedClassId = classId as Id<'classes'>
 
@@ -526,7 +549,7 @@ function ClassPage() {
         <Button variant="ghost" size="sm" className="mb-4 -ml-2" asChild>
           <Link to="/">
             <ArrowLeft data-icon="inline-start" />
-            Back to classes
+            {t('backToClasses')}
           </Link>
         </Button>
 
@@ -538,13 +561,11 @@ function ClassPage() {
         ) : classDoc === null ? (
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
-              Class not found
+              {t('notFoundTitle')}
             </h1>
-            <p className="text-muted-foreground">
-              This class may have been deleted or you don&apos;t have access.
-            </p>
+            <p className="text-muted-foreground">{t('notFoundDescription')}</p>
             <Button className="mt-4" asChild>
-              <Link to="/">Go home</Link>
+              <Link to="/">{t('common:goHome')}</Link>
             </Button>
           </div>
         ) : (

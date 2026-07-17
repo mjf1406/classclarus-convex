@@ -3,6 +3,8 @@ import { api } from '../../convex/_generated/api'
 import type { Doc, Id } from '../../convex/_generated/dataModel'
 import { compareClasses, DEFAULT_CLASS_SORT } from './classSort'
 import type { ClassSort } from './classSort'
+import type { AppLanguage } from '#/i18n/locales'
+import { DEFAULT_APP_LANGUAGE } from '#/i18n/locales'
 
 export type { ClassSort } from './classSort'
 
@@ -26,8 +28,13 @@ export type ClassDisplayRole = ClassRole | 'guardian'
  */
 export type ClassPublic = Omit<
   Doc<'classes'>,
-  'studentCode' | 'teacherCode' | 'assistantTeacherCode' | 'publicDisplayPin'
+  | 'studentCode'
+  | 'teacherCode'
+  | 'assistantTeacherCode'
+  | 'publicDisplayPin'
+  | 'language'
 > & {
+  language: AppLanguage
   myRole: ClassDisplayRole | undefined
   canManage?: boolean
   canManageMembers?: boolean
@@ -47,6 +54,7 @@ type ListMyClass = {
   archivedTime?: number
   organizationId?: string
   teamId?: string
+  language: AppLanguage
 }
 
 function toListMyClass(doc: ClassPublic): ListMyClass {
@@ -62,6 +70,7 @@ function toListMyClass(doc: ClassPublic): ListMyClass {
     archivedTime: doc.archivedTime,
     organizationId: doc.organizationId,
     teamId: doc.teamId,
+    language: doc.language,
     myRole: doc.myRole === 'guardian' ? undefined : doc.myRole,
     canManage: doc.canManage === true,
   }
@@ -107,6 +116,7 @@ function applyClassPatch(
     description?: string
     icon?: string
     archived?: boolean
+    language?: AppLanguage
   },
   now: number,
 ): ClassPublic {
@@ -118,6 +128,7 @@ function applyClassPatch(
   if (args.name !== undefined) updated.name = args.name
   if (args.description !== undefined) updated.description = args.description
   if (args.icon !== undefined) updated.icon = args.icon
+  if (args.language !== undefined) updated.language = args.language
   if (args.archived === true) {
     updated.archivedTime = now
   } else if (args.archived === false) {
@@ -142,6 +153,7 @@ export function useCreateClass() {
         description: args.description,
         icon: args.icon,
         year: args.year,
+        language: args.language ?? DEFAULT_APP_LANGUAGE,
         myRole: 'creator',
         canManage: true,
       }

@@ -1,5 +1,6 @@
 import QRCode from 'react-qr-code'
 import { Copy } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import type { ClassRole } from '#/lib/classes'
@@ -7,6 +8,7 @@ import {
   CLASS_ROLE_BADGE_CONFIG,
   ClassRoleBadge,
 } from '@/components/classes/ClassRoleBadge'
+import { translateClassRole } from '#/i18n/roleLabels'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -35,23 +37,26 @@ export function JoinSharePanel({
   title,
   description,
 }: JoinSharePanelProps) {
+  const { t } = useTranslation('classes')
   const roleConfig = CLASS_ROLE_BADGE_CONFIG[role]
   const RoleIcon = roleConfig.icon
-  const roleLabel = roleConfig.label
+  const roleLabel = translateClassRole(t, role).toLowerCase()
   const joinUrl = getJoinUrl(code)
 
   const handleCopyCode = () => {
     void navigator.clipboard
       .writeText(code)
-      .then(() => toast.success(`${roleLabel} code copied`))
-      .catch(() => toast.error('Failed to copy code'))
+      .then(() =>
+        toast.success(t('codeCopied', { role: translateClassRole(t, role) })),
+      )
+      .catch(() => toast.error(t('codeCopyFailed')))
   }
 
   const handleCopyLink = () => {
     void navigator.clipboard
       .writeText(joinUrl)
-      .then(() => toast.success('Join link copied'))
-      .catch(() => toast.error('Failed to copy link'))
+      .then(() => toast.success(t('joinLinkCopied')))
+      .catch(() => toast.error(t('linkCopyFailed')))
   }
 
   return (
@@ -59,11 +64,10 @@ export function JoinSharePanel({
       <div className="mb-8 space-y-3">
         <ClassRoleBadge role={role} className="text-base [&_svg]:size-4" />
         <h1 className="font-heading text-3xl font-medium sm:text-4xl">
-          {title ?? `Share ${roleLabel.toLowerCase()} join code`}
+          {title ?? t('shareJoinCodeTitle', { role: roleLabel })}
         </h1>
         <p className="text-lg leading-relaxed text-muted-foreground sm:text-xl">
-          {description ??
-            `Display this for your class, or share the code / link so others can join as ${roleLabel.toLowerCase()}.`}
+          {description ?? t('shareJoinCodeDescription', { role: roleLabel })}
         </p>
       </div>
 
@@ -80,7 +84,7 @@ export function JoinSharePanel({
                 1
               </span>
               <span>
-                Open{' '}
+                {t('shareStep1Before')}{' '}
                 <span
                   className={cn(
                     'rounded-md border px-2 py-1 font-mono text-xl font-medium break-all sm:text-2xl xl:text-3xl',
@@ -89,7 +93,7 @@ export function JoinSharePanel({
                 >
                   {getJoinPageUrl()}
                 </span>{' '}
-                (or scan the QR).
+                {t('shareStep1After')}
               </span>
             </li>
             <li className="flex gap-4">
@@ -101,9 +105,7 @@ export function JoinSharePanel({
               >
                 2
               </span>
-              <span>
-                Enter the join code — scanning the QR prefills it for you.
-              </span>
+              <span>{t('shareStep2')}</span>
             </li>
             <li className="flex gap-4">
               <span
@@ -114,11 +116,7 @@ export function JoinSharePanel({
               >
                 3
               </span>
-              <span>
-                Tap{' '}
-                <span className="font-medium text-foreground">Join class</span>{' '}
-                while signed in.
-              </span>
+              <span>{t('shareStep3')}</span>
             </li>
           </ol>
 
@@ -130,7 +128,7 @@ export function JoinSharePanel({
           >
             <div className="flex items-center gap-2 text-lg font-medium sm:text-xl">
               <RoleIcon className="size-5 sm:size-6" />
-              {roleLabel} join code
+              {t('roleJoinCode', { role: translateClassRole(t, role) })}
             </div>
             <p className="font-mono text-5xl font-semibold tracking-widest sm:text-6xl xl:text-7xl">
               {formatJoinCodeDisplay(code)}
@@ -138,11 +136,11 @@ export function JoinSharePanel({
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={handleCopyCode}>
                 <Copy className="size-4" />
-                Copy code
+                {t('copyCode')}
               </Button>
               <Button variant="outline" size="sm" onClick={handleCopyLink}>
                 <Copy className="size-4" />
-                Copy join link
+                {t('copyJoinLink')}
               </Button>
             </div>
           </div>
@@ -182,8 +180,10 @@ export function JoinShareDialog({
   role,
   qrOnly = false,
 }: JoinShareDialogProps) {
+  const { t } = useTranslation('classes')
   const roleConfig = CLASS_ROLE_BADGE_CONFIG[role]
-  const roleLabel = roleConfig.label
+  const roleLabel = translateClassRole(t, role)
+  const roleLabelLower = roleLabel.toLowerCase()
   const joinUrl = getJoinUrl(code)
 
   if (qrOnly) {
@@ -191,9 +191,11 @@ export function JoinShareDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-xs gap-0 p-4 sm:max-w-sm">
           <DialogHeader className="sr-only">
-            <DialogTitle>{roleLabel} join QR code</DialogTitle>
+            <DialogTitle>
+              {t('joinQrTitle', { role: roleLabel })}
+            </DialogTitle>
             <DialogDescription>
-              Scan this QR code to join as {roleLabel.toLowerCase()}.
+              {t('joinQrDescription', { role: roleLabelLower })}
             </DialogDescription>
           </DialogHeader>
           <div
@@ -224,11 +226,10 @@ export function JoinShareDialog({
       >
         <DialogHeader className="sr-only">
           <DialogTitle>
-            Share {roleLabel.toLowerCase()} join code
+            {t('shareJoinCodeTitle', { role: roleLabelLower })}
           </DialogTitle>
           <DialogDescription>
-            Display this for your class, or share the code / link so others can
-            join as {roleLabel.toLowerCase()}.
+            {t('shareJoinCodeDescription', { role: roleLabelLower })}
           </DialogDescription>
         </DialogHeader>
 

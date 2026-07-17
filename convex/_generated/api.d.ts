@@ -19,12 +19,14 @@ import type * as lib_classAuth from "../lib/classAuth.js";
 import type * as lib_guardianAuth from "../lib/guardianAuth.js";
 import type * as lib_guardianLinks from "../lib/guardianLinks.js";
 import type * as lib_joinCodes from "../lib/joinCodes.js";
+import type * as lib_languages from "../lib/languages.js";
 import type * as lib_soloRoster from "../lib/soloRoster.js";
 import type * as lib_studentContentAccess from "../lib/studentContentAccess.js";
 import type * as memberships from "../memberships.js";
 import type * as permissions from "../permissions.js";
 import type * as rateLimiter from "../rateLimiter.js";
 import type * as tenants from "../tenants.js";
+import type * as userPreferences from "../userPreferences.js";
 import type * as users from "../users.js";
 
 import type {
@@ -45,12 +47,14 @@ declare const fullApi: ApiFromModules<{
   "lib/guardianAuth": typeof lib_guardianAuth;
   "lib/guardianLinks": typeof lib_guardianLinks;
   "lib/joinCodes": typeof lib_joinCodes;
+  "lib/languages": typeof lib_languages;
   "lib/soloRoster": typeof lib_soloRoster;
   "lib/studentContentAccess": typeof lib_studentContentAccess;
   memberships: typeof memberships;
   permissions: typeof permissions;
   rateLimiter: typeof rateLimiter;
   tenants: typeof tenants;
+  userPreferences: typeof userPreferences;
   users: typeof users;
 }>;
 

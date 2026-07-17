@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useConvexAuth } from '@convex-dev/auth/react'
 import { ArrowDown, ArrowUp, LayoutGrid, List } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
+import i18n from '#/i18n'
 import { ClassList } from '#/components/classes/ClassList'
 import type { ClassListView } from '#/components/classes/ClassList'
 import { ClassFormCredenza } from '#/components/classes/ClassFormCredenza'
@@ -29,11 +31,11 @@ export const Route = createFileRoute('/_account/')({
   head: () => ({
     meta: [
       {
-        name: 'ClassClarus',
-        content: 'Manage your classes for the ClassClarus webapp',
+        name: 'description',
+        content: i18n.t('home:docDescription'),
       },
       {
-        title: 'My Classes | ClassClarus',
+        title: i18n.t('home:docTitle'),
       },
     ],
   }),
@@ -41,14 +43,15 @@ export const Route = createFileRoute('/_account/')({
 
 type FormMode = 'create' | 'edit'
 
-const SORT_FIELD_LABELS: Record<ClassSortField, string> = {
-  name: 'Name',
-  created: 'Created',
-  updated: 'Updated',
-}
-
 function Home() {
+  const { t } = useTranslation('home')
   const { isAuthenticated } = useConvexAuth()
+
+  const sortFieldLabels: Record<ClassSortField, string> = {
+    name: t('sortByName'),
+    created: t('sortByCreated'),
+    updated: t('sortByUpdated'),
+  }
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<FormMode>('create')
   const [editingClass, setEditingClass] = useState<ClassPublic | null>(null)
@@ -99,7 +102,7 @@ function Home() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:p-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-4xl font-bold tracking-tight">My Classes</h1>
+        <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <ToggleGroup
             type="single"
@@ -115,25 +118,28 @@ function Home() {
             }}
             variant="outline"
             spacing={0}
-            aria-label="Sort classes"
+            aria-label={t('sortClasses')}
           >
             {(['name', 'created', 'updated'] as const).map((field) => {
               const isActive = field === activeSortField
+              const fieldLabel = sortFieldLabels[field]
               return (
                 <ToggleGroupItem
                   key={field}
                   value={field}
                   aria-label={
                     isActive
-                      ? `Sort by ${SORT_FIELD_LABELS[field]}, ${
-                          activeSortDirection === 'asc'
-                            ? 'ascending'
-                            : 'descending'
-                        }. Click to reverse.`
-                      : `Sort by ${SORT_FIELD_LABELS[field]}`
+                      ? t('sortByFieldActive', {
+                          field: fieldLabel,
+                          direction:
+                            activeSortDirection === 'asc'
+                              ? t('sortAscending')
+                              : t('sortDescending'),
+                        })
+                      : t('sortByField', { field: fieldLabel })
                   }
                 >
-                  {SORT_FIELD_LABELS[field]}
+                  {fieldLabel}
                   {isActive ? (
                     <SortDirectionIcon data-icon="inline-end" />
                   ) : null}
@@ -151,12 +157,12 @@ function Home() {
             }}
             variant="outline"
             spacing={0}
-            aria-label="Class list layout"
+            aria-label={t('title')}
           >
-            <ToggleGroupItem value="grid" aria-label="Grid view">
+            <ToggleGroupItem value="grid" aria-label={t('viewGrid')}>
               <LayoutGrid />
             </ToggleGroupItem>
-            <ToggleGroupItem value="list" aria-label="List view">
+            <ToggleGroupItem value="list" aria-label={t('viewList')}>
               <List />
             </ToggleGroupItem>
           </ToggleGroup>
@@ -206,7 +212,9 @@ function Home() {
       <LinkedStudentsSection />
 
       <section className="mt-12">
-        <h2 className="mb-4 text-xl font-semibold tracking-tight">Archived</h2>
+        <h2 className="mb-4 text-xl font-semibold tracking-tight">
+          {t('archived')}
+        </h2>
         <ClassList
           classes={archivedClasses}
           view={view}

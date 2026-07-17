@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useCreateClass, useUpdateClass } from '#/lib/classes'
 import type { ClassPublic } from '#/lib/classes'
+import { usePersonalLocale } from '#/i18n/LocaleProvider'
+import { LanguageSelect } from '#/i18n/LanguageSelect'
+import { coerceAppLanguage } from '#/i18n/locales'
+import type { AppLanguage } from '#/i18n/locales'
 import { Button } from '@/components/ui/button'
 import {
   Credenza,
@@ -29,23 +34,6 @@ import { Input } from '@/components/ui/input'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { NumberInput } from '@/components/ui/number-input'
 import { Textarea } from '@/components/ui/textarea'
-
-const classFormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be 100 characters or less'),
-  description: z
-    .string()
-    .trim()
-    .max(500, 'Description must be 500 characters or less'),
-  year: z
-    .number({ error: 'Year is required' })
-    .int('Year must be a whole number')
-    .min(2000, 'Year must be 2000 or later')
-    .max(2100, 'Year must be 2100 or earlier'),
-})
 
 type FieldErrors = {
   name?: string
@@ -72,6 +60,8 @@ export function ClassFormCredenza({
   mode = 'create',
   classDoc,
 }: ClassFormCredenzaProps) {
+  const { t } = useTranslation(['classes', 'common'])
+  const { personalLanguage } = usePersonalLocale()
   const isEdit = mode === 'edit'
   const showCreateTrigger = showTrigger === true
 
@@ -89,6 +79,7 @@ export function ClassFormCredenza({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [year, setYear] = useState(() => String(new Date().getFullYear()))
+  const [language, setLanguage] = useState<AppLanguage>(personalLanguage)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
@@ -100,6 +91,7 @@ export function ClassFormCredenza({
     setName('')
     setDescription('')
     setYear(String(new Date().getFullYear()))
+    setLanguage(personalLanguage)
     setErrors({})
   }
 
@@ -109,9 +101,12 @@ export function ClassFormCredenza({
       setName(classDoc.name)
       setDescription(classDoc.description ?? '')
       setYear(String(classDoc.year))
+      setLanguage(coerceAppLanguage(classDoc.language))
       setErrors({})
+    } else if (!isEdit) {
+      setLanguage(personalLanguage)
     }
-  }, [open, classDoc])
+  }, [open, classDoc, isEdit, personalLanguage])
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next)
@@ -123,6 +118,23 @@ export function ClassFormCredenza({
   const submitForm = () => {
     if (isSubmittingRef.current) return
     if (isEdit && !classDoc) return
+
+    const classFormSchema = z.object({
+      name: z
+        .string()
+        .trim()
+        .min(1, t('nameRequired'))
+        .max(100, t('nameTooLong')),
+      description: z
+        .string()
+        .trim()
+        .max(500, t('descriptionTooLong')),
+      year: z
+        .number({ error: t('yearRequired') })
+        .int(t('yearWholeNumber'))
+        .min(2000, t('yearMin'))
+        .max(2100, t('yearMax')),
+    })
 
     const trimmedYear = year.trim()
     const parsedYear = trimmedYear === '' ? Number.NaN : Number(trimmedYear)
@@ -148,19 +160,19 @@ export function ClassFormCredenza({
     const editing = classDoc
     const nextName = result.data.name
     const trimmedDescription = result.data.description
+    const nextLanguage = language
 
-    // Fire mutation first so optimistic updates apply, then close.
-    // Create shows a PENDING placeholder (not navigable) until the real Id lands.
-    // Year is immutable after creation.
     const mutationPromise = editing
       ? updateClass({
           classId: editing._id,
           name: nextName,
           description: trimmedDescription,
+          language: nextLanguage,
         })
       : createClass({
           name: nextName,
           year: result.data.year,
+          language: nextLanguage,
           ...(trimmedDescription ? { description: trimmedDescription } : {}),
         })
 
@@ -168,15 +180,15 @@ export function ClassFormCredenza({
 
     void mutationPromise
       .then(() => {
-        toast.success(editing ? 'Class updated' : 'Class created')
+        toast.success(editing ? t('updated') : t('created'))
       })
       .catch((error: unknown) => {
         toast.error(
           error instanceof Error
             ? error.message
             : editing
-              ? 'Failed to update class'
-              : 'Failed to create class',
+              ? t('updateFailed')
+              : t('createFailed'),
         )
       })
       .finally(() => {
@@ -192,8 +204,6 @@ export function ClassFormCredenza({
 
   const handleKeyDown = (event: KeyboardEvent<HTMLFormElement>) => {
     if (event.key !== 'Enter') return
-    // Enter alone: native submit from inputs; newline in textarea.
-    // Ctrl/Cmd+Enter: submit from anywhere, including the textarea.
     if (event.ctrlKey || event.metaKey) {
       event.preventDefault()
       submitForm()
@@ -208,30 +218,30 @@ export function ClassFormCredenza({
         <CredenzaTrigger asChild>
           <Button className="w-full sm:w-auto">
             <Plus data-icon="inline-start" />
-            Create Class
+            {t('createTitle')}
           </Button>
         </CredenzaTrigger>
       )}
       <CredenzaContent>
         <CredenzaHeader>
           <CredenzaTitle>
-            {isEdit ? 'Edit Class' : 'Create Class'}
+            {isEdit ? t('editTitle') : t('createTitle')}
           </CredenzaTitle>
           <CredenzaDescription>
-            {isEdit
-              ? 'Update the class name and description. The academic year cannot be changed.'
-              : 'Add a new class with a name, academic year, and optional description.'}
+            {isEdit ? t('editDescription') : t('createDescription')}
           </CredenzaDescription>
         </CredenzaHeader>
         <CredenzaBody>
           <form id={formId} onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
             <FieldGroup>
               <Field data-invalid={!!errors.name || undefined}>
-                <FieldLabel htmlFor={`${formId}-name`}>Name</FieldLabel>
+                <FieldLabel htmlFor={`${formId}-name`}>
+                  {t('nameLabel')}
+                </FieldLabel>
                 <Input
                   id={`${formId}-name`}
                   name="name"
-                  placeholder="Period 3 Biology"
+                  placeholder={t('namePlaceholder')}
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value)
@@ -246,13 +256,10 @@ export function ClassFormCredenza({
               </Field>
               <Field data-invalid={!!errors.year || undefined}>
                 <FieldLabel htmlFor={`${formId}-year`}>
-                  Academic Year
+                  {t('yearLabel')}
                 </FieldLabel>
                 {isEdit ? (
-                  <FieldDescription>
-                    The academic year cannot be changed after a class is
-                    created.
-                  </FieldDescription>
+                  <FieldDescription>{t('yearImmutable')}</FieldDescription>
                 ) : null}
                 <NumberInput
                   id={`${formId}-year`}
@@ -275,15 +282,26 @@ export function ClassFormCredenza({
                 />
                 <FieldError>{errors.year}</FieldError>
               </Field>
+              <Field>
+                <FieldLabel htmlFor={`${formId}-language`}>
+                  {t('languageLabel')}
+                </FieldLabel>
+                <FieldDescription>{t('languageDescription')}</FieldDescription>
+                <LanguageSelect
+                  id={`${formId}-language`}
+                  value={language}
+                  onValueChange={setLanguage}
+                />
+              </Field>
               <Field data-invalid={!!errors.description || undefined}>
                 <FieldLabel htmlFor={`${formId}-description`}>
-                  Description
+                  {t('descriptionLabel')}
                 </FieldLabel>
-                <FieldDescription>Optional</FieldDescription>
+                <FieldDescription>{t('common:optional')}</FieldDescription>
                 <Textarea
                   id={`${formId}-description`}
                   name="description"
-                  placeholder="Optional notes about this class"
+                  placeholder={t('descriptionPlaceholder')}
                   value={description}
                   onChange={(e) => {
                     setDescription(e.target.value)
@@ -305,11 +323,11 @@ export function ClassFormCredenza({
         </CredenzaBody>
         <CredenzaFooter className="flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="hidden flex-wrap items-center gap-1.5 text-xs text-muted-foreground md:flex">
-            <span>In description,</span>
+            <span>{t('submitHintBefore')}</span>
             <KbdGroup>
               <Kbd>Ctrl</Kbd> + <Kbd>Enter</Kbd>
             </KbdGroup>
-            <span>to submit</span>
+            <span>{t('submitHintAfter')}</span>
           </p>
           <div className="flex w-full gap-2 sm:w-auto">
             <CredenzaClose asChild>
@@ -318,7 +336,7 @@ export function ClassFormCredenza({
                 variant="outline"
                 className="flex-1 sm:flex-initial"
               >
-                Cancel
+                {t('common:cancel')}
               </Button>
             </CredenzaClose>
             <Button
@@ -327,7 +345,7 @@ export function ClassFormCredenza({
               className="flex-1 sm:flex-initial"
               disabled={isSubmitting || (isEdit && !classDoc)}
             >
-              {isEdit ? 'Save' : 'Create'}
+              {isEdit ? t('common:save') : t('common:create')}
             </Button>
           </div>
         </CredenzaFooter>

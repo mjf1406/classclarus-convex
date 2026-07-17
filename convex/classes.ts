@@ -13,6 +13,13 @@ import type { ClassRole } from './lib/classAuth'
 import { authz } from './authz'
 import { generateUniqueJoinCode } from './lib/joinCodes'
 import { hasGuardianAccessToClass } from './lib/guardianAuth'
+import {
+  DEFAULT_APP_LANGUAGE,
+  coerceAppLanguage,
+  languageValidator
+  
+} from './lib/languages'
+import type {AppLanguage} from './lib/languages';
 
 // Public class shape: join codes and the display pin are redacted. Codes are
 // only available via getJoinCodes — student code gated on class:manageMembers;
@@ -30,6 +37,7 @@ export const classDocPublic = v.object({
   archivedTime: v.optional(v.number()),
   organizationId: v.optional(v.string()),
   teamId: v.optional(v.string()),
+  language: languageValidator,
 })
 
 export const classRoleValidator = v.union(
@@ -79,6 +87,7 @@ export type ClassPublic = {
   archivedTime?: number
   organizationId?: string
   teamId?: string
+  language: AppLanguage
 }
 
 export type ClassDisplayRole = ClassRole | 'guardian'
@@ -101,6 +110,7 @@ export function toPublicClass(doc: Doc<'classes'>): ClassPublic {
     archivedTime: doc.archivedTime,
     organizationId: doc.organizationId,
     teamId: doc.teamId,
+    language: coerceAppLanguage(doc.language),
   }
 }
 
@@ -157,6 +167,7 @@ export const createClass = mutation({
     icon: v.optional(v.string()),
     year: v.number(),
     publicDisplayPin: v.optional(v.string()),
+    language: v.optional(languageValidator),
   },
   returns: v.id('classes'),
   handler: async (ctx, args) => {
@@ -167,6 +178,15 @@ export const createClass = mutation({
       studentCode,
       teacherCode,
     ])
+
+    let language = args.language
+    if (!language) {
+      const prefs = await ctx.db
+        .query('userPreferences')
+        .withIndex('by_userId', (q) => q.eq('userId', user._id))
+        .unique()
+      language = coerceAppLanguage(prefs?.language)
+    }
 
     const classId = await ctx.db.insert('classes', {
       // userId is denormalized creator metadata; authorization uses authz.
@@ -181,6 +201,7 @@ export const createClass = mutation({
       assistantTeacherCode,
       organizationId: undefined,
       teamId: undefined,
+      language,
     })
 
     // Same mutation as the insert, so both commit atomically.
@@ -198,6 +219,7 @@ export const updateClass = mutation({
     icon: v.optional(v.string()),
     publicDisplayPin: v.optional(v.string()),
     archived: v.optional(v.boolean()),
+    language: v.optional(languageValidator),
     // Note: year is intentionally not accepted — it is immutable after creation.
   },
   returns: v.null(),
@@ -216,6 +238,7 @@ export const updateClass = mutation({
       icon?: string
       publicDisplayPin?: string
       archivedTime?: number | undefined
+      language?: AppLanguage
       updatedTime: number
     } = {
       updatedTime: Date.now(),
@@ -227,6 +250,7 @@ export const updateClass = mutation({
     if (args.publicDisplayPin !== undefined) {
       updates.publicDisplayPin = args.publicDisplayPin
     }
+    if (args.language !== undefined) updates.language = args.language
     if (args.archived === true) {
       updates.archivedTime = Date.now()
     } else if (args.archived === false) {
@@ -368,5 +392,22 @@ export const backfillCreatorRoles = internalMutation({
       }
     }
     return { scanned: classes.length, assigned }
+  },
+})
+
+// One-shot: set language on classes that predate the field.
+//   npx convex run classes:backfillLanguage
+export const backfillLanguage = internalMutation({
+  args: {},
+  returns: v.object({ scanned: v.number(), updated: v.number() }),
+  handler: async (ctx) => {
+    const classes = await ctx.db.query('classes').collect()
+    let updated = 0
+    for (const doc of classes) {
+      if (doc.language !== undefined) continue
+      await ctx.db.patch(doc._id, { language: DEFAULT_APP_LANGUAGE })
+      updated++
+    }
+    return { scanned: classes.length, updated }
   },
 })

@@ -52,7 +52,9 @@ const config = defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        globPatterns: [
+          '**/*.{js,css,html,ico,png,svg,webp,woff,woff2,json}',
+        ],
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
       },

@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { authTables } from '@convex-dev/auth/server'
+import { languageValidator } from './lib/languages'
 
 export default defineSchema({
   ...authTables,
@@ -21,11 +22,18 @@ export default defineSchema({
     publicDisplayPin: v.optional(v.string()),
     organizationId: v.optional(v.string()), // undefined = solo class. Set in Phase 2 (tenants org/team ids).
     teamId: v.optional(v.string()),
+    // Optional until backfillLanguage runs; new classes always set it.
+    // Students use this language inside the class; teachers/guardians keep personal.
+    language: v.optional(languageValidator),
   })
     .index('by_user', ['userId'])
     .index('by_studentCode', ['studentCode'])
     .index('by_teacherCode', ['teacherCode'])
     .index('by_assistantTeacherCode', ['assistantTeacherCode']),
+  userPreferences: defineTable({
+    userId: v.id('users'),
+    language: languageValidator,
+  }).index('by_userId', ['userId']),
   orgStudents: defineTable({
     organizationId: v.optional(v.string()),
     displayName: v.string(),

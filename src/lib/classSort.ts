@@ -1,3 +1,6 @@
+import i18n from '#/i18n'
+import { LANGUAGE_BCP47, coerceAppLanguage } from '#/i18n/locales'
+
 export const CLASS_SORTS = [
   'createdDesc',
   'createdAsc',
@@ -44,7 +47,7 @@ export function makeClassSort(
   direction: ClassSortDirection,
 ): ClassSort {
   const suffix = direction === 'asc' ? 'Asc' : 'Desc'
-  return `${field}${suffix}` as ClassSort
+  return `${field}${suffix}`
 }
 
 /** Defaults: name → A–Z; created/updated → newest first. */
@@ -72,8 +75,12 @@ type SortableClass = {
   updatedTime?: number
 }
 
+function activeBcp47(): string {
+  return LANGUAGE_BCP47[coerceAppLanguage(i18n.language)]
+}
+
 function compareNames(left: string, right: string): number {
-  return left.localeCompare(right, 'en', { sensitivity: 'base' })
+  return left.localeCompare(right, activeBcp47(), { sensitivity: 'base' })
 }
 
 export function compareClasses(
@@ -113,7 +120,7 @@ export function compareClasses(
   const creationComparison = right._creationTime - left._creationTime
   if (creationComparison !== 0) return creationComparison
 
-  return String(left._id).localeCompare(String(right._id), 'en')
+  return String(left._id).localeCompare(String(right._id), activeBcp47())
 }
 
 export function sortClasses<T extends SortableClass>(

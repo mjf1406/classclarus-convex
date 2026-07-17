@@ -12,6 +12,7 @@ import { useQuery } from 'convex/react'
 import { Toaster } from '@/components/ui/sonner'
 import { PwaUpdatePrompt } from '@/components/pwa/PwaUpdatePrompt'
 import { ThemeProvider } from '#/components/theme/theme-provider'
+import { LocaleProvider } from '#/i18n/LocaleProvider'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { ErrorPage } from '@/components/errors/ErrorPage'
 import { AuthzProvider } from '@djpanda/convex-authz/react'
@@ -48,20 +49,22 @@ function RootComponent() {
     <>
       <ConvexAuthProvider client={convex}>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-            <RequireAuth>
-              <AppAuthzProvider>
-                <div vaul-drawer-wrapper="" className="bg-background">
-                  <TooltipProvider>
-                    <HeadContent />
-                    <Outlet />
-                  </TooltipProvider>
-                </div>
-              </AppAuthzProvider>
-            </RequireAuth>
-          </ThemeProvider>
-          <Toaster />
-          <PwaUpdatePrompt />
+          <LocaleProvider>
+            <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+              <RequireAuth>
+                <AppAuthzProvider>
+                  <div vaul-drawer-wrapper="" className="bg-background">
+                    <TooltipProvider>
+                      <HeadContent />
+                      <Outlet />
+                    </TooltipProvider>
+                  </div>
+                </AppAuthzProvider>
+              </RequireAuth>
+            </ThemeProvider>
+            <Toaster />
+            <PwaUpdatePrompt />
+          </LocaleProvider>
         </QueryClientProvider>
       </ConvexAuthProvider>
       <TanStackDevtools

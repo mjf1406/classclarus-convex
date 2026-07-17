@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { LogoBig } from '@/components/brand/logo'
 import {
@@ -12,6 +13,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { SignInWithGoogle } from '@/components/auth/SignInWithGoogle'
 import { ModeToggle } from '#/components/theme/mode-toggle'
+import { LanguageToggle } from '#/i18n/LanguageToggle'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -22,30 +24,33 @@ export const Route = createFileRoute('/login')({
   component: RouteComponent,
 })
 
-
 function RouteComponent() {
   const { redirect } = Route.useSearch()
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const { t } = useTranslation(['auth', 'common'])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <ModeToggle className="absolute top-4 right-4" />
+      <div className="absolute top-4 right-4 flex items-center gap-1">
+        <LanguageToggle />
+        <ModeToggle />
+      </div>
       <Card className="w-full max-w-md bg-input/30">
         <CardHeader className="text-center space-y-3">
           <div className="flex justify-center">
             <LogoBig />
           </div>
           <div>
-            <CardTitle className="text-2xl">Welcome to ClassClarus</CardTitle>
+            <CardTitle className="text-2xl">{t('welcomeTitle')}</CardTitle>
             <CardDescription className="mt-2">
-              Sign in to continue.{' '}
+              {t('signInToContinue')}{' '}
               <a
                 href="https://www.classclarus.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline underline-offset-4"
               >
-                Learn more about what we do
+                {t('learnMore')}
               </a>
             </CardDescription>
           </div>
@@ -62,7 +67,7 @@ function RouteComponent() {
               htmlFor="terms-acceptance"
               className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
             >
-              I agree to the{' '}
+              {t('agreePrefix')}{' '}
               <a
                 href="https://www.classclarus.com/privacy-policy"
                 target="_blank"
@@ -70,7 +75,7 @@ function RouteComponent() {
                 className="text-primary underline underline-offset-4"
                 onClick={(e) => e.stopPropagation()}
               >
-                privacy policy
+                {t('privacyPolicy')}
               </a>
               ,{' '}
               <a
@@ -80,9 +85,9 @@ function RouteComponent() {
                 className="text-primary underline underline-offset-4"
                 onClick={(e) => e.stopPropagation()}
               >
-                terms and conditions
+                {t('termsAndConditions')}
               </a>
-              , and{' '}
+              , {t('and')}{' '}
               <a
                 href="https://www.classclarus.com/cookie-policy"
                 target="_blank"
@@ -90,7 +95,7 @@ function RouteComponent() {
                 className="text-primary underline underline-offset-4"
                 onClick={(e) => e.stopPropagation()}
               >
-                cookie policy
+                {t('cookiePolicy')}
               </a>
               .
             </label>
@@ -99,17 +104,17 @@ function RouteComponent() {
             termsAccepted={termsAccepted}
             redirectTo={redirect}
           />
-          <p className='opacity-50 text-sm'>We're sorry that we only support Google at the moment. We're working on adding more options.</p>
+          <p className="opacity-50 text-sm">{t('googleOnlyNote')}</p>
           <div className="pt-4 mt-4 border-t">
             <p className="text-xs text-center text-muted-foreground">
-              This is the ClassClarus app.{' '}
+              {t('appFooter')}{' '}
               <a
                 href="https://www.classclarus.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline underline-offset-4"
               >
-                Learn more about what we do
+                {t('learnMore')}
               </a>
               .
             </p>
