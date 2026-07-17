@@ -12,7 +12,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { I18nextProvider } from 'react-i18next'
 
 import { api } from '../../convex/_generated/api'
-import i18n from './index'
+import i18n, { ensureLanguageLoaded } from './index'
 import {
   LANGUAGE_BCP47,
   coerceAppLanguage,
@@ -80,10 +80,18 @@ function PersonalLocaleInner({ children }: { children: ReactNode }) {
     useActiveLocale(personalLanguage)
 
   useLayoutEffect(() => {
-    if (i18n.language !== activeLanguage) {
-      void i18n.changeLanguage(activeLanguage)
+    let cancelled = false
+    void (async () => {
+      await ensureLanguageLoaded(activeLanguage)
+      if (cancelled) return
+      if (i18n.language !== activeLanguage) {
+        await i18n.changeLanguage(activeLanguage)
+      }
+      applyDocumentLang(activeLanguage)
+    })()
+    return () => {
+      cancelled = true
     }
-    applyDocumentLang(activeLanguage)
   }, [activeLanguage])
 
   const value = useMemo(

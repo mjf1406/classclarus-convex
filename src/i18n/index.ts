@@ -7,33 +7,8 @@ import {
   LANGUAGE_BCP47,
   getInitialPersonalLanguage,
 } from './locales'
-import de from './resources/de'
+import type { AppLanguage } from './locales'
 import en from './resources/en'
-import es from './resources/es'
-import fr from './resources/fr'
-import it from './resources/it'
-import ja from './resources/ja'
-import ko from './resources/ko'
-import pt from './resources/pt'
-import ru from './resources/ru'
-import uk from './resources/uk'
-import zhs from './resources/zhs'
-import zht from './resources/zht'
-
-const catalogs = {
-  en,
-  ja,
-  ko,
-  zhs,
-  zht,
-  es,
-  fr,
-  it,
-  de,
-  pt,
-  ru,
-  uk,
-} as const
 
 export const i18nNamespaces = [
   'common',
@@ -46,34 +21,72 @@ export const i18nNamespaces = [
   'account',
 ] as const
 
+type LocaleCatalog = typeof en
+
+const localeLoaders: Record<
+  AppLanguage,
+  () => Promise<{ default: LocaleCatalog }>
+> = {
+  en: () => Promise.resolve({ default: en }),
+  ja: () => import('./resources/ja'),
+  ko: () => import('./resources/ko'),
+  zhs: () => import('./resources/zhs'),
+  zht: () => import('./resources/zht'),
+  es: () => import('./resources/es'),
+  fr: () => import('./resources/fr'),
+  it: () => import('./resources/it'),
+  de: () => import('./resources/de'),
+  pt: () => import('./resources/pt'),
+  ru: () => import('./resources/ru'),
+  uk: () => import('./resources/uk'),
+}
+
+const loadedLanguages = new Set<AppLanguage>([DEFAULT_APP_LANGUAGE])
+
+function addCatalog(lng: AppLanguage, catalog: LocaleCatalog) {
+  for (const ns of i18nNamespaces) {
+    i18n.addResourceBundle(lng, ns, catalog[ns], true, true)
+  }
+  loadedLanguages.add(lng)
+}
+
+function catalogToResources(catalog: LocaleCatalog) {
+  return {
+    common: catalog.common,
+    auth: catalog.auth,
+    pwa: catalog.pwa,
+    home: catalog.home,
+    join: catalog.join,
+    classes: catalog.classes,
+    settings: catalog.settings,
+    account: catalog.account,
+  }
+}
+
+/** Ensure a locale catalog is registered before calling changeLanguage. */
+export async function ensureLanguageLoaded(lng: AppLanguage): Promise<void> {
+  if (loadedLanguages.has(lng)) return
+  const { default: catalog } = await localeLoaders[lng]()
+  addCatalog(lng, catalog)
+}
+
 const initialLanguage = getInitialPersonalLanguage()
 if (typeof document !== 'undefined') {
   document.documentElement.lang = LANGUAGE_BCP47[initialLanguage]
 }
 
-function toResources() {
-  const resources: Record<
-    string,
-    Record<(typeof i18nNamespaces)[number], Record<string, string>>
-  > = {}
-  for (const lng of APP_LANGUAGES) {
-    const catalog = catalogs[lng]
-    resources[lng] = {
-      common: catalog.common,
-      auth: catalog.auth,
-      pwa: catalog.pwa,
-      home: catalog.home,
-      join: catalog.join,
-      classes: catalog.classes,
-      settings: catalog.settings,
-      account: catalog.account,
-    }
-  }
-  return resources
+const resources: Record<string, ReturnType<typeof catalogToResources>> = {
+  [DEFAULT_APP_LANGUAGE]: catalogToResources(en),
+}
+
+if (initialLanguage !== DEFAULT_APP_LANGUAGE) {
+  const { default: catalog } = await localeLoaders[initialLanguage]()
+  resources[initialLanguage] = catalogToResources(catalog)
+  loadedLanguages.add(initialLanguage)
 }
 
 void i18n.use(initReactI18next).init({
-  resources: toResources(),
+  resources,
   lng: initialLanguage,
   fallbackLng: DEFAULT_APP_LANGUAGE,
   supportedLngs: [...APP_LANGUAGES],
