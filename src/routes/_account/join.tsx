@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
 import { useTranslation } from 'react-i18next'
@@ -54,10 +54,10 @@ function JoinPage() {
     api.memberships.redeemJoinOrGuardianCode,
   )
 
+  // Prefill from share/login URLs, but never auto-redeem — require an explicit click.
   const [code, setCode] = useState(prefilledCode ?? '')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const autoJoinedRef = useRef(false)
 
   const handleJoin = useCallback(async () => {
     if (code.length !== JOIN_CODE_LENGTH) {
@@ -100,20 +100,6 @@ function JoinPage() {
       setIsSubmitting(false)
     }
   }, [code, navigate, redeemJoinOrGuardianCode, t])
-
-  // Auto-redeem when arriving from a share/login redirect with a full code.
-  useEffect(() => {
-    if (
-      !prefilledCode ||
-      code.length !== JOIN_CODE_LENGTH ||
-      isSubmitting ||
-      autoJoinedRef.current
-    ) {
-      return
-    }
-    autoJoinedRef.current = true
-    void handleJoin()
-  }, [prefilledCode, code.length, isSubmitting, handleJoin])
 
   return (
     <main className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-lg items-center px-6 py-10">

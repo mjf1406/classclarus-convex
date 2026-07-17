@@ -15,9 +15,13 @@ import {
 } from '../ui/dropdown-menu'
 import { SignOutButton } from './SignOut'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import type { Doc } from '../../../convex/_generated/dataModel'
+type CurrentUser = {
+  name?: string
+  email?: string
+  image?: string
+}
 
-function getInitials(user: Doc<'users'>) {
+function getInitials(user: CurrentUser) {
   if (user.name && user.name.trim()) {
     const parts = user.name.trim().split(/\s+/).filter(Boolean)
     if (parts.length >= 2) {
@@ -34,7 +38,7 @@ function getInitials(user: Doc<'users'>) {
   return local ?? ''
 }
 
-function getDisplayName(user: Doc<'users'>) {
+function getDisplayName(user: CurrentUser) {
   if (user.name && user.name.trim()) {
     return user.name
       .trim()

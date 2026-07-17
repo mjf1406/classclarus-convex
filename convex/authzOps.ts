@@ -1,7 +1,8 @@
 // Operational actions for the authz role catalog. After editing roles in
 // authz.ts and deploying, run `npx convex run authzOps:syncRoles` so existing
 // classclarus assignments (including classTeacher) pick up the new permissions.
-import { action } from './_generated/server'
+// Internal-only: not callable from clients.
+import { internalAction } from './_generated/server'
 import { v } from 'convex/values'
 import { authz } from './authz'
 
@@ -10,7 +11,7 @@ import { authz } from './authz'
  * classclarus tenant catalog (class roster roles + any global assignments).
  * Org partitions are synced separately via `tenants:syncRoles`.
  */
-export const syncRoles = action({
+export const syncRoles = internalAction({
   args: {},
   returns: v.object({
     rolesProcessed: v.number(),
@@ -24,7 +25,7 @@ export const syncRoles = action({
 /**
  * Per-role variant — e.g. `npx convex run authzOps:syncRole '{"role":"classTeacher"}'`.
  */
-export const syncRole = action({
+export const syncRole = internalAction({
   args: { role: v.string() },
   returns: v.object({
     usersProcessed: v.number(),

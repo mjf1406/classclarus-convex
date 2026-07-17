@@ -3,7 +3,7 @@
 // authz client. See plans/roles-and-authorization-implementation-guide.md §5/§7.3.
 //
 // Operational rule: after editing role definitions and deploying, run
-// `npx convex run authzOps:syncRoles` (classclarus / class roles) and
+// `npx convex run authzOps:syncRoles` (internal; classclarus / class roles) and
 // `npx convex run tenants:syncRoles` (org partitions) so users who already
 // hold a role get the new materialized permission set.
 import { Authz, definePermissions, defineRoles } from '@djpanda/convex-authz'
