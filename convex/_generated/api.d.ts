@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as authz from "../authz.js";
 import type * as authzOps from "../authzOps.js";
 import type * as classes from "../classes.js";
+import type * as groups from "../groups.js";
 import type * as guardians from "../guardians.js";
 import type * as http from "../http.js";
 import type * as lib_classAuth from "../lib/classAuth.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   authz: typeof authz;
   authzOps: typeof authzOps;
   classes: typeof classes;
+  groups: typeof groups;
   guardians: typeof guardians;
   http: typeof http;
   "lib/classAuth": typeof lib_classAuth;

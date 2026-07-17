@@ -6,7 +6,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { resolveIconId } from "@/lib/fontawesome-icon-catalog";
+import { resolveIconId } from "./fontawesome-icon-catalog";
+import { UI_CATEGORIES } from "./fa-icon-categories";
+import iconCategoriesData from "./fontawesome-icon-categories.json";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-import iconCategoriesData from "@/lib/fontawesome-icon-categories.json";
 
 type IconCategoriesData = {
   metadata: {
@@ -90,6 +91,8 @@ function findScrollAreaViewport(root: HTMLElement | null) {
 }
 
 function formatCategoryName(categoryId: string): string {
+  const fromUi = UI_CATEGORIES.find((category) => category.id === categoryId);
+  if (fromUi) return fromUi.label;
   return categoryId
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -315,9 +318,16 @@ export function FontAwesomeIconPicker({
     return results;
   }, [allIcons, parsedIcons, deferredQuery]);
 
-  // Get category list from JSON
+  // Prefer curated UI category order, then any remaining scrape categories
   const categories = React.useMemo(() => {
-    return Object.keys(categoriesData.categories).sort();
+    const available = new Set(Object.keys(categoriesData.categories));
+    const ordered = UI_CATEGORIES.map((category) => category.id).filter((id) =>
+      available.has(id),
+    );
+    const extras = [...available]
+      .filter((id) => !ordered.includes(id))
+      .sort();
+    return [...ordered, ...extras];
   }, []);
 
   // Vertical icon grid ScrollArea

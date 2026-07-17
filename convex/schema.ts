@@ -70,4 +70,32 @@ export default defineSchema({
       'guardianUserId',
       'orgStudentId',
     ]),
+  // Classroom student groups (not tenants/org staff teams).
+  classGroups: defineTable({
+    classId: v.id('classes'),
+    name: v.string(),
+    description: v.optional(v.string()),
+    icon: v.optional(v.string()),
+    sortOrder: v.optional(v.number()),
+  }).index('by_classId', ['classId']),
+  classTeams: defineTable({
+    classId: v.id('classes'),
+    groupId: v.id('classGroups'),
+    name: v.string(),
+    description: v.optional(v.string()),
+    icon: v.optional(v.string()),
+    sortOrder: v.optional(v.number()),
+  })
+    .index('by_groupId', ['groupId'])
+    .index('by_classId', ['classId']),
+  classGroupMemberships: defineTable({
+    classId: v.id('classes'),
+    orgStudentId: v.id('orgStudents'),
+    groupId: v.id('classGroups'),
+    teamId: v.optional(v.id('classTeams')),
+  })
+    .index('by_classId', ['classId'])
+    .index('by_classId_and_orgStudentId', ['classId', 'orgStudentId'])
+    .index('by_groupId', ['groupId'])
+    .index('by_teamId', ['teamId']),
 })

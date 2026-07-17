@@ -24,11 +24,12 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-type ClassSubpage = 'points' | 'members' | 'students' | 'invite' | 'settings'
+type ClassSubpage = 'points' | 'members' | 'students' | 'groups' | 'invite' | 'settings'
 
 function getSubpageFromPath(pathname: string): ClassSubpage {
   if (pathname.endsWith('/members')) return 'members'
   if (pathname.endsWith('/students')) return 'students'
+  if (pathname.endsWith('/groups')) return 'groups'
   if (pathname.endsWith('/invite')) return 'invite'
   if (pathname.endsWith('/settings')) return 'settings'
   return 'points'
@@ -38,6 +39,7 @@ const SUBPAGE_ROUTES = {
   points: '/c/$classId/points',
   members: '/c/$classId/members',
   students: '/c/$classId/students',
+  groups: '/c/$classId/groups',
   invite: '/c/$classId/invite',
   settings: '/c/$classId/settings',
 } as const

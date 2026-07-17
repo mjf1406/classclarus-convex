@@ -25,6 +25,7 @@ import { Route as AccountCClassIdSettingsRouteImport } from './routes/_account/c
 import { Route as AccountCClassIdPointsRouteImport } from './routes/_account/c.$classId/points'
 import { Route as AccountCClassIdMembersRouteImport } from './routes/_account/c.$classId/members'
 import { Route as AccountCClassIdInviteRouteImport } from './routes/_account/c.$classId/invite'
+import { Route as AccountCClassIdGroupsRouteImport } from './routes/_account/c.$classId/groups'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -105,6 +106,11 @@ const AccountCClassIdInviteRoute = AccountCClassIdInviteRouteImport.update({
   path: '/invite',
   getParentRoute: () => AccountCClassIdRouteRoute,
 } as any)
+const AccountCClassIdGroupsRoute = AccountCClassIdGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AccountIndexRoute
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/join': typeof AccountJoinRoute
   '/settings': typeof AccountSettingsRoute
   '/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/c/$classId/invite': typeof AccountCClassIdInviteRoute
   '/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/c/$classId/points': typeof AccountCClassIdPointsRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/join': typeof AccountJoinRoute
   '/settings': typeof AccountSettingsRoute
   '/': typeof AccountIndexRoute
+  '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/c/$classId/invite': typeof AccountCClassIdInviteRoute
   '/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/c/$classId/points': typeof AccountCClassIdPointsRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/_account/settings': typeof AccountSettingsRoute
   '/_account/': typeof AccountIndexRoute
   '/_account/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/_account/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/_account/c/$classId/invite': typeof AccountCClassIdInviteRoute
   '/_account/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/_account/c/$classId/points': typeof AccountCClassIdPointsRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/settings'
     | '/c/$classId'
+    | '/c/$classId/groups'
     | '/c/$classId/invite'
     | '/c/$classId/members'
     | '/c/$classId/points'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/settings'
     | '/'
+    | '/c/$classId/groups'
     | '/c/$classId/invite'
     | '/c/$classId/members'
     | '/c/$classId/points'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/_account/settings'
     | '/_account/'
     | '/_account/c/$classId'
+    | '/_account/c/$classId/groups'
     | '/_account/c/$classId/invite'
     | '/_account/c/$classId/members'
     | '/_account/c/$classId/points'
@@ -334,10 +346,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountCClassIdInviteRouteImport
       parentRoute: typeof AccountCClassIdRouteRoute
     }
+    '/_account/c/$classId/groups': {
+      id: '/_account/c/$classId/groups'
+      path: '/groups'
+      fullPath: '/c/$classId/groups'
+      preLoaderRoute: typeof AccountCClassIdGroupsRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
   }
 }
 
 interface AccountCClassIdRouteRouteChildren {
+  AccountCClassIdGroupsRoute: typeof AccountCClassIdGroupsRoute
   AccountCClassIdInviteRoute: typeof AccountCClassIdInviteRoute
   AccountCClassIdMembersRoute: typeof AccountCClassIdMembersRoute
   AccountCClassIdPointsRoute: typeof AccountCClassIdPointsRoute
@@ -347,6 +367,7 @@ interface AccountCClassIdRouteRouteChildren {
 }
 
 const AccountCClassIdRouteRouteChildren: AccountCClassIdRouteRouteChildren = {
+  AccountCClassIdGroupsRoute: AccountCClassIdGroupsRoute,
   AccountCClassIdInviteRoute: AccountCClassIdInviteRoute,
   AccountCClassIdMembersRoute: AccountCClassIdMembersRoute,
   AccountCClassIdPointsRoute: AccountCClassIdPointsRoute,

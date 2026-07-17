@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { Link2, Settings, Star, Users, UsersRound } from 'lucide-react'
+import { LayoutGrid, Link2, Settings, Star, Users, UsersRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useClassLayout } from '#/components/classes/ClassLayoutContext'
@@ -16,12 +16,14 @@ type NavItem = {
     | 'navPoints'
     | 'navMembers'
     | 'navStudents'
+    | 'navGroups'
     | 'navInvite'
     | 'navSettings'
   to:
     | '/c/$classId/points'
     | '/c/$classId/members'
     | '/c/$classId/students'
+    | '/c/$classId/groups'
     | '/c/$classId/invite'
     | '/c/$classId/settings'
   icon: typeof Star
@@ -50,6 +52,12 @@ export function ClassNavMain() {
       titleKey: 'navStudents',
       to: '/c/$classId/students',
       icon: UsersRound,
+      visible: canManageMembers,
+    },
+    {
+      titleKey: 'navGroups',
+      to: '/c/$classId/groups',
+      icon: LayoutGrid,
       visible: canManageMembers,
     },
     {

@@ -20,6 +20,7 @@ const PAGE_TITLE_KEYS = {
   points: 'navPoints',
   members: 'navMembers',
   students: 'navStudents',
+  groups: 'navGroups',
   invite: 'navInvite',
   settings: 'navSettings',
 } as const
@@ -29,6 +30,7 @@ type ClassSubpage = keyof typeof PAGE_TITLE_KEYS
 function getSubpageFromPath(pathname: string): ClassSubpage {
   if (pathname.endsWith('/members')) return 'members'
   if (pathname.endsWith('/students')) return 'students'
+  if (pathname.endsWith('/groups')) return 'groups'
   if (pathname.endsWith('/invite')) return 'invite'
   if (pathname.endsWith('/settings')) return 'settings'
   return 'points'
