@@ -7,6 +7,16 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
+const PORTALED_MENU_CONTENT_SELECTOR =
+  '[data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"]'
+
+function isInsidePortaledMenuContent(target: EventTarget | null) {
+  return (
+    target instanceof Element &&
+    target.closest(PORTALED_MENU_CONTENT_SELECTOR) !== null
+  )
+}
+
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -51,6 +61,8 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onInteractOutside,
+  onPointerDownOutside,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
@@ -64,6 +76,18 @@ function DialogContent({
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-4xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/5 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
+        onInteractOutside={(event) => {
+          if (isInsidePortaledMenuContent(event.target)) {
+            event.preventDefault()
+          }
+          onInteractOutside?.(event)
+        }}
+        onPointerDownOutside={(event) => {
+          if (isInsidePortaledMenuContent(event.target)) {
+            event.preventDefault()
+          }
+          onPointerDownOutside?.(event)
+        }}
         {...props}
       >
         {children}
