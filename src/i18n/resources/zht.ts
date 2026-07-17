@@ -179,9 +179,9 @@ const zht: Catalog = {
     students: '學生',
     studentsDescription:
       '每位已註冊學生都有私密監護人加入碼（最多 5 名監護人）。可複製代碼或連結分享，外洩時重新產生，或下載全班可列印 QR 碼。',
-    downloadPdf: '下載 PDF',
-    downloadPdfAria: '下載監護人代碼 PDF',
-    downloadPdfFailed: '產生監護人代碼 PDF 失敗',
+    downloadGuardianCodePdf: '下載監護人代碼 PDF',
+    downloadGuardianCodePdfAria: '下載監護人代碼 PDF',
+    downloadGuardianCodePdfFailed: '產生監護人代碼 PDF 失敗',
     noStudentsYet: '尚無學生。學生使用學生碼加入後會顯示在這裡。',
     noGuardianLinked: '尚未連結監護人',
     guardianCount_one: '1 名監護人',

@@ -189,9 +189,9 @@ const fr: Catalog = {
     students: 'Élèves',
     studentsDescription:
       'Chaque élève inscrit a un code d’accès tuteur privé (max. 5 tuteurs). Copiez un code ou un lien à partager, régénérez en cas de fuite, ou téléchargez des QR prêts à imprimer pour toute la classe.',
-    downloadPdf: 'Télécharger le PDF',
-    downloadPdfAria: 'Télécharger le PDF des codes tuteur',
-    downloadPdfFailed: 'Échec de la génération du PDF des codes tuteur',
+    downloadGuardianCodePdf: 'Télécharger le PDF des codes tuteur',
+    downloadGuardianCodePdfAria: 'Télécharger le PDF des codes tuteur',
+    downloadGuardianCodePdfFailed: 'Échec de la génération du PDF des codes tuteur',
     noStudentsYet:
       'Aucun élève pour l’instant. Ils apparaissent ici après avoir rejoint avec le code élève.',
     noGuardianLinked: 'Aucun tuteur lié pour l’instant',

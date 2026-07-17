@@ -189,9 +189,9 @@ const es: Catalog = {
     students: 'Estudiantes',
     studentsDescription:
       'Cada estudiante inscrito tiene un código privado de tutor (máx. 5 tutores). Copia un código o enlace para compartir, regenera si se filtra o descarga QR listos para imprimir de toda la clase.',
-    downloadPdf: 'Descargar PDF',
-    downloadPdfAria: 'Descargar PDF de códigos de tutor',
-    downloadPdfFailed: 'No se pudo generar el PDF de códigos de tutor',
+    downloadGuardianCodePdf: 'Descargar PDF de códigos de tutor',
+    downloadGuardianCodePdfAria: 'Descargar PDF de códigos de tutor',
+    downloadGuardianCodePdfFailed: 'No se pudo generar el PDF de códigos de tutor',
     noStudentsYet:
       'Aún no hay estudiantes. Aparecen aquí cuando se unen con el código de estudiante.',
     noGuardianLinked: 'Aún no hay tutor vinculado',

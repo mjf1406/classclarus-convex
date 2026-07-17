@@ -189,9 +189,9 @@ const uk: Catalog = {
     students: 'Учні',
     studentsDescription:
       'Кожен зарахований учень має особистий код опікуна (макс. 5). Скопіюйте код або посилання, перестворіть у разі витоку або завантажте QR для друку всього класу.',
-    downloadPdf: 'Завантажити PDF',
-    downloadPdfAria: 'Завантажити PDF із кодами опікунів',
-    downloadPdfFailed: 'Не вдалося створити PDF із кодами опікунів',
+    downloadGuardianCodePdf: 'Завантажити PDF із кодами опікунів',
+    downloadGuardianCodePdfAria: 'Завантажити PDF із кодами опікунів',
+    downloadGuardianCodePdfFailed: 'Не вдалося створити PDF із кодами опікунів',
     noStudentsYet:
       'Поки немає учнів. Вони з’являться тут після вступу за кодом учня.',
     noGuardianLinked: 'Опікуна ще не пов’язано',

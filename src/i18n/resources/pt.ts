@@ -189,9 +189,9 @@ const pt: Catalog = {
     students: 'Alunos',
     studentsDescription:
       'Cada aluno inscrito tem um código privado de responsável (máx. 5). Copie um código ou link para compartilhar, regenere se vazar ou baixe QRs prontos para impressão da turma toda.',
-    downloadPdf: 'Baixar PDF',
-    downloadPdfAria: 'Baixar PDF de códigos de responsável',
-    downloadPdfFailed: 'Falha ao gerar o PDF de códigos de responsável',
+    downloadGuardianCodePdf: 'Baixar PDF de códigos de responsável',
+    downloadGuardianCodePdfAria: 'Baixar PDF de códigos de responsável',
+    downloadGuardianCodePdfFailed: 'Falha ao gerar o PDF de códigos de responsável',
     noStudentsYet:
       'Ainda não há alunos. Eles aparecem aqui depois de entrarem com o código de aluno.',
     noGuardianLinked: 'Nenhum responsável vinculado ainda',

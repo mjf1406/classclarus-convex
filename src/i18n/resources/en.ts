@@ -181,9 +181,9 @@ const en = {
     students: 'Students',
     studentsDescription:
       'Each enrolled student has a private guardian join code (max 5 guardians). Copy a code or link to share, regenerate if it leaks, or download print-ready QR slips for the whole class.',
-    downloadPdf: 'Download PDF',
-    downloadPdfAria: 'Download guardian codes PDF',
-    downloadPdfFailed: 'Failed to generate guardian codes PDF',
+    downloadGuardianCodePdf: 'Download Guardian Code PDF',
+    downloadGuardianCodePdfAria: 'Download guardian codes PDF',
+    downloadGuardianCodePdfFailed: 'Failed to generate guardian codes PDF',
     noStudentsYet:
       'No students yet. Students appear here after they join with the student code.',
     noGuardianLinked: 'No guardian linked yet',

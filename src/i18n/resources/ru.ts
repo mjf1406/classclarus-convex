@@ -189,9 +189,9 @@ const ru: Catalog = {
     students: 'Ученики',
     studentsDescription:
       'У каждого зачисленного ученика есть личный код опекуна (макс. 5). Скопируйте код или ссылку, пересоздайте при утечке или скачайте QR для печати всего класса.',
-    downloadPdf: 'Скачать PDF',
-    downloadPdfAria: 'Скачать PDF с кодами опекунов',
-    downloadPdfFailed: 'Не удалось создать PDF с кодами опекунов',
+    downloadGuardianCodePdf: 'Скачать PDF с кодами опекунов',
+    downloadGuardianCodePdfAria: 'Скачать PDF с кодами опекунов',
+    downloadGuardianCodePdfFailed: 'Не удалось создать PDF с кодами опекунов',
     noStudentsYet:
       'Пока нет учеников. Они появятся здесь после вступления по коду ученика.',
     noGuardianLinked: 'Опекун ещё не связан',

@@ -188,9 +188,9 @@ const ko: Catalog = {
     students: '학생',
     studentsDescription:
       '등록된 각 학생에게는 비공개 보호자 참가 코드가 있습니다(최대 5명). 코드나 링크를 복사해 공유하고, 유출 시 재생성하거나 전체 수업용 인쇄 QR을 다운로드하세요.',
-    downloadPdf: 'PDF 다운로드',
-    downloadPdfAria: '보호자 코드 PDF 다운로드',
-    downloadPdfFailed: '보호자 코드 PDF 생성에 실패했습니다',
+    downloadGuardianCodePdf: '보호자 코드 PDF 다운로드',
+    downloadGuardianCodePdfAria: '보호자 코드 PDF 다운로드',
+    downloadGuardianCodePdfFailed: '보호자 코드 PDF 생성에 실패했습니다',
     noStudentsYet:
       '아직 학생이 없습니다. 학생 코드로 참가하면 여기에 표시됩니다.',
     noGuardianLinked: '아직 연결된 보호자가 없습니다',

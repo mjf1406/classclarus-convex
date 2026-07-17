@@ -189,9 +189,11 @@ const de: Catalog = {
     students: 'Schüler',
     studentsDescription:
       'Jeder eingeschriebene Schüler hat einen privaten Erziehungsberechtigten-Code (max. 5). Kopieren Sie Code oder Link zum Teilen, regenerieren Sie bei Leak oder laden Sie druckfertige QR-Codes für die ganze Klasse herunter.',
-    downloadPdf: 'PDF herunterladen',
-    downloadPdfAria: 'PDF mit Erziehungsberechtigten-Codes herunterladen',
-    downloadPdfFailed:
+    downloadGuardianCodePdf:
+      'PDF mit Erziehungsberechtigten-Codes herunterladen',
+    downloadGuardianCodePdfAria:
+      'PDF mit Erziehungsberechtigten-Codes herunterladen',
+    downloadGuardianCodePdfFailed:
       'Erzeugen des PDFs mit Erziehungsberechtigten-Codes fehlgeschlagen',
     noStudentsYet:
       'Noch keine Schüler. Sie erscheinen hier, nachdem sie mit dem Schülercode beigetreten sind.',

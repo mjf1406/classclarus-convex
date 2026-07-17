@@ -179,9 +179,9 @@ const zhs: Catalog = {
     students: '学生',
     studentsDescription:
       '每位已注册学生都有私密监护人加入码（最多 5 名监护人）。可复制代码或链接分享，泄露时重新生成，或下载全班可打印二维码。',
-    downloadPdf: '下载 PDF',
-    downloadPdfAria: '下载监护人代码 PDF',
-    downloadPdfFailed: '生成监护人代码 PDF 失败',
+    downloadGuardianCodePdf: '下载监护人代码 PDF',
+    downloadGuardianCodePdfAria: '下载监护人代码 PDF',
+    downloadGuardianCodePdfFailed: '生成监护人代码 PDF 失败',
     noStudentsYet: '还没有学生。学生使用学生码加入后会显示在这里。',
     noGuardianLinked: '尚未关联监护人',
     guardianCount_one: '1 名监护人',

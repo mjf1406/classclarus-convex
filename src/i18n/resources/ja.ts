@@ -188,9 +188,9 @@ const ja: Catalog = {
     students: '生徒',
     studentsDescription:
       '登録された各生徒には非公開の保護者参加コードがあります（最大5人）。コードやリンクをコピーして共有し、漏洩時は再生成するか、クラス全体の印刷用QRをダウンロードできます。',
-    downloadPdf: 'PDFをダウンロード',
-    downloadPdfAria: '保護者コードPDFをダウンロード',
-    downloadPdfFailed: '保護者コードPDFの生成に失敗しました',
+    downloadGuardianCodePdf: '保護者コードPDFをダウンロード',
+    downloadGuardianCodePdfAria: '保護者コードPDFをダウンロード',
+    downloadGuardianCodePdfFailed: '保護者コードPDFの生成に失敗しました',
     noStudentsYet:
       'まだ生徒がいません。生徒コードで参加するとここに表示されます。',
     noGuardianLinked: 'まだ保護者がリンクされていません',

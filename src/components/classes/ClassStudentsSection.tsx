@@ -109,7 +109,7 @@ export function ClassStudentsSection({
       await downloadGuardianCodesPdf(data)
     } catch (error: unknown) {
       toast.error(
-        error instanceof Error ? error.message : t('downloadPdfFailed'),
+        error instanceof Error ? error.message : t('downloadGuardianCodePdfFailed'),
       )
     } finally {
       setIsGenerating(false)
@@ -225,11 +225,11 @@ export function ClassStudentsSection({
             size="sm"
             variant="default"
             className="w-full shrink-0 sm:w-auto"
-            aria-label={t('downloadPdfAria')}
+            aria-label={t('downloadGuardianCodePdfAria')}
             disabled={data === undefined || isGenerating}
             onClick={() => void handleDownload()}
           >
-            <Download /> {t('downloadPdf')}
+            <Download /> {t('downloadGuardianCodePdf')}
           </Button>
         </div>
 
