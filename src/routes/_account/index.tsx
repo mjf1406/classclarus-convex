@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, LayoutGrid, List } from 'lucide-react'
 import { ClassList } from '#/components/classes/ClassList'
 import type { ClassListView } from '#/components/classes/ClassList'
 import { ClassFormCredenza } from '#/components/classes/ClassFormCredenza'
+import { LinkedStudentsSection } from '#/components/classes/LinkedStudentsSection'
 import {
   DEFAULT_CLASS_SORT,
   getSortDirection,
@@ -50,8 +51,7 @@ function Home() {
 
   const activeSortField = getSortField(sort)
   const activeSortDirection = getSortDirection(sort)
-  const SortDirectionIcon =
-    activeSortDirection === 'asc' ? ArrowUp : ArrowDown
+  const SortDirectionIcon = activeSortDirection === 'asc' ? ArrowUp : ArrowDown
 
   useEffect(() => {
     return () => {
@@ -176,6 +176,8 @@ function Home() {
           })
         }}
       />
+
+      <LinkedStudentsSection />
 
       <section className="mt-12">
         <h2 className="mb-4 text-xl font-semibold tracking-tight">Archived</h2>

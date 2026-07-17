@@ -2,7 +2,19 @@ import { useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
-import { Archive, ArchiveRestore, ArrowLeft, Copy, ExternalLink, MoreVertical, Pencil, QrCode, RefreshCw, Trash2, UserMinus } from 'lucide-react'
+import {
+  Archive,
+  ArchiveRestore,
+  ArrowLeft,
+  Copy,
+  ExternalLink,
+  MoreVertical,
+  Pencil,
+  QrCode,
+  RefreshCw,
+  Trash2,
+  UserMinus,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import { TEN_MINUTES } from '#/lib/queryCache'
@@ -14,6 +26,7 @@ import {
   JOIN_CODE_LENGTH,
 } from '#/lib/joinCode'
 import { ClassFormCredenza } from '#/components/classes/ClassFormCredenza'
+import { ClassStudentsSection } from '#/components/classes/ClassStudentsSection'
 import {
   CLASS_ROLE_BADGE_CONFIG,
   ClassRoleBadge,
@@ -155,9 +168,9 @@ function JoinCodesSection({
     <section className="mt-10">
       <h2 className="text-xl font-semibold tracking-tight">Join codes</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Share a code to let others join this class with the matching role.
-        Tap a code to show a QR for the classroom. Regenerate a code if it
-        leaks — existing members keep their access until removed.
+        Share a code to let others join this class with the matching role. Tap a
+        code to show a QR for the classroom. Regenerate a code if it leaks —
+        existing members keep their access until removed.
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {(['student', 'teacher', 'assistantTeacher'] as const).map((type) => {
@@ -168,10 +181,7 @@ function JoinCodesSection({
           return (
             <div
               key={type}
-              className={cn(
-                'rounded-xl border p-4',
-                roleConfig.className,
-              )}
+              className={cn('rounded-xl border p-4', roleConfig.className)}
             >
               <div className="flex items-center gap-1.5 text-xs font-medium">
                 <RoleIcon className="size-3.5" />
@@ -283,9 +293,7 @@ function ClassMembersSection({ classId }: { classId: Id<'classes'> }) {
     gcTime: TEN_MINUTES,
   })
   const removeMember = useMutation(api.memberships.removeMember)
-  const [removingUserId, setRemovingUserId] = useState<Id<'users'> | null>(
-    null,
-  )
+  const [removingUserId, setRemovingUserId] = useState<Id<'users'> | null>(null)
 
   const handleRemove = (userId: Id<'users'>) => {
     setRemovingUserId(userId)
@@ -542,6 +550,10 @@ function ClassPage() {
 
             {canManage === true ? (
               <ClassMembersSection classId={typedClassId} />
+            ) : null}
+
+            {canManageMembers === true ? (
+              <ClassStudentsSection classId={typedClassId} />
             ) : null}
           </>
         )}

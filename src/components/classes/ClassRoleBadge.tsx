@@ -7,12 +7,11 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import type { ClassRole } from '#/lib/classes'
+import type { ClassDisplayRole } from '#/lib/classes'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
-/** Display roles including guardian (ready for Phase 2). */
-export type ClassRoleBadgeRole = ClassRole | 'guardian'
+export type ClassRoleBadgeRole = ClassDisplayRole
 
 export const CLASS_ROLE_BADGE_CONFIG: Record<
   ClassRoleBadgeRole,
@@ -27,8 +26,7 @@ export const CLASS_ROLE_BADGE_CONFIG: Record<
   classTeacher: {
     label: 'Co-teacher',
     icon: GraduationCap,
-    className:
-      'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+    className: 'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300',
   },
   assistantTeacher: {
     label: 'Assistant Teacher',

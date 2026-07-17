@@ -10,7 +10,7 @@ const router = createRouter({
   context: {
     queryClient,
   },
-  defaultPreload: 'viewport',
+  defaultPreload: 'intent',
   scrollRestoration: true,
   defaultPreloadGcTime: 1000 * 60, // 1 minute,
   defaultPendingComponent: PendingComponent,

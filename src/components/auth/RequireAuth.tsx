@@ -7,24 +7,31 @@ import {
   useRouterState,
 } from '@tanstack/react-router'
 import PendingComponent from '@/components/loading/PendingComponent'
+import { getSafeAuthRedirect } from '@/lib/authRedirect'
 
 const PUBLIC_PATHS = new Set(['/login', '/unauthorized', '/join-share'])
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { isLoading, isAuthenticated } = useConvexAuth()
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const { pathname, searchStr, redirectParam } = useRouterState({
+    select: (s) => {
+      const search = s.location.search as { redirect?: unknown }
+      return {
+        pathname: s.location.pathname,
+        searchStr: s.location.searchStr,
+        redirectParam:
+          typeof search.redirect === 'string' ? search.redirect : undefined,
+      }
+    },
+  })
   const navigate = useNavigate()
   const router = useRouter()
   const wasAuthLoading = useRef(true)
-  const wasAuthenticatedRef = useRef(false)
-
-  if (isAuthenticated) {
-    wasAuthenticatedRef.current = true
-  }
 
   const isPublicPath = PUBLIC_PATHS.has(pathname)
-  const shouldRedirectToLogin =
-    !isAuthenticated && !isPublicPath && !wasAuthenticatedRef.current
+  const shouldRedirectToLogin = !isAuthenticated && !isPublicPath
+  const postLoginTarget =
+    pathname === '/login' ? getSafeAuthRedirect(redirectParam) : '/'
 
   // Re-run route loaders once auth is ready so Convex queries in loaders succeed.
   useEffect(() => {
@@ -41,14 +48,28 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     if (isLoading) return
 
     if (shouldRedirectToLogin) {
-      void navigate({ to: '/login', replace: true })
+      const returnTo = `${pathname}${searchStr}`
+      void navigate({
+        to: '/login',
+        search: { redirect: returnTo },
+        replace: true,
+      })
       return
     }
 
     if (isAuthenticated && pathname === '/login') {
-      void navigate({ to: '/', replace: true })
+      router.history.replace(postLoginTarget)
     }
-  }, [isLoading, isAuthenticated, shouldRedirectToLogin, pathname, navigate])
+  }, [
+    isLoading,
+    isAuthenticated,
+    shouldRedirectToLogin,
+    pathname,
+    searchStr,
+    postLoginTarget,
+    navigate,
+    router,
+  ])
 
   if (isLoading) {
     return <PendingComponent />

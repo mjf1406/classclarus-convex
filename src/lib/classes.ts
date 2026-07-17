@@ -6,24 +6,49 @@ import type { ClassSort } from './classSort'
 
 export type { ClassSort } from './classSort'
 
-/** Class roster roles, as returned in `myRole` by the class queries. */
+/** Class roster roles, as returned in `myRole` by the class list queries. */
 export type ClassRole =
   | 'creator'
   | 'classTeacher'
   | 'assistantTeacher'
   | 'student'
 
+/** Display role including guardian (ReBAC access on getClass, not a roster role). */
+export type ClassDisplayRole = ClassRole | 'guardian'
+
 /**
  * The class shape returned by public queries: join codes and the display pin
  * are redacted server-side (codes are only available via getJoinCodes).
- * `myRole` is the caller's highest roster role in the class; absent when
- * access comes from a non-roster grant.
+ * `myRole` is the caller's highest roster role, or `guardian` on getClass when
+ * access is via a linked child enrollment.
  */
 export type ClassPublic = Omit<
   Doc<'classes'>,
   'studentCode' | 'teacherCode' | 'assistantTeacherCode' | 'publicDisplayPin'
 > & {
+  myRole: ClassDisplayRole | undefined
+}
+
+type ListMyClass = {
   myRole: ClassRole | undefined
+  _id: Id<'classes'>
+  _creationTime: number
+  userId: Id<'users'>
+  name: string
+  description?: string
+  icon?: string
+  year: number
+  updatedTime?: number
+  archivedTime?: number
+  organizationId?: string
+  teamId?: string
+}
+
+function toListMyClass(doc: ClassPublic): ListMyClass {
+  return {
+    ...doc,
+    myRole: doc.myRole === 'guardian' ? undefined : doc.myRole,
+  }
 }
 
 const PENDING_ID_PREFIX = 'PENDING-'
@@ -44,15 +69,15 @@ function listQueryMode(queryArgs: {
 
 /** Insert using the same ordering as the Convex list queries. */
 function insertSorted(
-  list: ClassPublic[],
+  list: ListMyClass[],
   doc: ClassPublic,
   sort: ClassSort,
-): ClassPublic[] {
+): ListMyClass[] {
   const next = [...list]
   const insertAt = next.findIndex(
     (existing) => compareClasses(doc, existing, sort) < 0,
   )
-  next.splice(insertAt === -1 ? next.length : insertAt, 0, doc)
+  next.splice(insertAt === -1 ? next.length : insertAt, 0, toListMyClass(doc))
   return next
 }
 
@@ -205,11 +230,7 @@ export function useUpdateClass() {
 export function useRemoveClass() {
   return useMutation(api.classes.removeClass).withOptimisticUpdate(
     (localStore, args) => {
-      localStore.setQuery(
-        api.classes.getClass,
-        { classId: args.classId },
-        null,
-      )
+      localStore.setQuery(api.classes.getClass, { classId: args.classId }, null)
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(
         api.memberships.listMyClasses,

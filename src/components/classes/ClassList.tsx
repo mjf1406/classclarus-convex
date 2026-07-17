@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
+import { useConvexAuth } from '@convex-dev/auth/react'
 import {
   Archive,
   ArchiveRestore,
@@ -406,10 +407,12 @@ export function ClassList({
   onCreateClick,
   onEdit,
 }: ClassListProps) {
+  const { isAuthenticated } = useConvexAuth()
+  const listArgs = archivedOnly ? { archivedOnly: true, sort } : { sort }
   const { data: classes } = useQuery({
     ...convexQuery(
       api.memberships.listMyClasses,
-      archivedOnly ? { archivedOnly: true, sort } : { sort },
+      isAuthenticated ? listArgs : 'skip',
     ),
     placeholderData: (previousData) => previousData,
     gcTime: ONE_HOUR,

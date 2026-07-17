@@ -1,10 +1,10 @@
 import { requireUser } from '#/lib/auth'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
-import { mutation, query } from './_generated/server'
+import { internalMutation, mutation, query } from './_generated/server'
 import type { MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
-import { components } from './_generated/api'
+import { components, internal } from './_generated/api'
 import { authz } from './authz'
 import {
   CLASS_ROLES_BY_PRECEDENCE,
@@ -13,7 +13,16 @@ import {
   requireClassPermission,
 } from './lib/classAuth'
 import type { ClassRole } from './lib/classAuth'
-import { classDocWithMyRole, classRoleValidator, classSort, toPublicClass } from './classes'
+import {
+  ensureSoloStudentEnrollment,
+  withdrawSoloStudentEnrollment,
+} from './lib/soloRoster'
+import {
+  classDocWithMyRole,
+  classRoleValidator,
+  classSort,
+  toPublicClass,
+} from './classes'
 import { rateLimiter } from './rateLimiter'
 
 type RedeemableRole = 'student' | 'classTeacher' | 'assistantTeacher'
@@ -49,6 +58,7 @@ async function findClassByCode(
 
 const INVALID_CODE_ERROR = 'Invalid join code'
 const RATE_LIMITED_ERROR = 'Too many attempts. Please try again later.'
+const SOLO_BACKFILL_USERS_PER_BATCH = 20
 
 // Failures are returned (not thrown) so rate-limit consumption commits — a
 // thrown error would roll back the whole mutation, including the rate-limit
@@ -118,6 +128,9 @@ export const redeemJoinCode = mutation({
     const alreadyHasRole = await authz.hasRole(ctx, user._id, match.role, scope)
     if (!alreadyHasRole) {
       await authz.assignRole(ctx, user._id, match.role, scope)
+    }
+    if (match.role === 'student' && match.doc.organizationId === undefined) {
+      await ensureSoloStudentEnrollment(ctx, user, match.doc._id)
     }
 
     return { ok: true as const, classId: match.doc._id, role: match.role }
@@ -260,14 +273,19 @@ export const removeMember = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const caller = await requireUser(ctx)
-    await requireClassPermission(
-      ctx,
-      caller._id,
-      args.classId,
-      'class:manage',
-    )
+    await requireClassPermission(ctx, caller._id, args.classId, 'class:manage')
 
     const scope = classScope(args.classId)
+    const classDoc = await ctx.db.get('classes', args.classId)
+    if (!classDoc) {
+      throw new Error('Class not found')
+    }
+    const targetIsStudent = await authz.hasRole(
+      ctx,
+      args.userId,
+      'student',
+      scope,
+    )
     const targetIsCreator = await authz.hasRole(
       ctx,
       args.userId,
@@ -292,7 +310,97 @@ export const removeMember = mutation({
     if (revoked === 0) {
       throw new Error('User is not a member of this class')
     }
+    if (targetIsStudent && classDoc.organizationId === undefined) {
+      await withdrawSoloStudentEnrollment(ctx, args.userId, args.classId)
+    }
 
+    return null
+  },
+})
+
+export const backfillSoloRosters = internalMutation({
+  args: {
+    cursor: v.optional(v.string()),
+    classId: v.optional(v.id('classes')),
+    userOffset: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    let classId = args.classId
+    let nextClassCursor = args.cursor
+
+    if (classId === undefined) {
+      const classPage = await ctx.db.query('classes').paginate({
+        numItems: 1,
+        cursor: args.cursor ?? null,
+      })
+      const classDoc = classPage.page.at(0)
+      if (!classDoc) return null
+
+      classId = classDoc._id
+      nextClassCursor = classPage.isDone ? undefined : classPage.continueCursor
+      if (classDoc.organizationId !== undefined) {
+        if (!classPage.isDone) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.memberships.backfillSoloRosters,
+            { cursor: classPage.continueCursor },
+          )
+        }
+        return null
+      }
+    }
+
+    const classDoc = await ctx.db.get('classes', classId)
+    if (!classDoc || classDoc.organizationId !== undefined) {
+      if (nextClassCursor !== undefined) {
+        await ctx.scheduler.runAfter(
+          0,
+          internal.memberships.backfillSoloRosters,
+          { cursor: nextClassCursor },
+        )
+      }
+      return null
+    }
+
+    const holders = await ctx.runQuery(
+      components.authz.queries.getUsersWithRole,
+      {
+        tenantId: 'classclarus',
+        role: 'student',
+        scope: classScope(classId),
+      },
+    )
+    const userOffset = args.userOffset ?? 0
+    const batch = holders.slice(
+      userOffset,
+      userOffset + SOLO_BACKFILL_USERS_PER_BATCH,
+    )
+    for (const holder of batch) {
+      const user = await ctx.db.get('users', holder.userId as Id<'users'>)
+      if (user) {
+        await ensureSoloStudentEnrollment(ctx, user, classId)
+      }
+    }
+
+    const nextUserOffset = userOffset + batch.length
+    if (nextUserOffset < holders.length) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.memberships.backfillSoloRosters,
+        {
+          cursor: nextClassCursor,
+          classId,
+          userOffset: nextUserOffset,
+        },
+      )
+    } else if (nextClassCursor !== undefined) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.memberships.backfillSoloRosters,
+        { cursor: nextClassCursor },
+      )
+    }
     return null
   },
 })

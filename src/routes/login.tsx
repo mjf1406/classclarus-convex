@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { z } from 'zod'
 import { LogoBig } from '@/components/brand/logo'
 import {
   Card,
@@ -12,11 +13,18 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { SignInWithGoogle } from '@/components/auth/SignInWithGoogle'
 import { ModeToggle } from '#/components/theme/mode-toggle'
 
+const loginSearchSchema = z.object({
+  redirect: z.string().optional(),
+})
+
 export const Route = createFileRoute('/login')({
+  validateSearch: loginSearchSchema,
   component: RouteComponent,
 })
 
+
 function RouteComponent() {
+  const { redirect } = Route.useSearch()
   const [termsAccepted, setTermsAccepted] = useState(false)
 
   return (
@@ -87,7 +95,11 @@ function RouteComponent() {
               .
             </label>
           </div>
-          <SignInWithGoogle termsAccepted={termsAccepted} />
+          <SignInWithGoogle
+            termsAccepted={termsAccepted}
+            redirectTo={redirect}
+          />
+          <p className='opacity-50 text-sm'>We're sorry that we only support Google at the moment. We're working on adding more options.</p>
           <div className="pt-4 mt-4 border-t">
             <p className="text-xs text-center text-muted-foreground">
               This is the ClassClarus app.{' '}

@@ -1,6 +1,5 @@
 import { requireUser } from '#/lib/auth'
 import { internalMutation, mutation, query } from './_generated/server'
-import type { MutationCtx } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { v } from 'convex/values'
 import {
@@ -12,6 +11,8 @@ import {
 } from './lib/classAuth'
 import type { ClassRole } from './lib/classAuth'
 import { authz } from './authz'
+import { generateUniqueJoinCode } from './lib/joinCodes'
+import { hasGuardianAccessToClass } from './lib/guardianAuth'
 
 // Public class shape: join codes and the display pin are redacted. Codes are
 // only available via getJoinCodes (gated on class:manageMembers) — otherwise a
@@ -37,12 +38,19 @@ export const classRoleValidator = v.union(
   v.literal('student'),
 )
 
+/** Display role on class cards/pages — includes guardian (ReBAC, not a roster role). */
+export const classDisplayRoleValidator = v.union(
+  classRoleValidator,
+  v.literal('guardian'),
+)
+
 // Class shape enriched with the caller's own (highest) roster role — what the
 // class cards and the class page render as a badge. Optional because access
-// can come from non-roster grants (e.g. Phase 2 org staff).
+// can come from non-roster grants (e.g. Phase 2 org staff). Includes
+// `guardian` when access is via a linked child enrollment.
 export const classDocWithMyRole = v.object({
   ...classDocPublic.fields,
-  myRole: v.optional(classRoleValidator),
+  myRole: v.optional(classDisplayRoleValidator),
 })
 
 export const classSort = v.union(
@@ -68,7 +76,8 @@ export type ClassPublic = {
   teamId?: string
 }
 
-export type ClassWithMyRole = ClassPublic & { myRole?: ClassRole }
+export type ClassDisplayRole = ClassRole | 'guardian'
+export type ClassWithMyRole = ClassPublic & { myRole?: ClassDisplayRole }
 
 export function toPublicClass(doc: Doc<'classes'>): ClassPublic {
   return {
@@ -84,52 +93,6 @@ export function toPublicClass(doc: Doc<'classes'>): ClassPublic {
     organizationId: doc.organizationId,
     teamId: doc.teamId,
   }
-}
-
-const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-const JOIN_CODE_LENGTH = 8
-
-function generateJoinCode(length = JOIN_CODE_LENGTH): string {
-  const bytes = new Uint8Array(length)
-  crypto.getRandomValues(bytes)
-  let code = ''
-  for (let i = 0; i < length; i++) {
-    // bytes[i] is defined for i < length; non-null assertion keeps strict indexing happy.
-    code += CODE_CHARS[bytes[i]! % CODE_CHARS.length]
-  }
-  return code
-}
-
-async function isCodeTaken(ctx: MutationCtx, code: string): Promise<boolean> {
-  const [byStudent, byTeacher, byAssistant] = await Promise.all([
-    ctx.db
-      .query('classes')
-      .withIndex('by_studentCode', (q) => q.eq('studentCode', code))
-      .first(),
-    ctx.db
-      .query('classes')
-      .withIndex('by_teacherCode', (q) => q.eq('teacherCode', code))
-      .first(),
-    ctx.db
-      .query('classes')
-      .withIndex('by_assistantTeacherCode', (q) =>
-        q.eq('assistantTeacherCode', code),
-      )
-      .first(),
-  ])
-  return byStudent !== null || byTeacher !== null || byAssistant !== null
-}
-
-// Redemption lookups use "exactly one match" semantics, so codes must be
-// unique across all three code fields of all classes.
-async function generateUniqueJoinCode(ctx: MutationCtx): Promise<string> {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const code = generateJoinCode()
-    if (!(await isCodeTaken(ctx, code))) {
-      return code
-    }
-  }
-  throw new Error('Failed to generate a unique join code')
 }
 
 export const getClass = query({
@@ -149,9 +112,18 @@ export const getClass = query({
       args.classId,
       'class:read',
     )
-    if (!canRead) return null
-    const myRole = await getMyClassRole(ctx, user._id, args.classId)
-    return { ...toPublicClass(doc), myRole: myRole ?? undefined }
+    if (canRead) {
+      const myRole = await getMyClassRole(ctx, user._id, args.classId)
+      return { ...toPublicClass(doc), myRole: myRole ?? undefined }
+    }
+
+    const isGuardian = await hasGuardianAccessToClass(
+      ctx,
+      user._id,
+      args.classId,
+    )
+    if (!isGuardian) return null
+    return { ...toPublicClass(doc), myRole: 'guardian' as const }
   },
 })
 
@@ -166,6 +138,12 @@ export const createClass = mutation({
   returns: v.id('classes'),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
+    const studentCode = await generateUniqueJoinCode(ctx)
+    const teacherCode = await generateUniqueJoinCode(ctx, [studentCode])
+    const assistantTeacherCode = await generateUniqueJoinCode(ctx, [
+      studentCode,
+      teacherCode,
+    ])
 
     const classId = await ctx.db.insert('classes', {
       // userId is denormalized creator metadata; authorization uses authz.
@@ -175,9 +153,9 @@ export const createClass = mutation({
       icon: args.icon,
       year: args.year,
       publicDisplayPin: args.publicDisplayPin,
-      studentCode: await generateUniqueJoinCode(ctx),
-      teacherCode: await generateUniqueJoinCode(ctx),
-      assistantTeacherCode: await generateUniqueJoinCode(ctx),
+      studentCode,
+      teacherCode,
+      assistantTeacherCode,
       organizationId: undefined,
       teamId: undefined,
     })
@@ -252,9 +230,14 @@ export const removeClass = mutation({
       throw new Error('Class not found')
     }
 
-    // Phase 2: refuse deletion when classEnrollments rows reference this class
-    // ("archive instead"). Solo classes have no dependent rows yet.
-    //
+    const enrollment = await ctx.db
+      .query('classEnrollments')
+      .withIndex('by_classId', (index) => index.eq('classId', args.classId))
+      .first()
+    if (enrollment) {
+      throw new Error('This class has enrollment history; archive it instead')
+    }
+
     // Residual: authz role assignments scoped to this class id remain in the
     // component (no scope-wide revoke API). They are inert; listMyClasses
     // drops ids whose db.get returns null.

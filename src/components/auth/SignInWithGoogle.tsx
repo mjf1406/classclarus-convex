@@ -2,12 +2,17 @@ import { useState } from 'react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
+import { getSafeAuthRedirect } from '@/lib/authRedirect'
 
 interface SignInProps {
   termsAccepted?: boolean
+  redirectTo?: string
 }
 
-export function SignInWithGoogle({ termsAccepted = false }: SignInProps) {
+export function SignInWithGoogle({
+  termsAccepted = false,
+  redirectTo,
+}: SignInProps) {
   const { signIn } = useAuthActions()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -15,7 +20,8 @@ export function SignInWithGoogle({ termsAccepted = false }: SignInProps) {
     if (!termsAccepted) return
     setIsLoading(true)
 
-    signIn('google').catch(() => {
+    const safeRedirectTo = getSafeAuthRedirect(redirectTo)
+    signIn('google', { redirectTo: safeRedirectTo }).catch(() => {
       setIsLoading(false)
     })
   }

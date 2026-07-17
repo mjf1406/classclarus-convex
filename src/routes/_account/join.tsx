@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
 import { toast } from 'sonner'
@@ -15,10 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import {
-  JOIN_CODE_LENGTH,
-  normalizeJoinCode,
-} from '@/lib/joinCode'
+import { JOIN_CODE_LENGTH, normalizeJoinCode } from '@/lib/joinCode'
 
 const joinSearchSchema = z.object({
   joinCode: z
@@ -57,12 +54,14 @@ function JoinPage() {
   const navigate = useNavigate()
   const { joinCode: prefilledCode } = Route.useSearch()
   const redeemJoinCode = useMutation(api.memberships.redeemJoinCode)
+  const redeemGuardianCode = useMutation(api.guardians.redeemGuardianCode)
 
   const [code, setCode] = useState(prefilledCode ?? '')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const autoJoinedRef = useRef(false)
 
-  const handleJoin = () => {
+  const handleJoin = useCallback(async () => {
     if (code.length !== JOIN_CODE_LENGTH) {
       setError('Enter a complete 8-character join code.')
       return
@@ -71,26 +70,53 @@ function JoinPage() {
     setError(null)
     setIsSubmitting(true)
 
-    redeemJoinCode({ code })
-      .then((result) => {
-        if (!result.ok) {
-          // Server errors are intentionally generic (no code-type hints).
-          setError(result.error)
-          return
-        }
-        toast.success(`Joined as ${ROLE_LABELS[result.role] ?? result.role}`)
-        void navigate({
+    try {
+      const classResult = await redeemJoinCode({ code })
+      if (classResult.ok) {
+        toast.success(
+          `Joined as ${ROLE_LABELS[classResult.role] ?? classResult.role}`,
+        )
+        await navigate({
           to: '/c/$classId',
-          params: { classId: result.classId },
+          params: { classId: classResult.classId },
         })
-      })
-      .catch(() => {
-        setError('Something went wrong. Please try again.')
-      })
-      .finally(() => {
-        setIsSubmitting(false)
-      })
-  }
+        return
+      }
+
+      if (classResult.error.startsWith('Too many attempts')) {
+        setError(classResult.error)
+        return
+      }
+
+      const guardianResult = await redeemGuardianCode({ code })
+      if (guardianResult.ok) {
+        toast.success('Guardian access linked')
+        await navigate({ to: '/' })
+        return
+      }
+
+      // One generic error for both code namespaces prevents type leakage.
+      setError(guardianResult.error)
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [code, navigate, redeemGuardianCode, redeemJoinCode])
+
+  // Auto-redeem when arriving from a share/login redirect with a full code.
+  useEffect(() => {
+    if (
+      !prefilledCode ||
+      code.length !== JOIN_CODE_LENGTH ||
+      isSubmitting ||
+      autoJoinedRef.current
+    ) {
+      return
+    }
+    autoJoinedRef.current = true
+    void handleJoin()
+  }, [prefilledCode, code.length, isSubmitting, handleJoin])
 
   return (
     <main className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-lg items-center px-6 py-10">
@@ -98,7 +124,7 @@ function JoinPage() {
         <CardHeader>
           <CardTitle>Enter join code</CardTitle>
           <CardDescription>
-            Enter the 8-character code your teacher shared with you.
+            Enter the 8-character class or guardian code your teacher shared.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -124,7 +150,7 @@ function JoinPage() {
             disabled={isSubmitting || code.length !== JOIN_CODE_LENGTH}
             onClick={() => void handleJoin()}
           >
-            {isSubmitting ? 'Joining…' : 'Join class'}
+            {isSubmitting ? 'Joining…' : 'Join'}
           </Button>
 
           {error ? (
