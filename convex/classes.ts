@@ -1,4 +1,8 @@
 import { requireUser } from '#/lib/auth'
+import {
+  DEFAULT_CLASS_SORT,
+  sortClasses,
+} from '#/lib/classSort'
 import { mutation, query } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
@@ -11,7 +15,7 @@ const classDoc = v.object({
   name: v.string(),
   description: v.optional(v.string()),
   icon: v.optional(v.string()),
-  year: v.optional(v.number()),
+  year: v.number(),
   updatedTime: v.optional(v.number()),
   archivedTime: v.optional(v.number()),
   studentCode: v.string(),
@@ -19,6 +23,15 @@ const classDoc = v.object({
   assistantTeacherCode: v.string(),
   publicDisplayPin: v.optional(v.string()),
 })
+
+const classSort = v.union(
+  v.literal('createdDesc'),
+  v.literal('createdAsc'),
+  v.literal('updatedDesc'),
+  v.literal('updatedAsc'),
+  v.literal('nameAsc'),
+  v.literal('nameDesc'),
+)
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -47,28 +60,36 @@ export const listClasses = query({
   args: {
     includeArchived: v.optional(v.boolean()),
     archivedOnly: v.optional(v.boolean()),
+    sort: v.optional(classSort),
   },
   returns: v.array(classDoc),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
     const archivedOnly = args.archivedOnly ?? false
     const includeArchived = args.includeArchived ?? false
+    const sort = args.sort ?? DEFAULT_CLASS_SORT
 
     const classes = await ctx.db
       .query('classes')
       .withIndex('by_user', (q) => q.eq('userId', user._id))
-      .order('desc')
+      .order(sort === 'createdAsc' ? 'asc' : 'desc')
       .take(100)
 
     if (archivedOnly) {
-      return classes.filter((c) => c.archivedTime !== undefined)
+      return sortClasses(
+        classes.filter((c) => c.archivedTime !== undefined),
+        sort,
+      )
     }
 
     if (includeArchived) {
-      return classes
+      return sortClasses(classes, sort)
     }
 
-    return classes.filter((c) => c.archivedTime === undefined)
+    return sortClasses(
+      classes.filter((c) => c.archivedTime === undefined),
+      sort,
+    )
   },
 })
 
@@ -88,7 +109,7 @@ export const createClass = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     icon: v.optional(v.string()),
-    year: v.optional(v.number()),
+    year: v.number(),
     publicDisplayPin: v.optional(v.string()),
   },
   returns: v.id('classes'),
@@ -115,7 +136,6 @@ export const updateClass = mutation({
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     icon: v.optional(v.string()),
-    year: v.optional(v.number()),
     publicDisplayPin: v.optional(v.string()),
     archived: v.optional(v.boolean()),
   },
@@ -131,7 +151,6 @@ export const updateClass = mutation({
       name?: string
       description?: string
       icon?: string
-      year?: number
       publicDisplayPin?: string
       archivedTime?: number | undefined
       updatedTime: number
@@ -142,7 +161,6 @@ export const updateClass = mutation({
     if (args.name !== undefined) updates.name = args.name
     if (args.description !== undefined) updates.description = args.description
     if (args.icon !== undefined) updates.icon = args.icon
-    if (args.year !== undefined) updates.year = args.year
     if (args.publicDisplayPin !== undefined) {
       updates.publicDisplayPin = args.publicDisplayPin
     }

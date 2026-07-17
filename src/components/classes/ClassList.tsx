@@ -13,7 +13,13 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useRemoveClass, useUpdateClass } from '#/lib/classes'
+import {
+  isPendingClass,
+  useRemoveClass,
+  useUpdateClass,
+} from '#/lib/classes'
+import type { ClassSort } from '#/lib/classes'
+import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
 import type { Doc } from '../../../convex/_generated/dataModel'
@@ -46,6 +52,7 @@ export type ClassListView = 'grid' | 'list'
 
 type ClassListProps = {
   view?: ClassListView
+  sort?: ClassSort
   archivedOnly?: boolean
   onCreateClick?: () => void
   onEdit?: (classDoc: Doc<'classes'>) => void
@@ -129,18 +136,25 @@ function ClassCard({
   onDelete: () => void
 }) {
   const isArchived = classDoc.archivedTime !== undefined
+  const isPending = isPendingClass(classDoc)
 
   return (
     <Card
       size="sm"
-      className="relative cursor-pointer transition-colors hover:bg-muted/30"
+      className={
+        isPending
+          ? 'relative cursor-default opacity-80'
+          : 'relative cursor-pointer transition-colors hover:bg-muted/30'
+      }
     >
-      <Link
-        to="/c/$classId"
-        params={{ classId: classDoc._id }}
-        className="absolute inset-0 z-0 rounded-[inherit]"
-        aria-label={`Open ${classDoc.name}`}
-      />
+      {isPending ? null : (
+        <Link
+          to="/c/$classId"
+          params={{ classId: classDoc._id }}
+          className="absolute inset-0 z-0 rounded-[inherit]"
+          aria-label={`Open ${classDoc.name}`}
+        />
+      )}
       <CardHeader className="relative z-10 pointer-events-none">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -148,17 +162,24 @@ function ClassCard({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <CardTitle className="truncate text-base font-semibold">
-                {classDoc.name}
-              </CardTitle>
-              <div className="pointer-events-auto">
-                <ClassActionsMenu
-                  isArchived={isArchived}
-                  onEdit={onEdit}
-                  onArchiveToggle={onArchiveToggle}
-                  onDelete={onDelete}
-                />
+              <div className="min-w-0 flex-1">
+                <CardTitle className="truncate text-base font-semibold">
+                  {classDoc.name}
+                </CardTitle>
+                <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                  {isPending ? 'Creating…' : classDoc.year}
+                </p>
               </div>
+              {isPending ? null : (
+                <div className="pointer-events-auto">
+                  <ClassActionsMenu
+                    isArchived={isArchived}
+                    onEdit={onEdit}
+                    onArchiveToggle={onArchiveToggle}
+                    onDelete={onDelete}
+                  />
+                </div>
+              )}
             </div>
             {classDoc.description ? (
               <CardDescription className="mt-1 line-clamp-2">
@@ -189,18 +210,25 @@ function ClassRow({
   onDelete: () => void
 }) {
   const isArchived = classDoc.archivedTime !== undefined
+  const isPending = isPendingClass(classDoc)
 
   return (
     <Card
       size="sm"
-      className="relative cursor-pointer transition-colors hover:bg-muted/30"
+      className={
+        isPending
+          ? 'relative cursor-default opacity-80'
+          : 'relative cursor-pointer transition-colors hover:bg-muted/30'
+      }
     >
-      <Link
-        to="/c/$classId"
-        params={{ classId: classDoc._id }}
-        className="absolute inset-0 z-0 rounded-[inherit]"
-        aria-label={`Open ${classDoc.name}`}
-      />
+      {isPending ? null : (
+        <Link
+          to="/c/$classId"
+          params={{ classId: classDoc._id }}
+          className="absolute inset-0 z-0 rounded-[inherit]"
+          aria-label={`Open ${classDoc.name}`}
+        />
+      )}
       <CardHeader className="relative z-10 pointer-events-none py-0">
         <div className="flex items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -209,9 +237,14 @@ function ClassRow({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <CardTitle className="truncate text-base font-semibold">
-                  {classDoc.name}
-                </CardTitle>
+                <div className="flex items-baseline gap-2">
+                  <CardTitle className="truncate text-base font-semibold">
+                    {classDoc.name}
+                  </CardTitle>
+                  <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                    {isPending ? 'Creating…' : classDoc.year}
+                  </span>
+                </div>
                 {classDoc.description ? (
                   <CardDescription className="mt-0.5 line-clamp-1">
                     {classDoc.description}
@@ -222,14 +255,16 @@ function ClassRow({
                   </CardDescription>
                 )}
               </div>
-              <div className="pointer-events-auto">
-                <ClassActionsMenu
-                  isArchived={isArchived}
-                  onEdit={onEdit}
-                  onArchiveToggle={onArchiveToggle}
-                  onDelete={onDelete}
-                />
-              </div>
+              {isPending ? null : (
+                <div className="pointer-events-auto">
+                  <ClassActionsMenu
+                    isArchived={isArchived}
+                    onEdit={onEdit}
+                    onArchiveToggle={onArchiveToggle}
+                    onDelete={onDelete}
+                  />
+                </div>
+              )}
             </div>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-2xs text-muted-foreground">
               <span>
@@ -252,11 +287,28 @@ function ClassListSkeleton({ view }: { view: ClassListView }) {
           <Card key={i} size="sm">
             <CardHeader className="py-0">
               <div className="flex items-center gap-3">
-                <Skeleton className="size-10 rounded-xl" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-1/3" />
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="size-10 shrink-0 rounded-xl" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex h-6 items-baseline gap-2">
+                        <div className="flex h-6 items-center">
+                          <Skeleton className="h-4 w-40" />
+                        </div>
+                        <div className="flex h-4 items-center">
+                          <Skeleton className="h-3 w-10" />
+                        </div>
+                      </div>
+                      <div className="mt-0.5 flex h-5 items-center">
+                        <Skeleton className="h-4 w-56" />
+                      </div>
+                    </div>
+                    <Skeleton className="size-8 shrink-0 rounded-md" />
+                  </div>
+                  <div className="mt-1 flex h-[17px] items-center gap-4">
+                    <Skeleton className="h-3 w-36" />
+                    <Skeleton className="h-3 w-36" />
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -272,12 +324,30 @@ function ClassListSkeleton({ view }: { view: ClassListView }) {
         <Card key={i} size="sm">
           <CardHeader>
             <div className="flex items-start gap-3">
-              <Skeleton className="size-10 rounded-xl" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-5 w-2/3" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-3 w-1/2" />
-                <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="size-10 shrink-0 rounded-xl" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex h-6 items-center">
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                    <div className="mt-0.5 flex h-4 items-center">
+                      <Skeleton className="h-3 w-10" />
+                    </div>
+                  </div>
+                  <Skeleton className="size-8 shrink-0 rounded-md" />
+                </div>
+                <div className="mt-1 flex h-5 items-center">
+                  <Skeleton className="h-4 w-full" />
+                </div>
+                <div className="mt-2 space-y-0.5">
+                  <div className="flex h-[17px] items-center">
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                  <div className="flex h-[17px] items-center">
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -319,17 +389,20 @@ function EmptyState({
 
 export function ClassList({
   view = 'grid',
+  sort = DEFAULT_CLASS_SORT,
   archivedOnly = false,
   onCreateClick,
   onEdit,
 }: ClassListProps) {
-  const { data: classes, isPending } = useQuery({
+  const { data: classes } = useQuery({
     ...convexQuery(
       api.classes.listClasses,
-      archivedOnly ? { archivedOnly: true } : {},
+      archivedOnly ? { archivedOnly: true, sort } : { sort },
     ),
+    placeholderData: (previousData) => previousData,
     gcTime: ONE_HOUR,
   })
+  const sortedClasses = classes ? sortClasses(classes, sort) : undefined
   const removeClass = useRemoveClass()
   const updateClass = useUpdateClass()
 
@@ -372,11 +445,11 @@ export function ClassList({
       })
   }
 
-  if (isPending || classes === undefined) {
+  if (sortedClasses === undefined) {
     return <ClassListSkeleton view={view} />
   }
 
-  if (classes.length === 0) {
+  if (sortedClasses.length === 0) {
     return (
       <EmptyState archivedOnly={archivedOnly} onCreateClick={onCreateClick} />
     )
@@ -391,7 +464,7 @@ export function ClassList({
             : 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
         }
       >
-        {classes.map((classDoc) =>
+        {sortedClasses.map((classDoc) =>
           view === 'list' ? (
             <ClassRow
               key={classDoc._id}

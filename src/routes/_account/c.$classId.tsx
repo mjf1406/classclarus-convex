@@ -5,11 +5,43 @@ import { ArrowLeft } from 'lucide-react'
 
 import { TEN_MINUTES } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
-import type { Id } from '../../../convex/_generated/dataModel'
+import type { Doc, Id } from '../../../convex/_generated/dataModel'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
+function classLabel(classDoc: Doc<'classes'> | null | undefined) {
+  if (classDoc == null) return 'Class'
+  return `(${classDoc.year}) ${classDoc.name}`
+}
+
 export const Route = createFileRoute('/_account/c/$classId')({
+  loader: async ({ context, params }) => {
+    try {
+      const classDoc = await context.queryClient.ensureQueryData(
+        convexQuery(api.classes.getClass, {
+          classId: params.classId as Id<'classes'>,
+        }),
+      )
+      return { classDoc }
+    } catch {
+      // Auth may not be ready on cold load; useQuery retries after auth.
+      return { classDoc: undefined }
+    }
+  },
+  head: ({ loaderData }) => {
+    const label = classLabel(loaderData?.classDoc)
+    return {
+      meta: [
+        {
+          name: 'description',
+          content: `Manage ${label} for the ClassClarus webapp`,
+        },
+        {
+          title: `${label} | ClassClarus`,
+        },
+      ],
+    }
+  },
   component: ClassPage,
 })
 
@@ -51,6 +83,9 @@ function ClassPage() {
           </div>
         ) : (
           <header className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">
+              {classDoc.year}
+            </p>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {classDoc.name}
             </h1>

@@ -1,16 +1,42 @@
 import { useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import type { Doc, Id } from '../../convex/_generated/dataModel'
+import {
+  compareClasses,
+  DEFAULT_CLASS_SORT,
+} from './classSort'
+import type { ClassSort } from './classSort'
+
+export type { ClassSort } from './classSort'
 
 const PENDING_CODE = 'PENDING'
+
+export function isPendingClass(classDoc: Doc<'classes'>): boolean {
+  return classDoc.studentCode === PENDING_CODE
+}
 
 function listQueryMode(queryArgs: {
   includeArchived?: boolean
   archivedOnly?: boolean
+  sort?: ClassSort
 }): 'active' | 'archived' | 'all' {
   if (queryArgs.archivedOnly) return 'archived'
   if (queryArgs.includeArchived) return 'all'
   return 'active'
+}
+
+/** Insert using the same ordering as the Convex `listClasses` query. */
+function insertSorted(
+  list: Doc<'classes'>[],
+  doc: Doc<'classes'>,
+  sort: ClassSort,
+): Doc<'classes'>[] {
+  const next = [...list]
+  const insertAt = next.findIndex(
+    (existing) => compareClasses(doc, existing, sort) < 0,
+  )
+  next.splice(insertAt === -1 ? next.length : insertAt, 0, doc)
+  return next
 }
 
 function applyClassPatch(
@@ -19,7 +45,6 @@ function applyClassPatch(
     name?: string
     description?: string
     icon?: string
-    year?: number
     publicDisplayPin?: string
     archived?: boolean
   },
@@ -33,7 +58,6 @@ function applyClassPatch(
   if (args.name !== undefined) updated.name = args.name
   if (args.description !== undefined) updated.description = args.description
   if (args.icon !== undefined) updated.icon = args.icon
-  if (args.year !== undefined) updated.year = args.year
   if (args.publicDisplayPin !== undefined) {
     updated.publicDisplayPin = args.publicDisplayPin
   }
@@ -74,10 +98,15 @@ export function useCreateClass() {
         // New classes are active; only insert into active (or "all") lists.
         const mode = listQueryMode(queryArgs)
         if (mode === 'archived') continue
-        localStore.setQuery(api.classes.listClasses, queryArgs, [
-          optimisticClass,
-          ...value,
-        ])
+        localStore.setQuery(
+          api.classes.listClasses,
+          queryArgs,
+          insertSorted(
+            value,
+            optimisticClass,
+            queryArgs.sort ?? DEFAULT_CLASS_SORT,
+          ),
+        )
       }
     },
   )
@@ -138,16 +167,26 @@ export function useUpdateClass() {
         }
 
         if (index === -1) {
-          localStore.setQuery(api.classes.listClasses, queryArgs, [
-            updated,
-            ...value,
-          ])
+          localStore.setQuery(
+            api.classes.listClasses,
+            queryArgs,
+            insertSorted(value, updated, queryArgs.sort ?? DEFAULT_CLASS_SORT),
+          )
           continue
         }
 
-        const next = [...value]
-        next[index] = updated
-        localStore.setQuery(api.classes.listClasses, queryArgs, next)
+        const withoutUpdatedClass = value.filter(
+          (classDoc) => classDoc._id !== args.classId,
+        )
+        localStore.setQuery(
+          api.classes.listClasses,
+          queryArgs,
+          insertSorted(
+            withoutUpdatedClass,
+            updated,
+            queryArgs.sort ?? DEFAULT_CLASS_SORT,
+          ),
+        )
       }
     },
   )

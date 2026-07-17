@@ -9,7 +9,7 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     icon: v.optional(v.string()),
-    year: v.optional(v.number()),
+    year: v.number(),
     // createdAt: v.number(), // Convex automatically creates _creationTime, which is UNIX timestamp in milliseconds.
     updatedTime: v.optional(v.number()),
     archivedTime: v.optional(v.number()), // null = active, string = archived

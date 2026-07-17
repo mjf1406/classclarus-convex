@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
+import { NumberInput } from '@/components/ui/number-input'
 import { Textarea } from '@/components/ui/textarea'
 
 const classFormSchema = z.object({
@@ -39,11 +40,17 @@ const classFormSchema = z.object({
     .string()
     .trim()
     .max(500, 'Description must be 500 characters or less'),
+  year: z
+    .number({ error: 'Year is required' })
+    .int('Year must be a whole number')
+    .min(2000, 'Year must be 2000 or later')
+    .max(2100, 'Year must be 2100 or earlier'),
 })
 
 type FieldErrors = {
   name?: string
   description?: string
+  year?: string
 }
 
 type ClassFormMode = 'create' | 'edit'
@@ -81,7 +88,9 @@ export function ClassFormCredenza({
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [year, setYear] = useState(() => String(new Date().getFullYear()))
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
 
   const createClass = useCreateClass()
@@ -90,6 +99,7 @@ export function ClassFormCredenza({
   const resetForm = () => {
     setName('')
     setDescription('')
+    setYear(String(new Date().getFullYear()))
     setErrors({})
   }
 
@@ -98,6 +108,7 @@ export function ClassFormCredenza({
     if (classDoc) {
       setName(classDoc.name)
       setDescription(classDoc.description ?? '')
+      setYear(String(classDoc.year))
       setErrors({})
     }
   }, [open, classDoc])
@@ -113,24 +124,34 @@ export function ClassFormCredenza({
     if (isSubmittingRef.current) return
     if (isEdit && !classDoc) return
 
-    const result = classFormSchema.safeParse({ name, description })
+    const trimmedYear = year.trim()
+    const parsedYear = trimmedYear === '' ? Number.NaN : Number(trimmedYear)
+    const result = classFormSchema.safeParse({
+      name,
+      description,
+      year: parsedYear,
+    })
     if (!result.success) {
       const fieldErrors = z.flattenError(result.error).fieldErrors
       setErrors({
         name: fieldErrors.name?.[0],
         description: fieldErrors.description?.[0],
+        year: fieldErrors.year?.[0],
       })
       return
     }
 
     setErrors({})
     isSubmittingRef.current = true
+    setIsSubmitting(true)
 
     const editing = classDoc
     const nextName = result.data.name
     const trimmedDescription = result.data.description
 
-    // Fire mutation first so optimistic updates apply, then close immediately.
+    // Fire mutation first so optimistic updates apply, then close.
+    // Create shows a PENDING placeholder (not navigable) until the real Id lands.
+    // Year is immutable after creation.
     const mutationPromise = editing
       ? updateClass({
           classId: editing._id,
@@ -139,6 +160,7 @@ export function ClassFormCredenza({
         })
       : createClass({
           name: nextName,
+          year: result.data.year,
           ...(trimmedDescription ? { description: trimmedDescription } : {}),
         })
 
@@ -159,6 +181,7 @@ export function ClassFormCredenza({
       })
       .finally(() => {
         isSubmittingRef.current = false
+        setIsSubmitting(false)
       })
   }
 
@@ -196,8 +219,8 @@ export function ClassFormCredenza({
           </CredenzaTitle>
           <CredenzaDescription>
             {isEdit
-              ? 'Update the class name and description.'
-              : 'Add a new class with a name and optional description.'}
+              ? 'Update the class name and description. The academic year cannot be changed.'
+              : 'Add a new class with a name, academic year, and optional description.'}
           </CredenzaDescription>
         </CredenzaHeader>
         <CredenzaBody>
@@ -220,6 +243,37 @@ export function ClassFormCredenza({
                   autoFocus
                 />
                 <FieldError>{errors.name}</FieldError>
+              </Field>
+              <Field data-invalid={!!errors.year || undefined}>
+                <FieldLabel htmlFor={`${formId}-year`}>
+                  Academic Year
+                </FieldLabel>
+                {isEdit ? (
+                  <FieldDescription>
+                    The academic year cannot be changed after a class is
+                    created.
+                  </FieldDescription>
+                ) : null}
+                <NumberInput
+                  id={`${formId}-year`}
+                  name="year"
+                  inputMode="numeric"
+                  min={2000}
+                  max={2100}
+                  step={1}
+                  placeholder={String(new Date().getFullYear())}
+                  value={year}
+                  disabled={isEdit}
+                  onChange={(next) => {
+                    setYear(next)
+                    if (errors.year) {
+                      setErrors((prev) => ({ ...prev, year: undefined }))
+                    }
+                  }}
+                  aria-invalid={!!errors.year}
+                  inputClassName="w-20 min-w-20"
+                />
+                <FieldError>{errors.year}</FieldError>
               </Field>
               <Field data-invalid={!!errors.description || undefined}>
                 <FieldLabel htmlFor={`${formId}-description`}>
@@ -271,6 +325,7 @@ export function ClassFormCredenza({
               type="submit"
               form={formId}
               className="flex-1 sm:flex-initial"
+              disabled={isSubmitting || (isEdit && !classDoc)}
             >
               {isEdit ? 'Save' : 'Create'}
             </Button>
