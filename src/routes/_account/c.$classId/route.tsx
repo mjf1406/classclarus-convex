@@ -5,10 +5,8 @@ import { useTranslation } from 'react-i18next'
 
 import { TEN_MINUTES } from '#/lib/queryCache'
 import { classLabel } from '#/components/classes/classLabel'
-import {
-  ClassLayoutProvider,
-  type ClassAdminBundle,
-} from '#/components/classes/ClassLayoutContext'
+import { ClassLayoutProvider } from '#/components/classes/ClassLayoutContext'
+import type { ClassAdminBundle } from '#/components/classes/ClassLayoutContext';
 import { ClassSidebar } from '#/components/class-sidebar/ClassSidebar'
 import { ClassInsetHeader } from '#/components/class-sidebar/ClassInsetHeader'
 import i18n from '#/i18n'
@@ -22,10 +20,20 @@ import {
 } from '@/components/ui/sidebar'
 
 export const Route = createFileRoute('/_account/c/$classId')({
-  loader: async ({ context, params }) => {
-    void context
-    void params
-    return { classDoc: undefined }
+  loader: async ({ context, params, cause }) => {
+    if (cause === 'preload') {
+      return { classDoc: undefined }
+    }
+    try {
+      const classDoc = await context.queryClient.ensureQueryData(
+        convexQuery(api.classes.getClass, {
+          classId: params.classId as Id<'classes'>,
+        }),
+      )
+      return { classDoc }
+    } catch {
+      return { classDoc: undefined }
+    }
   },
   head: ({ loaderData }) => {
     const label = classLabel(
