@@ -22,7 +22,7 @@ export type ClassDisplayRole = ClassRole | 'guardian'
  * getClassAdminBundle).
  * `myRole` is the caller's highest roster role, or `guardian` on getClass when
  * access is via a linked child enrollment.
- * Permission flags are present on getClass; list queries omit them.
+ * Permission flags are present on getClass and listMyClasses.
  */
 export type ClassPublic = Omit<
   Doc<'classes'>,
@@ -35,6 +35,7 @@ export type ClassPublic = Omit<
 
 type ListMyClass = {
   myRole: ClassRole | undefined
+  canManage: boolean
   _id: Id<'classes'>
   _creationTime: number
   userId: Id<'users'>
@@ -62,6 +63,7 @@ function toListMyClass(doc: ClassPublic): ListMyClass {
     organizationId: doc.organizationId,
     teamId: doc.teamId,
     myRole: doc.myRole === 'guardian' ? undefined : doc.myRole,
+    canManage: doc.canManage === true,
   }
 }
 
@@ -141,6 +143,7 @@ export function useCreateClass() {
         icon: args.icon,
         year: args.year,
         myRole: 'creator',
+        canManage: true,
       }
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(

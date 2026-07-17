@@ -271,10 +271,18 @@ export const listMyClasses = query({
         return doc.archivedTime === undefined
       })
 
-    return sortClasses(classes, sort).map((doc) => ({
-      ...toPublicClass(doc),
-      myRole: highestClassRole(rolesByClassId.get(doc._id) ?? []) ?? undefined,
-    }))
+    return sortClasses(classes, sort).map((doc) => {
+      const held = rolesByClassId.get(doc._id) ?? []
+      const myRole = highestClassRole(held) ?? undefined
+      // classTeacher and creator both hold class:manage (creator inherits).
+      const canManage =
+        held.includes('creator') || held.includes('classTeacher')
+      return {
+        ...toPublicClass(doc),
+        myRole,
+        canManage,
+      }
+    })
   },
 })
 
@@ -345,7 +353,7 @@ export async function loadClassMembers(
   return members
 }
 
-/** Roster members for a class. Gated on class:manage (creator). */
+/** Roster members for a class. Gated on class:manage. */
 export const listClassMembers = query({
   args: {
     classId: v.id('classes'),
@@ -438,7 +446,7 @@ export const getClassAdminBundle = query({
 })
 
 /**
- * Revoke all class-scoped roles for a member. Creator-only (class:manage).
+ * Revoke all class-scoped roles for a member. Requires class:manage.
  * Refuses removing the sole creator so the class cannot be left unmanaged.
  */
 export const removeMember = mutation({

@@ -49,8 +49,8 @@ export const classDisplayRoleValidator = v.union(
 // class cards and the class page render as a badge. Optional because access
 // can come from non-roster grants (e.g. Phase 2 org staff). Includes
 // `guardian` when access is via a linked child enrollment.
-// Permission flags are set by getClass so the page does not need separate
-// checkClassPermission subscriptions; list queries omit them.
+// Permission flags are set by getClass and listMyClasses so the UI can gate
+// manage actions without separate checkClassPermission subscriptions.
 export const classDocWithMyRole = v.object({
   ...classDocPublic.fields,
   myRole: v.optional(classDisplayRoleValidator),
@@ -275,7 +275,7 @@ export const getJoinCodes = query({
   },
   returns: v.object({
     studentCode: v.string(),
-    /** Only present when caller has class:manage (creator). */
+    /** Only present when caller has class:manage. */
     teacherCode: v.union(v.string(), v.null()),
     assistantTeacherCode: v.union(v.string(), v.null()),
   }),

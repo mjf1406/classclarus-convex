@@ -24,7 +24,7 @@ export const CLASS_ROLE_BADGE_CONFIG: Record<
       'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300',
   },
   classTeacher: {
-    label: 'Co-teacher',
+    label: 'Teacher',
     icon: GraduationCap,
     className: 'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300',
   },

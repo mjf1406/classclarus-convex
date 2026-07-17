@@ -46,7 +46,7 @@ export const Route = createFileRoute('/_account/join')({
 
 const ROLE_LABELS: Record<string, string> = {
   student: 'student',
-  classTeacher: 'co-teacher',
+  classTeacher: 'teacher',
   assistantTeacher: 'assistant teacher',
 }
 

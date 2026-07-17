@@ -300,7 +300,7 @@ function JoinCodesSection({
 
 const MEMBER_ROLE_LABELS: Record<string, string> = {
   creator: 'Creator',
-  classTeacher: 'Co-teacher',
+  classTeacher: 'Teacher',
   assistantTeacher: 'Assistant',
   student: 'Student',
 }

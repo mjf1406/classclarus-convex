@@ -55,6 +55,9 @@ export const {
   grantPermission,
   denyPermission,
   getAuditLog,
+  // Re-materialize permissions after editing role definitions in authz.ts.
+  syncRoles,
+  syncRole,
   // Optional (only when generateUploadUrl is set): generateLogoUploadUrl,
 } = makeTenantsAPI(components.tenants, {
   authz, // Required: your Authz instance from authz.ts

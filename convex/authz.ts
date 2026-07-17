@@ -3,8 +3,9 @@
 // authz client. See plans/roles-and-authorization-implementation-guide.md §5/§7.3.
 //
 // Operational rule: after editing role definitions and deploying, run
-// `npx convex run tenants:syncRoles` so users who already hold a role get the
-// new materialized permission set.
+// `npx convex run authzOps:syncRoles` (classclarus / class roles) and
+// `npx convex run tenants:syncRoles` (org partitions) so users who already
+// hold a role get the new materialized permission set.
 import { Authz, definePermissions, defineRoles } from '@djpanda/convex-authz'
 import { TENANTS_PERMISSIONS, TENANTS_ROLES } from '@djpanda/convex-tenants'
 import { components } from './_generated/api'
@@ -41,8 +42,9 @@ const permissions = definePermissions(TENANTS_PERMISSIONS, {
 // org roles and class-scoped roster roles.
 //
 // Naming notes (guide §5): the class role is `classTeacher` (org role `teacher`
-// already exists in the same catalog) and the top class role is `creator`
-// (`owner` is taken by tenants).
+// already exists in the same catalog; UI label is "Teacher") and the top class
+// role is `creator` (`owner` is taken by tenants). `classTeacher` has full
+// class ops via `class:manage`; `creator` is the ownership marker.
 const roles = defineRoles(permissions, TENANTS_ROLES, {
   // --- Org roles (school/district STAFF only; used from Phase 2) ---
   // Extend the tenants `owner` default with the education resources.
@@ -82,11 +84,13 @@ const roles = defineRoles(permissions, TENANTS_ROLES, {
   },
   classTeacher: {
     inherits: 'assistantTeacher',
-    class: ['manageMembers'],
+    // Full class ops (settings, archive/delete, roster, all join codes).
+    // `creator` remains a distinct ownership marker above this role.
+    class: ['manageMembers', 'manage'],
   },
   creator: {
     inherits: 'classTeacher',
-    class: ['manage'],
+    // Ownership / history marker; permissions come from classTeacher.
   },
 })
 

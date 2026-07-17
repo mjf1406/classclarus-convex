@@ -135,7 +135,7 @@ function ClassCard({
 }) {
   const isArchived = classDoc.archivedTime !== undefined
   const isPending = isPendingClass(classDoc)
-  const canManage = classDoc.myRole === 'creator'
+  const canManage = classDoc.canManage === true
 
   return (
     <Card
@@ -216,7 +216,7 @@ function ClassRow({
 }) {
   const isArchived = classDoc.archivedTime !== undefined
   const isPending = isPendingClass(classDoc)
-  const canManage = classDoc.myRole === 'creator'
+  const canManage = classDoc.canManage === true
 
   return (
     <Card
