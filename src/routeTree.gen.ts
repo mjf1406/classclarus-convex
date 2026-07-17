@@ -15,8 +15,16 @@ import { Route as JoinShareRouteImport } from './routes/join-share'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AccountRouteRouteImport } from './routes/_account/route'
 import { Route as AccountIndexRouteImport } from './routes/_account/index'
+import { Route as AccountSettingsRouteImport } from './routes/_account/settings'
 import { Route as AccountJoinRouteImport } from './routes/_account/join'
-import { Route as AccountCClassIdRouteImport } from './routes/_account/c.$classId'
+import { Route as AccountAccountRouteImport } from './routes/_account/account'
+import { Route as AccountCClassIdRouteRouteImport } from './routes/_account/c.$classId/route'
+import { Route as AccountCClassIdIndexRouteImport } from './routes/_account/c.$classId/index'
+import { Route as AccountCClassIdStudentsRouteImport } from './routes/_account/c.$classId/students'
+import { Route as AccountCClassIdSettingsRouteImport } from './routes/_account/c.$classId/settings'
+import { Route as AccountCClassIdPointsRouteImport } from './routes/_account/c.$classId/points'
+import { Route as AccountCClassIdMembersRouteImport } from './routes/_account/c.$classId/members'
+import { Route as AccountCClassIdInviteRouteImport } from './routes/_account/c.$classId/invite'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -47,15 +55,55 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRouteRoute,
 } as any)
+const AccountSettingsRoute = AccountSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AccountRouteRoute,
+} as any)
 const AccountJoinRoute = AccountJoinRouteImport.update({
   id: '/join',
   path: '/join',
   getParentRoute: () => AccountRouteRoute,
 } as any)
-const AccountCClassIdRoute = AccountCClassIdRouteImport.update({
+const AccountAccountRoute = AccountAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AccountRouteRoute,
+} as any)
+const AccountCClassIdRouteRoute = AccountCClassIdRouteRouteImport.update({
   id: '/c/$classId',
   path: '/c/$classId',
   getParentRoute: () => AccountRouteRoute,
+} as any)
+const AccountCClassIdIndexRoute = AccountCClassIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
+const AccountCClassIdStudentsRoute = AccountCClassIdStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
+const AccountCClassIdSettingsRoute = AccountCClassIdSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
+const AccountCClassIdPointsRoute = AccountCClassIdPointsRouteImport.update({
+  id: '/points',
+  path: '/points',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
+const AccountCClassIdMembersRoute = AccountCClassIdMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
+const AccountCClassIdInviteRoute = AccountCClassIdInviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => AccountCClassIdRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -64,17 +112,32 @@ export interface FileRoutesByFullPath {
   '/join-share': typeof JoinShareRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/account': typeof AccountAccountRoute
   '/join': typeof AccountJoinRoute
-  '/c/$classId': typeof AccountCClassIdRoute
+  '/settings': typeof AccountSettingsRoute
+  '/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/c/$classId/invite': typeof AccountCClassIdInviteRoute
+  '/c/$classId/members': typeof AccountCClassIdMembersRoute
+  '/c/$classId/points': typeof AccountCClassIdPointsRoute
+  '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
+  '/c/$classId/students': typeof AccountCClassIdStudentsRoute
+  '/c/$classId/': typeof AccountCClassIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/join-share': typeof JoinShareRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/account': typeof AccountAccountRoute
   '/join': typeof AccountJoinRoute
+  '/settings': typeof AccountSettingsRoute
   '/': typeof AccountIndexRoute
-  '/c/$classId': typeof AccountCClassIdRoute
+  '/c/$classId/invite': typeof AccountCClassIdInviteRoute
+  '/c/$classId/members': typeof AccountCClassIdMembersRoute
+  '/c/$classId/points': typeof AccountCClassIdPointsRoute
+  '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
+  '/c/$classId/students': typeof AccountCClassIdStudentsRoute
+  '/c/$classId': typeof AccountCClassIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,9 +146,17 @@ export interface FileRoutesById {
   '/join-share': typeof JoinShareRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/_account/account': typeof AccountAccountRoute
   '/_account/join': typeof AccountJoinRoute
+  '/_account/settings': typeof AccountSettingsRoute
   '/_account/': typeof AccountIndexRoute
-  '/_account/c/$classId': typeof AccountCClassIdRoute
+  '/_account/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/_account/c/$classId/invite': typeof AccountCClassIdInviteRoute
+  '/_account/c/$classId/members': typeof AccountCClassIdMembersRoute
+  '/_account/c/$classId/points': typeof AccountCClassIdPointsRoute
+  '/_account/c/$classId/settings': typeof AccountCClassIdSettingsRoute
+  '/_account/c/$classId/students': typeof AccountCClassIdStudentsRoute
+  '/_account/c/$classId/': typeof AccountCClassIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,16 +166,31 @@ export interface FileRouteTypes {
     | '/join-share'
     | '/login'
     | '/unauthorized'
+    | '/account'
     | '/join'
+    | '/settings'
     | '/c/$classId'
+    | '/c/$classId/invite'
+    | '/c/$classId/members'
+    | '/c/$classId/points'
+    | '/c/$classId/settings'
+    | '/c/$classId/students'
+    | '/c/$classId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/$'
     | '/join-share'
     | '/login'
     | '/unauthorized'
+    | '/account'
     | '/join'
+    | '/settings'
     | '/'
+    | '/c/$classId/invite'
+    | '/c/$classId/members'
+    | '/c/$classId/points'
+    | '/c/$classId/settings'
+    | '/c/$classId/students'
     | '/c/$classId'
   id:
     | '__root__'
@@ -113,9 +199,17 @@ export interface FileRouteTypes {
     | '/join-share'
     | '/login'
     | '/unauthorized'
+    | '/_account/account'
     | '/_account/join'
+    | '/_account/settings'
     | '/_account/'
     | '/_account/c/$classId'
+    | '/_account/c/$classId/invite'
+    | '/_account/c/$classId/members'
+    | '/_account/c/$classId/points'
+    | '/_account/c/$classId/settings'
+    | '/_account/c/$classId/students'
+    | '/_account/c/$classId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRouteRoute
     }
+    '/_account/settings': {
+      id: '/_account/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AccountSettingsRouteImport
+      parentRoute: typeof AccountRouteRoute
+    }
     '/_account/join': {
       id: '/_account/join'
       path: '/join'
@@ -177,26 +278,100 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountJoinRouteImport
       parentRoute: typeof AccountRouteRoute
     }
+    '/_account/account': {
+      id: '/_account/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountAccountRouteImport
+      parentRoute: typeof AccountRouteRoute
+    }
     '/_account/c/$classId': {
       id: '/_account/c/$classId'
       path: '/c/$classId'
       fullPath: '/c/$classId'
-      preLoaderRoute: typeof AccountCClassIdRouteImport
+      preLoaderRoute: typeof AccountCClassIdRouteRouteImport
       parentRoute: typeof AccountRouteRoute
+    }
+    '/_account/c/$classId/': {
+      id: '/_account/c/$classId/'
+      path: '/'
+      fullPath: '/c/$classId/'
+      preLoaderRoute: typeof AccountCClassIdIndexRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
+    '/_account/c/$classId/students': {
+      id: '/_account/c/$classId/students'
+      path: '/students'
+      fullPath: '/c/$classId/students'
+      preLoaderRoute: typeof AccountCClassIdStudentsRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
+    '/_account/c/$classId/settings': {
+      id: '/_account/c/$classId/settings'
+      path: '/settings'
+      fullPath: '/c/$classId/settings'
+      preLoaderRoute: typeof AccountCClassIdSettingsRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
+    '/_account/c/$classId/points': {
+      id: '/_account/c/$classId/points'
+      path: '/points'
+      fullPath: '/c/$classId/points'
+      preLoaderRoute: typeof AccountCClassIdPointsRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
+    '/_account/c/$classId/members': {
+      id: '/_account/c/$classId/members'
+      path: '/members'
+      fullPath: '/c/$classId/members'
+      preLoaderRoute: typeof AccountCClassIdMembersRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
+    '/_account/c/$classId/invite': {
+      id: '/_account/c/$classId/invite'
+      path: '/invite'
+      fullPath: '/c/$classId/invite'
+      preLoaderRoute: typeof AccountCClassIdInviteRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
     }
   }
 }
 
+interface AccountCClassIdRouteRouteChildren {
+  AccountCClassIdInviteRoute: typeof AccountCClassIdInviteRoute
+  AccountCClassIdMembersRoute: typeof AccountCClassIdMembersRoute
+  AccountCClassIdPointsRoute: typeof AccountCClassIdPointsRoute
+  AccountCClassIdSettingsRoute: typeof AccountCClassIdSettingsRoute
+  AccountCClassIdStudentsRoute: typeof AccountCClassIdStudentsRoute
+  AccountCClassIdIndexRoute: typeof AccountCClassIdIndexRoute
+}
+
+const AccountCClassIdRouteRouteChildren: AccountCClassIdRouteRouteChildren = {
+  AccountCClassIdInviteRoute: AccountCClassIdInviteRoute,
+  AccountCClassIdMembersRoute: AccountCClassIdMembersRoute,
+  AccountCClassIdPointsRoute: AccountCClassIdPointsRoute,
+  AccountCClassIdSettingsRoute: AccountCClassIdSettingsRoute,
+  AccountCClassIdStudentsRoute: AccountCClassIdStudentsRoute,
+  AccountCClassIdIndexRoute: AccountCClassIdIndexRoute,
+}
+
+const AccountCClassIdRouteRouteWithChildren =
+  AccountCClassIdRouteRoute._addFileChildren(AccountCClassIdRouteRouteChildren)
+
 interface AccountRouteRouteChildren {
+  AccountAccountRoute: typeof AccountAccountRoute
   AccountJoinRoute: typeof AccountJoinRoute
+  AccountSettingsRoute: typeof AccountSettingsRoute
   AccountIndexRoute: typeof AccountIndexRoute
-  AccountCClassIdRoute: typeof AccountCClassIdRoute
+  AccountCClassIdRouteRoute: typeof AccountCClassIdRouteRouteWithChildren
 }
 
 const AccountRouteRouteChildren: AccountRouteRouteChildren = {
+  AccountAccountRoute: AccountAccountRoute,
   AccountJoinRoute: AccountJoinRoute,
+  AccountSettingsRoute: AccountSettingsRoute,
   AccountIndexRoute: AccountIndexRoute,
-  AccountCClassIdRoute: AccountCClassIdRoute,
+  AccountCClassIdRouteRoute: AccountCClassIdRouteRouteWithChildren,
 }
 
 const AccountRouteRouteWithChildren = AccountRouteRoute._addFileChildren(

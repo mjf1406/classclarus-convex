@@ -31,6 +31,8 @@ const pt: Catalog = {
     themeLight: 'Claro',
     themeDark: 'Escuro',
     themeSystem: 'Sistema',
+    settings: 'Configurações',
+    account: 'Conta',
     userFallback: 'Usuário {{id}}',
     cannotUndo: 'Isso não pode ser desfeito.',
   },
@@ -88,6 +90,8 @@ const pt: Catalog = {
     myChildren: 'Meus filhos',
     childrenClasses: 'Turmas dos seus filhos',
     noActiveClassesYet: 'Ainda não há turmas ativas.',
+    joinClassDescription:
+      'Tem um código do professor? Digite-o aqui para entrar em uma turma.',
   },
   join: {
     title: 'Entrar em uma turma',
@@ -117,7 +121,7 @@ const pt: Catalog = {
     createDescription:
       'Adicione uma turma com nome, ano letivo, idioma e descrição opcional.',
     editDescription:
-      'Atualize o nome, a descrição e o idioma. O ano letivo não pode ser alterado.',
+      'Atualize o nome e a descrição. O ano letivo não pode ser alterado.',
     nameLabel: 'Nome',
     namePlaceholder: '3º período Biologia',
     nameRequired: 'O nome é obrigatório',
@@ -177,6 +181,9 @@ const pt: Catalog = {
     membersDescription:
       'Remova o acesso de quem entrou com um código vazado. Regenerar um código não revoga membros existentes.',
     noMembersYet: 'Ainda não há membros.',
+    removeMemberTitle: 'Remover membro?',
+    removeMemberDescription:
+      'Remover {{name}} desta turma? A pessoa perderá o acesso até entrar novamente.',
     memberRemoved: 'Membro removido',
     memberRemoveFailed: 'Falha ao remover o membro',
     students: 'Alunos',
@@ -224,6 +231,40 @@ const pt: Catalog = {
     joinLinkCopied: 'Link de entrada copiado',
     joinQrTitle: 'QR de entrada de {{role}}',
     joinQrDescription: 'Escaneie este QR para entrar como {{role}}.',
+    navClass: 'Turma',
+    navPoints: 'Pontos',
+    navMembers: 'Membros',
+    navStudents: 'Alunos',
+    navInvite: 'Convite',
+    navSettings: 'Configurações',
+    settingsTitle: 'Configurações',
+    settingsDescription:
+      'Configure opções de toda a turma. Mais configurações serão adicionadas aqui.',
+    allClasses: 'Todas as turmas',
+    switchClass: 'Trocar turma',
+    pointsPlaceholder: 'O acompanhamento de pontos aparecerá aqui.',
+  },
+  settings: {
+    docTitle: 'Configurações | ClassClarus',
+    docDescription: 'Gerencie suas configurações pessoais do ClassClarus',
+    title: 'Configurações',
+    description: 'Gerencie suas preferências pessoais.',
+    languageLabel: 'Idioma',
+    languageDescription:
+      'Seu idioma pessoal para a interface do ClassClarus.',
+    themeLabel: 'Tema',
+    themeDescription:
+      'Escolha claro, escuro ou siga a configuração do sistema.',
+  },
+  account: {
+    docTitle: 'Conta | ClassClarus',
+    docDescription: 'Gerencie sua conta ClassClarus',
+    title: 'Conta',
+    description: 'Gerencie os detalhes da sua conta.',
+    profileLabel: 'Perfil',
+    paymentsTitle: 'Pagamentos',
+    paymentsComingSoon:
+      'Pagamentos e cobrança serão gerenciados aqui. Em breve.',
   },
 }
 

@@ -31,6 +31,8 @@ const ko: Catalog = {
     themeLight: '라이트',
     themeDark: '다크',
     themeSystem: '시스템',
+    settings: '설정',
+    account: '계정',
     userFallback: '사용자 {{id}}',
     cannotUndo: '이 작업은 되돌릴 수 없습니다.',
   },
@@ -88,6 +90,8 @@ const ko: Catalog = {
     myChildren: '내 자녀',
     childrenClasses: '자녀의 수업',
     noActiveClassesYet: '아직 활성 수업이 없습니다.',
+    joinClassDescription:
+      '선생님에게 받은 참가 코드가 있나요? 여기에 입력하여 수업에 참가하세요.',
   },
   join: {
     title: '수업 참가',
@@ -117,7 +121,7 @@ const ko: Catalog = {
     createDescription:
       '이름, 학년도, 언어 및 선택적 설명으로 새 수업을 추가하세요.',
     editDescription:
-      '수업 이름, 설명, 언어를 업데이트합니다. 학년도는 변경할 수 없습니다.',
+      '수업 이름과 설명을 업데이트합니다. 학년도는 변경할 수 없습니다.',
     nameLabel: '이름',
     namePlaceholder: '3교시 생물',
     nameRequired: '이름은 필수입니다',
@@ -176,6 +180,9 @@ const ko: Catalog = {
     membersDescription:
       '유출된 코드로 참가한 사람의 접근을 제거하세요. 코드를 재생성해도 기존 구성원의 접근은 취소되지 않습니다.',
     noMembersYet: '아직 구성원이 없습니다.',
+    removeMemberTitle: '구성원을 제거할까요?',
+    removeMemberDescription:
+      '{{name}}님을 이 클래스에서 제거할까요? 다시 참여할 때까지 접근할 수 없습니다.',
     memberRemoved: '구성원이 제거되었습니다',
     memberRemoveFailed: '구성원 제거에 실패했습니다',
     students: '학생',
@@ -223,6 +230,38 @@ const ko: Catalog = {
     joinLinkCopied: '참가 링크가 복사되었습니다',
     joinQrTitle: '{{role}} 참가 QR 코드',
     joinQrDescription: '이 QR 코드를 스캔하여 {{role}}(으)로 참가하세요.',
+    navClass: '수업',
+    navPoints: '포인트',
+    navMembers: '구성원',
+    navStudents: '학생',
+    navInvite: '초대',
+    navSettings: '설정',
+    settingsTitle: '설정',
+    settingsDescription:
+      '수업 전체 옵션을 구성합니다. 추가 설정이 여기에 제공됩니다.',
+    allClasses: '모든 수업',
+    switchClass: '수업 전환',
+    pointsPlaceholder: '포인트 추적이 여기에 표시됩니다.',
+  },
+  settings: {
+    docTitle: '설정 | ClassClarus',
+    docDescription: 'ClassClarus 개인 설정을 관리하세요',
+    title: '설정',
+    description: '개인 환경설정을 관리합니다.',
+    languageLabel: '언어',
+    languageDescription: 'ClassClarus 인터페이스에 사용할 개인 언어입니다.',
+    themeLabel: '테마',
+    themeDescription:
+      '라이트, 다크 또는 시스템 설정을 따르도록 선택하세요.',
+  },
+  account: {
+    docTitle: '계정 | ClassClarus',
+    docDescription: 'ClassClarus 계정을 관리하세요',
+    title: '계정',
+    description: '계정 정보를 관리합니다.',
+    profileLabel: '프로필',
+    paymentsTitle: '결제',
+    paymentsComingSoon: '결제 및 청구는 여기에서 관리됩니다. 곧 제공됩니다.',
   },
 }
 

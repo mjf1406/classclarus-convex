@@ -31,6 +31,8 @@ const it: Catalog = {
     themeLight: 'Chiaro',
     themeDark: 'Scuro',
     themeSystem: 'Sistema',
+    settings: 'Impostazioni',
+    account: 'Account',
     userFallback: 'Utente {{id}}',
     cannotUndo: 'Questa azione non può essere annullata.',
   },
@@ -88,6 +90,8 @@ const it: Catalog = {
     myChildren: 'I miei figli',
     childrenClasses: 'Classi dei tuoi figli',
     noActiveClassesYet: 'Nessuna classe attiva ancora.',
+    joinClassDescription:
+      'Hai un codice dall’insegnante? Inseriscilo qui per unirti a una classe.',
   },
   join: {
     title: 'Unisciti a una classe',
@@ -117,7 +121,7 @@ const it: Catalog = {
     createDescription:
       'Aggiungi una classe con nome, anno scolastico, lingua e descrizione facoltativa.',
     editDescription:
-      'Aggiorna nome, descrizione e lingua. L’anno scolastico non può essere modificato.',
+      'Aggiorna nome e descrizione. L’anno scolastico non può essere modificato.',
     nameLabel: 'Nome',
     namePlaceholder: '3ª ora Biologia',
     nameRequired: 'Il nome è obbligatorio',
@@ -177,6 +181,9 @@ const it: Catalog = {
     membersDescription:
       'Rimuovi l’accesso a chi si è unito con un codice divulgato. Rigenerare un codice non revoca i membri esistenti.',
     noMembersYet: 'Nessun membro ancora.',
+    removeMemberTitle: 'Rimuovere il membro?',
+    removeMemberDescription:
+      'Rimuovere {{name}} da questa classe? Perderà l’accesso finché non si unirà di nuovo.',
     memberRemoved: 'Membro rimosso',
     memberRemoveFailed: 'Rimozione del membro non riuscita',
     students: 'Studenti',
@@ -224,6 +231,41 @@ const it: Catalog = {
     joinLinkCopied: 'Link di accesso copiato',
     joinQrTitle: 'QR di accesso {{role}}',
     joinQrDescription: 'Scansiona questo QR per unirti come {{role}}.',
+    navClass: 'Classe',
+    navPoints: 'Punti',
+    navMembers: 'Membri',
+    navStudents: 'Studenti',
+    navInvite: 'Invito',
+    navSettings: 'Impostazioni',
+    settingsTitle: 'Impostazioni',
+    settingsDescription:
+      'Configura le opzioni dell’intera classe. Altre impostazioni verranno aggiunte qui.',
+    allClasses: 'Tutte le classi',
+    switchClass: 'Cambia classe',
+    pointsPlaceholder: 'Il monitoraggio dei punti apparirà qui.',
+  },
+  settings: {
+    docTitle: 'Impostazioni | ClassClarus',
+    docDescription:
+      'Gestisci le tue impostazioni personali per ClassClarus',
+    title: 'Impostazioni',
+    description: 'Gestisci le tue preferenze personali.',
+    languageLabel: 'Lingua',
+    languageDescription:
+      'La tua lingua personale per l’interfaccia di ClassClarus.',
+    themeLabel: 'Tema',
+    themeDescription:
+      'Scegli chiaro, scuro o segui le impostazioni di sistema.',
+  },
+  account: {
+    docTitle: 'Account | ClassClarus',
+    docDescription: 'Gestisci il tuo account ClassClarus',
+    title: 'Account',
+    description: 'Gestisci i dettagli del tuo account.',
+    profileLabel: 'Profilo',
+    paymentsTitle: 'Pagamenti',
+    paymentsComingSoon:
+      'Pagamenti e fatturazione saranno gestiti qui. In arrivo.',
   },
 }
 

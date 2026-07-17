@@ -24,11 +24,15 @@ export function useActiveLocale(personalLanguage: AppLanguage): {
   const { isAuthenticated } = useConvexAuth()
   const classId = useRouterState({
     select: (state) => {
-      const match = state.matches.find(
-        (routeMatch) => routeMatch.routeId === '/_account/c/$classId',
+      const match = state.matches.find((routeMatch) =>
+        routeMatch.routeId.startsWith('/_account/c/$classId'),
       )
-      const id = match?.params.classId
-      return typeof id === 'string' ? (id as Id<'classes'>) : undefined
+      const params = match?.params
+      const id =
+        params && 'classId' in params && typeof params.classId === 'string'
+          ? params.classId
+          : undefined
+      return id ? (id as Id<'classes'>) : undefined
     },
   })
 

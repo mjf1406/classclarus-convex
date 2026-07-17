@@ -31,6 +31,8 @@ const ja: Catalog = {
     themeLight: 'ライト',
     themeDark: 'ダーク',
     themeSystem: 'システム',
+    settings: '設定',
+    account: 'アカウント',
     userFallback: 'ユーザー {{id}}',
     cannotUndo: 'この操作は元に戻せません。',
   },
@@ -88,6 +90,8 @@ const ja: Catalog = {
     myChildren: '子ども',
     childrenClasses: 'お子様のクラス',
     noActiveClassesYet: 'まだアクティブなクラスはありません。',
+    joinClassDescription:
+      '先生から参加コードを受け取りましたか？ここに入力してクラスに参加してください。',
   },
   join: {
     title: 'クラスに参加',
@@ -117,7 +121,7 @@ const ja: Catalog = {
     createDescription:
       '名前、学年、言語、任意の説明で新しいクラスを追加します。',
     editDescription:
-      'クラス名、説明、言語を更新します。学年は変更できません。',
+      'クラス名と説明を更新します。学年は変更できません。',
     nameLabel: '名前',
     namePlaceholder: '3限 生物',
     nameRequired: '名前は必須です',
@@ -176,6 +180,9 @@ const ja: Catalog = {
     membersDescription:
       '漏洩したコードで参加した人のアクセスを削除できます。コードを再生成しても既存メンバーのアクセスは取り消されません。',
     noMembersYet: 'まだメンバーがいません。',
+    removeMemberTitle: 'メンバーを削除しますか？',
+    removeMemberDescription:
+      '{{name}}をこのクラスから削除しますか？再参加するまでアクセスできなくなります。',
     memberRemoved: 'メンバーを削除しました',
     memberRemoveFailed: 'メンバーの削除に失敗しました',
     students: '生徒',
@@ -223,6 +230,39 @@ const ja: Catalog = {
     joinLinkCopied: '参加リンクをコピーしました',
     joinQrTitle: '{{role}}参加QRコード',
     joinQrDescription: 'このQRコードをスキャンして{{role}}として参加します。',
+    navClass: 'クラス',
+    navPoints: 'ポイント',
+    navMembers: 'メンバー',
+    navStudents: '生徒',
+    navInvite: '招待',
+    navSettings: '設定',
+    settingsTitle: '設定',
+    settingsDescription:
+      'クラス全体のオプションを設定します。今後、さらに設定が追加されます。',
+    allClasses: 'すべてのクラス',
+    switchClass: 'クラスを切り替え',
+    pointsPlaceholder: 'ポイントの追跡はここに表示されます。',
+  },
+  settings: {
+    docTitle: '設定 | ClassClarus',
+    docDescription: 'ClassClarus の個人設定を管理します',
+    title: '設定',
+    description: '個人設定を管理します。',
+    languageLabel: '言語',
+    languageDescription: 'ClassClarus の画面に使用するあなたの言語です。',
+    themeLabel: 'テーマ',
+    themeDescription:
+      'ライト、ダーク、またはシステム設定に従うかを選択します。',
+  },
+  account: {
+    docTitle: 'アカウント | ClassClarus',
+    docDescription: 'ClassClarus のアカウントを管理します',
+    title: 'アカウント',
+    description: 'アカウント情報を管理します。',
+    profileLabel: 'プロフィール',
+    paymentsTitle: '支払い',
+    paymentsComingSoon:
+      '支払いと請求はここで管理できるようになります。近日公開。',
   },
 }
 

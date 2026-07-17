@@ -35,7 +35,16 @@ const catalogs = {
   uk,
 } as const
 
-export const i18nNamespaces = ['common', 'auth', 'pwa', 'home', 'join', 'classes'] as const
+export const i18nNamespaces = [
+  'common',
+  'auth',
+  'pwa',
+  'home',
+  'join',
+  'classes',
+  'settings',
+  'account',
+] as const
 
 const initialLanguage = getInitialPersonalLanguage()
 if (typeof document !== 'undefined') {
@@ -56,6 +65,8 @@ function toResources() {
       home: catalog.home,
       join: catalog.join,
       classes: catalog.classes,
+      settings: catalog.settings,
+      account: catalog.account,
     }
   }
   return resources

@@ -1,12 +1,8 @@
 import { Link } from '@tanstack/react-router'
-import { LogIn } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { UserMenu } from '#/components/auth/UserMenu'
+import { ClassNavUser } from '#/components/class-sidebar/ClassNavUser'
 import { Logo } from '#/components/brand/logo'
-import { ModeToggle } from '#/components/theme/mode-toggle'
-import { LanguageToggle } from '#/i18n/LanguageToggle'
-import { Button } from '@/components/ui/button'
 
 export function AccountNavbar() {
   const { t } = useTranslation('common')
@@ -21,17 +17,7 @@ export function AccountNavbar() {
         >
           <Logo />
         </Link>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/join" aria-label={t('joinClass')}>
-              <LogIn data-icon="inline-start" />
-              <span className="hidden sm:inline">{t('joinClass')}</span>
-            </Link>
-          </Button>
-          <UserMenu />
-          <LanguageToggle />
-          <ModeToggle />
-        </div>
+        <ClassNavUser variant="avatar" />
       </div>
     </header>
   )

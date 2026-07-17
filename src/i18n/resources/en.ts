@@ -23,6 +23,8 @@ const en = {
     themeLight: 'Light',
     themeDark: 'Dark',
     themeSystem: 'System',
+    settings: 'Settings',
+    account: 'Account',
     userFallback: 'User {{id}}',
     cannotUndo: 'This cannot be undone.',
   },
@@ -80,6 +82,8 @@ const en = {
     myChildren: 'My children',
     childrenClasses: 'Classes for your children',
     noActiveClassesYet: 'No active classes yet.',
+    joinClassDescription:
+      'Have a join code from your teacher? Enter it here to join a class.',
   },
   join: {
     title: 'Join a Class',
@@ -109,7 +113,7 @@ const en = {
     createDescription:
       'Add a new class with a name, academic year, language, and optional description.',
     editDescription:
-      'Update the class name, description, and language. The academic year cannot be changed.',
+      'Update the class name and description. The academic year cannot be changed.',
     nameLabel: 'Name',
     namePlaceholder: 'Period 3 Biology',
     nameRequired: 'Name is required',
@@ -169,6 +173,9 @@ const en = {
     membersDescription:
       'Remove access for anyone who joined with a leaked code. Regenerating a code does not revoke existing members.',
     noMembersYet: 'No members yet.',
+    removeMemberTitle: 'Remove member?',
+    removeMemberDescription:
+      'Remove {{name}} from this class? They will lose access until they rejoin.',
     memberRemoved: 'Member removed',
     memberRemoveFailed: 'Failed to remove member',
     students: 'Students',
@@ -216,6 +223,39 @@ const en = {
     joinLinkCopied: 'Join link copied',
     joinQrTitle: '{{role}} join QR code',
     joinQrDescription: 'Scan this QR code to join as {{role}}.',
+    navClass: 'Class',
+    navPoints: 'Points',
+    navMembers: 'Members',
+    navStudents: 'Students',
+    navInvite: 'Invite',
+    navSettings: 'Settings',
+    settingsTitle: 'Settings',
+    settingsDescription:
+      'Configure class-wide options. More settings will be added here.',
+    allClasses: 'All classes',
+    switchClass: 'Switch class',
+    pointsPlaceholder: 'Points tracking will appear here.',
+  },
+  settings: {
+    docTitle: 'Settings | ClassClarus',
+    docDescription: 'Manage your personal settings for ClassClarus',
+    title: 'Settings',
+    description: 'Manage your personal preferences.',
+    languageLabel: 'Language',
+    languageDescription:
+      'Your personal language for the ClassClarus interface.',
+    themeLabel: 'Theme',
+    themeDescription: 'Choose light, dark, or follow your system setting.',
+  },
+  account: {
+    docTitle: 'Account | ClassClarus',
+    docDescription: 'Manage your ClassClarus account',
+    title: 'Account',
+    description: 'Manage your account details.',
+    profileLabel: 'Profile',
+    paymentsTitle: 'Payments',
+    paymentsComingSoon:
+      'Payments and billing will be managed here. Coming soon.',
   },
 } as const
 

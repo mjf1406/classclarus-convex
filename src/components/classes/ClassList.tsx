@@ -4,6 +4,7 @@ import {
   Archive,
   ArchiveRestore,
   BookText,
+  LogIn,
   MoreVertical,
   Pencil,
   Plus,
@@ -65,6 +66,68 @@ function formatUpdatedLabel(
   return updatedTime === undefined
     ? notAvailable
     : formatLocalizedDateTime(updatedTime)
+}
+
+function JoinClassCard({ view }: { view: ClassListView }) {
+  const { t } = useTranslation(['common', 'home'])
+
+  if (view === 'list') {
+    return (
+      <Card
+        size="sm"
+        className="relative cursor-pointer border-dashed transition-colors hover:bg-muted/30"
+      >
+        <Link
+          to="/join"
+          className="absolute inset-0 z-0 rounded-[inherit]"
+          aria-label={t('common:joinClass')}
+        />
+        <CardHeader className="relative z-10 min-w-0 pointer-events-none py-0">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <LogIn className="size-5" />
+            </div>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <CardTitle className="text-base font-semibold">
+                {t('common:joinClass')}
+              </CardTitle>
+              <CardDescription className="mt-0.5 line-clamp-2">
+                {t('home:joinClassDescription')}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+    )
+  }
+
+  return (
+    <Card
+      size="sm"
+      className="relative cursor-pointer border-dashed transition-colors hover:bg-muted/30"
+    >
+      <Link
+        to="/join"
+        className="absolute inset-0 z-0 rounded-[inherit]"
+        aria-label={t('common:joinClass')}
+      />
+      <CardHeader className="relative z-10 min-w-0 pointer-events-none">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <LogIn className="size-5" />
+          </div>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <CardTitle className="text-base font-semibold">
+              {t('common:joinClass')}
+            </CardTitle>
+            <CardDescription className="mt-1 line-clamp-2">
+              {t('home:joinClassDescription')}
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+    </Card>
+  )
 }
 
 function ClassTimestamps({ classDoc }: { classDoc: ClassPublic }) {
@@ -338,7 +401,7 @@ function ClassListSkeleton({ view }: { view: ClassListView }) {
                     </div>
                     <Skeleton className="size-8 shrink-0 rounded-md" />
                   </div>
-                  <div className="mt-1 flex h-[17px] items-center gap-4">
+                  <div className="mt-1 flex h-4.25 items-center gap-4">
                     <Skeleton className="h-3 w-36" />
                     <Skeleton className="h-3 w-36" />
                   </div>
@@ -374,10 +437,10 @@ function ClassListSkeleton({ view }: { view: ClassListView }) {
                   <Skeleton className="h-4 w-full" />
                 </div>
                 <div className="mt-2 space-y-0.5">
-                  <div className="flex h-[17px] items-center">
+                  <div className="flex h-4.25 items-center">
                     <Skeleton className="h-3 w-1/2" />
                   </div>
-                  <div className="flex h-[17px] items-center">
+                  <div className="flex h-4.25 items-center">
                     <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
@@ -495,6 +558,7 @@ export function ClassList({
             : 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
         }
       >
+        {!archivedOnly ? <JoinClassCard view={view} /> : null}
         {sortedClasses.map((classDoc) =>
           view === 'list' ? (
             <ClassRow

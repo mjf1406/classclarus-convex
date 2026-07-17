@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
   Collapsible,
   CollapsibleContent,
@@ -209,7 +210,7 @@ export function ClassStudentsSection({
 
   return (
     <>
-      <section className="mt-10">
+      <section className="">
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold tracking-tight">
@@ -232,168 +233,191 @@ export function ClassStudentsSection({
           </Button>
         </div>
 
-        <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
-          {data === undefined ? (
-            <li className="p-4">
-              <Skeleton className="h-5 w-48" />
-            </li>
-          ) : data.students.length === 0 ? (
-            <li className="p-4 text-sm text-muted-foreground">
-              {t('noStudentsYet')}
-            </li>
-          ) : (
-            data.students.map((student) => {
+        {data === undefined ? (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <Card key={i} size="sm">
+                <CardHeader>
+                  <div className="min-w-0">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="mt-2 h-4 w-24" />
+                    <Skeleton className="mt-1.5 h-4 w-20" />
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        ) : data.students.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-sm text-muted-foreground">
+            {t('noStudentsYet')}
+          </div>
+        ) : (
+          <ul className="mt-4 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {data.students.map((student) => {
               const isUnlinking = unlinkingStudentId === student.orgStudentId
               const isRegenerating =
                 regeneratingStudentId === student.orgStudentId
               return (
-                <li key={student.orgStudentId} className="px-4 py-3">
-                  <Collapsible>
-                    <div className="flex items-start justify-between gap-3">
-                      <CollapsibleTrigger className="group min-w-0 flex-1 rounded-md text-left outline-none hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring">
-                        <div className="flex items-start gap-2 py-0.5">
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium">
-                              {student.displayName}
-                            </p>
-                            <p className="font-mono text-xs tracking-widest text-muted-foreground">
-                              {formatJoinCodeDisplay(student.guardianCode)}
-                            </p>
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {formatGuardianSummary(student.guardians.length)}
-                            </p>
-                          </div>
-                          <ChevronDown className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                        </div>
-                      </CollapsibleTrigger>
-                      <div className="flex shrink-0 gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          aria-label={t('copyCodeFor', {
-                            name: student.displayName,
-                          })}
-                          onClick={() =>
-                            handleCopyCode(
-                              student.guardianCode,
-                              student.displayName,
-                            )
-                          }
-                        >
-                          <Copy />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          aria-label={t('copyLinkFor', {
-                            name: student.displayName,
-                          })}
-                          onClick={() =>
-                            handleCopyLink(
-                              student.guardianCode,
-                              student.displayName,
-                            )
-                          }
-                        >
-                          <Link2 />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          aria-label={t('regenerateGuardianFor', {
-                            name: student.displayName,
-                          })}
-                          disabled={isRegenerating}
-                          onClick={() =>
-                            handleRegenerate(
-                              student.orgStudentId,
-                              student.displayName,
-                            )
-                          }
-                        >
-                          <RefreshCw
-                            className={
-                              isRegenerating ? 'animate-spin' : undefined
-                            }
-                          />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <CollapsibleContent className="mt-2">
-                      {student.guardians.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">
-                          {t('noGuardianLinked')}
-                        </p>
-                      ) : (
-                        <div className="space-y-2 text-xs">
-                          <p className="font-medium text-muted-foreground">
-                            {t('guardians')}
-                          </p>
-                          <ul className="space-y-1">
-                            {student.guardians.map((guardian) => {
-                              const guardianName = formatGuardianName(guardian)
-                              return (
-                                <li
-                                  key={guardian.guardianUserId}
-                                  className="flex max-w-lg items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1"
+                <li key={student.orgStudentId} className="min-w-0">
+                  <Card size="sm">
+                    <Collapsible className="contents">
+                      <CardHeader className="min-w-0">
+                        <div className="flex min-w-0 items-start justify-between gap-2">
+                          <CollapsibleTrigger className="group min-w-0 flex-1 rounded-md text-left outline-none hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring">
+                            <div className="flex items-start gap-2 py-0.5">
+                              <div className="min-w-0 flex-1">
+                                <p
+                                  className="truncate text-sm font-medium"
+                                  title={student.displayName}
                                 >
-                                  <span className="min-w-0 truncate">
-                                    {guardianName}
-                                  </span>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 shrink-0 px-2 text-xs"
-                                    disabled={isUnlinking}
-                                    onClick={() =>
-                                      setPendingUnlink({
-                                        kind: 'one',
-                                        orgStudentId: student.orgStudentId,
-                                        studentName: student.displayName,
-                                        guardianUserId: guardian.guardianUserId,
-                                        guardianName,
-                                      })
-                                    }
-                                  >
-                                    <UserMinus data-icon="inline-start" />
-                                    {t('common:remove')}
-                                  </Button>
-                                </li>
-                              )
-                            })}
-                          </ul>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs text-destructive hover:text-destructive"
-                            disabled={isUnlinking}
-                            onClick={() =>
-                              setPendingUnlink({
-                                kind: 'all',
-                                orgStudentId: student.orgStudentId,
-                                studentName: student.displayName,
-                                guardianCount: student.guardians.length,
-                              })
-                            }
-                          >
-                            <UserMinus data-icon="inline-start" />
-                            {t('removeAllGuardians')}
-                          </Button>
+                                  {student.displayName}
+                                </p>
+                                <p className="font-mono text-xs tracking-widest text-muted-foreground">
+                                  {formatJoinCodeDisplay(student.guardianCode)}
+                                </p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                  {formatGuardianSummary(
+                                    student.guardians.length,
+                                  )}
+                                </p>
+                              </div>
+                              <ChevronDown className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                            </div>
+                          </CollapsibleTrigger>
+                          <div className="flex shrink-0 gap-0.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={t('copyCodeFor', {
+                                name: student.displayName,
+                              })}
+                              onClick={() =>
+                                handleCopyCode(
+                                  student.guardianCode,
+                                  student.displayName,
+                                )
+                              }
+                            >
+                              <Copy />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={t('copyLinkFor', {
+                                name: student.displayName,
+                              })}
+                              onClick={() =>
+                                handleCopyLink(
+                                  student.guardianCode,
+                                  student.displayName,
+                                )
+                              }
+                            >
+                              <Link2 />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={t('regenerateGuardianFor', {
+                                name: student.displayName,
+                              })}
+                              disabled={isRegenerating}
+                              onClick={() =>
+                                handleRegenerate(
+                                  student.orgStudentId,
+                                  student.displayName,
+                                )
+                              }
+                            >
+                              <RefreshCw
+                                className={
+                                  isRegenerating ? 'animate-spin' : undefined
+                                }
+                              />
+                            </Button>
+                          </div>
                         </div>
-                      )}
-                    </CollapsibleContent>
-                  </Collapsible>
+                      </CardHeader>
+
+                      <CollapsibleContent>
+                        <CardContent>
+                          {student.guardians.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                              {t('noGuardianLinked')}
+                            </p>
+                          ) : (
+                            <div className="space-y-2 text-xs">
+                              <p className="font-medium text-muted-foreground">
+                                {t('guardians')}
+                              </p>
+                              <ul className="space-y-1">
+                                {student.guardians.map((guardian) => {
+                                  const guardianName =
+                                    formatGuardianName(guardian)
+                                  return (
+                                    <li
+                                      key={guardian.guardianUserId}
+                                      className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1"
+                                    >
+                                      <span className="min-w-0 truncate">
+                                        {guardianName}
+                                      </span>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 shrink-0 px-2 text-xs"
+                                        disabled={isUnlinking}
+                                        onClick={() =>
+                                          setPendingUnlink({
+                                            kind: 'one',
+                                            orgStudentId: student.orgStudentId,
+                                            studentName: student.displayName,
+                                            guardianUserId:
+                                              guardian.guardianUserId,
+                                            guardianName,
+                                          })
+                                        }
+                                      >
+                                        <UserMinus data-icon="inline-start" />
+                                        {t('common:remove')}
+                                      </Button>
+                                    </li>
+                                  )
+                                })}
+                              </ul>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                                disabled={isUnlinking}
+                                onClick={() =>
+                                  setPendingUnlink({
+                                    kind: 'all',
+                                    orgStudentId: student.orgStudentId,
+                                    studentName: student.displayName,
+                                    guardianCount: student.guardians.length,
+                                  })
+                                }
+                              >
+                                <UserMinus data-icon="inline-start" />
+                                {t('removeAllGuardians')}
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
                 </li>
               )
-            })
-          )}
-        </ul>
+            })}
+          </ul>
+        )}
       </section>
 
       <AlertDialog

@@ -31,6 +31,8 @@ const ru: Catalog = {
     themeLight: 'Светлая',
     themeDark: 'Тёмная',
     themeSystem: 'Системная',
+    settings: 'Настройки',
+    account: 'Аккаунт',
     userFallback: 'Пользователь {{id}}',
     cannotUndo: 'Это действие нельзя отменить.',
   },
@@ -88,6 +90,8 @@ const ru: Catalog = {
     myChildren: 'Мои дети',
     childrenClasses: 'Классы ваших детей',
     noActiveClassesYet: 'Пока нет активных классов.',
+    joinClassDescription:
+      'Есть код от учителя? Введите его здесь, чтобы присоединиться к классу.',
   },
   join: {
     title: 'Присоединиться к классу',
@@ -117,7 +121,7 @@ const ru: Catalog = {
     createDescription:
       'Добавьте класс с названием, учебным годом, языком и необязательным описанием.',
     editDescription:
-      'Обновите название, описание и язык. Учебный год изменить нельзя.',
+      'Обновите название и описание. Учебный год изменить нельзя.',
     nameLabel: 'Название',
     namePlaceholder: '3-й урок Биология',
     nameRequired: 'Название обязательно',
@@ -177,6 +181,9 @@ const ru: Catalog = {
     membersDescription:
       'Уберите доступ у тех, кто присоединился по утечшему коду. Пересоздание кода не отзывает существующих участников.',
     noMembersYet: 'Пока нет участников.',
+    removeMemberTitle: 'Удалить участника?',
+    removeMemberDescription:
+      'Удалить {{name}} из этого класса? Доступ будет закрыт до повторного присоединения.',
     memberRemoved: 'Участник удалён',
     memberRemoveFailed: 'Не удалось удалить участника',
     students: 'Ученики',
@@ -224,6 +231,38 @@ const ru: Catalog = {
     joinLinkCopied: 'Ссылка скопирована',
     joinQrTitle: 'QR-код доступа {{role}}',
     joinQrDescription: 'Отсканируйте этот QR, чтобы присоединиться как {{role}}.',
+    navClass: 'Класс',
+    navPoints: 'Баллы',
+    navMembers: 'Участники',
+    navStudents: 'Ученики',
+    navInvite: 'Приглашение',
+    navSettings: 'Настройки',
+    settingsTitle: 'Настройки',
+    settingsDescription:
+      'Настройте параметры для всего класса. Здесь появятся дополнительные настройки.',
+    allClasses: 'Все классы',
+    switchClass: 'Сменить класс',
+    pointsPlaceholder: 'Здесь появится учёт баллов.',
+  },
+  settings: {
+    docTitle: 'Настройки | ClassClarus',
+    docDescription: 'Управляйте личными настройками ClassClarus',
+    title: 'Настройки',
+    description: 'Управляйте личными предпочтениями.',
+    languageLabel: 'Язык',
+    languageDescription: 'Ваш личный язык интерфейса ClassClarus.',
+    themeLabel: 'Тема',
+    themeDescription: 'Выберите светлую, тёмную или системную тему.',
+  },
+  account: {
+    docTitle: 'Аккаунт | ClassClarus',
+    docDescription: 'Управляйте своим аккаунтом ClassClarus',
+    title: 'Аккаунт',
+    description: 'Управляйте данными аккаунта.',
+    profileLabel: 'Профиль',
+    paymentsTitle: 'Платежи',
+    paymentsComingSoon:
+      'Платежи и выставление счетов будут управляться здесь. Скоро.',
   },
 }
 

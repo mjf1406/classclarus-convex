@@ -31,6 +31,8 @@ const de: Catalog = {
     themeLight: 'Hell',
     themeDark: 'Dunkel',
     themeSystem: 'System',
+    settings: 'Einstellungen',
+    account: 'Konto',
     userFallback: 'Benutzer {{id}}',
     cannotUndo: 'Dies kann nicht rückgängig gemacht werden.',
   },
@@ -88,6 +90,8 @@ const de: Catalog = {
     myChildren: 'Meine Kinder',
     childrenClasses: 'Klassen Ihrer Kinder',
     noActiveClassesYet: 'Noch keine aktiven Klassen.',
+    joinClassDescription:
+      'Haben Sie einen Code von Ihrer Lehrkraft? Geben Sie ihn hier ein, um einer Klasse beizutreten.',
   },
   join: {
     title: 'Einer Klasse beitreten',
@@ -117,7 +121,7 @@ const de: Catalog = {
     createDescription:
       'Fügen Sie eine Klasse mit Name, Schuljahr, Sprache und optionaler Beschreibung hinzu.',
     editDescription:
-      'Aktualisieren Sie Name, Beschreibung und Sprache. Das Schuljahr kann nicht geändert werden.',
+      'Aktualisieren Sie Name und Beschreibung. Das Schuljahr kann nicht geändert werden.',
     nameLabel: 'Name',
     namePlaceholder: '3. Stunde Biologie',
     nameRequired: 'Name ist erforderlich',
@@ -177,6 +181,9 @@ const de: Catalog = {
     membersDescription:
       'Entfernen Sie den Zugang von Personen, die mit einem geleakten Code beigetreten sind. Das Regenerieren eines Codes widerruft bestehende Mitglieder nicht.',
     noMembersYet: 'Noch keine Mitglieder.',
+    removeMemberTitle: 'Mitglied entfernen?',
+    removeMemberDescription:
+      '{{name}} aus dieser Klasse entfernen? Die Person verliert den Zugriff, bis sie erneut beitritt.',
     memberRemoved: 'Mitglied entfernt',
     memberRemoveFailed: 'Entfernen des Mitglieds fehlgeschlagen',
     students: 'Schüler',
@@ -230,6 +237,41 @@ const de: Catalog = {
     joinLinkCopied: 'Beitrittslink kopiert',
     joinQrTitle: '{{role}}-Beitritts-QR-Code',
     joinQrDescription: 'Scannen Sie diesen QR-Code, um als {{role}} beizutreten.',
+    navClass: 'Klasse',
+    navPoints: 'Punkte',
+    navMembers: 'Mitglieder',
+    navStudents: 'Schüler',
+    navInvite: 'Einladung',
+    navSettings: 'Einstellungen',
+    settingsTitle: 'Einstellungen',
+    settingsDescription:
+      'Klassenweite Optionen konfigurieren. Weitere Einstellungen folgen hier.',
+    allClasses: 'Alle Klassen',
+    switchClass: 'Klasse wechseln',
+    pointsPlaceholder: 'Die Punkteverfolgung erscheint hier.',
+  },
+  settings: {
+    docTitle: 'Einstellungen | ClassClarus',
+    docDescription:
+      'Verwalten Sie Ihre persönlichen Einstellungen für ClassClarus',
+    title: 'Einstellungen',
+    description: 'Verwalten Sie Ihre persönlichen Präferenzen.',
+    languageLabel: 'Sprache',
+    languageDescription:
+      'Ihre persönliche Sprache für die ClassClarus-Oberfläche.',
+    themeLabel: 'Design',
+    themeDescription:
+      'Wählen Sie Hell, Dunkel oder folgen Sie Ihrer Systemeinstellung.',
+  },
+  account: {
+    docTitle: 'Konto | ClassClarus',
+    docDescription: 'Verwalten Sie Ihr ClassClarus-Konto',
+    title: 'Konto',
+    description: 'Verwalten Sie Ihre Kontodaten.',
+    profileLabel: 'Profil',
+    paymentsTitle: 'Zahlungen',
+    paymentsComingSoon:
+      'Zahlungen und Abrechnung werden hier verwaltet. Demnächst verfügbar.',
   },
 }
 

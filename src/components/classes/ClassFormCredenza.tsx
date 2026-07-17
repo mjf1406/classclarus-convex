@@ -9,7 +9,6 @@ import { useCreateClass, useUpdateClass } from '#/lib/classes'
 import type { ClassPublic } from '#/lib/classes'
 import { usePersonalLocale } from '#/i18n/LocaleProvider'
 import { LanguageSelect } from '#/i18n/LanguageSelect'
-import { coerceAppLanguage } from '#/i18n/locales'
 import type { AppLanguage } from '#/i18n/locales'
 import { Button } from '@/components/ui/button'
 import {
@@ -101,7 +100,6 @@ export function ClassFormCredenza({
       setName(classDoc.name)
       setDescription(classDoc.description ?? '')
       setYear(String(classDoc.year))
-      setLanguage(coerceAppLanguage(classDoc.language))
       setErrors({})
     } else if (!isEdit) {
       setLanguage(personalLanguage)
@@ -160,19 +158,17 @@ export function ClassFormCredenza({
     const editing = classDoc
     const nextName = result.data.name
     const trimmedDescription = result.data.description
-    const nextLanguage = language
 
     const mutationPromise = editing
       ? updateClass({
           classId: editing._id,
           name: nextName,
           description: trimmedDescription,
-          language: nextLanguage,
         })
       : createClass({
           name: nextName,
           year: result.data.year,
-          language: nextLanguage,
+          language,
           ...(trimmedDescription ? { description: trimmedDescription } : {}),
         })
 
@@ -282,17 +278,19 @@ export function ClassFormCredenza({
                 />
                 <FieldError>{errors.year}</FieldError>
               </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-language`}>
-                  {t('languageLabel')}
-                </FieldLabel>
-                <FieldDescription>{t('languageDescription')}</FieldDescription>
-                <LanguageSelect
-                  id={`${formId}-language`}
-                  value={language}
-                  onValueChange={setLanguage}
-                />
-              </Field>
+              {!isEdit ? (
+                <Field>
+                  <FieldLabel htmlFor={`${formId}-language`}>
+                    {t('languageLabel')}
+                  </FieldLabel>
+                  <FieldDescription>{t('languageDescription')}</FieldDescription>
+                  <LanguageSelect
+                    id={`${formId}-language`}
+                    value={language}
+                    onValueChange={setLanguage}
+                  />
+                </Field>
+              ) : null}
               <Field data-invalid={!!errors.description || undefined}>
                 <FieldLabel htmlFor={`${formId}-description`}>
                   {t('descriptionLabel')}
