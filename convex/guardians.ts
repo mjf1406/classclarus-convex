@@ -10,7 +10,6 @@ import {
   guardianAuthz,
   guardianObject,
   guardianSubject,
-  hasGuardianAccess,
 } from './lib/guardianAuth'
 import {
   listGuardianLinksForStudent,
@@ -334,13 +333,7 @@ export const listMyChildren = query({
       for (const enrollment of enrollments) {
         if (enrollment.status !== 'active') continue
         if (enrollment.organizationId !== orgStudent.organizationId) continue
-        const allowed = await hasGuardianAccess(
-          ctx,
-          user._id,
-          orgStudent._id,
-          enrollment.classId,
-        )
-        if (!allowed) continue
+        // Relation already verified for this orgStudent; only need the class doc.
         const classDoc = await ctx.db.get('classes', enrollment.classId)
         if (!classDoc) continue
         classes.push({
@@ -451,78 +444,89 @@ export const listGuardianCodesForClass = query({
       args.classId,
       'class:manageMembers',
     )
-
-    const classDoc = await ctx.db.get('classes', args.classId)
-    if (!classDoc) {
-      throw new Error('Class not found')
-    }
-
-    const enrollments = await ctx.db
-      .query('classEnrollments')
-      .withIndex('by_classId', (index) => index.eq('classId', classDoc._id))
-      .take(MAX_CLASS_STUDENTS + 1)
-    if (enrollments.length > MAX_CLASS_STUDENTS) {
-      throw new Error('Class is too large for a single guardian-code PDF')
-    }
-
-    const students: Array<{
-      orgStudentId: Id<'orgStudents'>
-      displayName: string
-      guardianCode: string
-      guardians: Array<{
-        guardianUserId: Id<'users'>
-        name?: string
-        linkedAt: number
-      }>
-    }> = []
-    for (const enrollment of enrollments) {
-      if (
-        enrollment.status !== 'active' ||
-        enrollment.organizationId !== classDoc.organizationId
-      ) {
-        continue
-      }
-      const orgStudent = await ctx.db.get(
-        'orgStudents',
-        enrollment.orgStudentId,
-      )
-      if (orgStudent && orgStudent.organizationId === classDoc.organizationId) {
-        const studentUser = orgStudent.userId
-          ? await ctx.db.get('users', orgStudent.userId)
-          : null
-        const links = await listGuardianLinksForStudent(
-          ctx,
-          orgStudent._id,
-          orgStudent.organizationId,
-        )
-        const guardians = await Promise.all(
-          links.map(async (link) => {
-            const guardian = await ctx.db.get('users', link.guardianUserId)
-            return {
-              guardianUserId: link.guardianUserId,
-              name: guardian?.name,
-              linkedAt: link.linkedAt,
-            }
-          }),
-        )
-        students.push({
-          orgStudentId: orgStudent._id,
-          displayName:
-            studentUser?.name ?? studentUser?.email ?? orgStudent.displayName,
-          guardianCode: orgStudent.guardianCode,
-          guardians,
-        })
-      }
-    }
-    students.sort((left, right) =>
-      left.displayName.localeCompare(right.displayName),
-    )
-
-    return {
-      className: classDoc.name,
-      year: classDoc.year,
-      organizationId: classDoc.organizationId,
-      students,
-    }
+    return await loadGuardianCodesForClass(ctx, args.classId)
   },
 })
+
+export type GuardianCodesForClass = {
+  className: string
+  year: number
+  organizationId?: string
+  students: Array<{
+    orgStudentId: Id<'orgStudents'>
+    displayName: string
+    guardianCode: string
+    guardians: Array<{
+      guardianUserId: Id<'users'>
+      name?: string
+      linkedAt: number
+    }>
+  }>
+}
+
+/** Load guardian codes for a class. Caller must already have authorized. */
+export async function loadGuardianCodesForClass(
+  ctx: QueryCtx | MutationCtx,
+  classId: Id<'classes'>,
+): Promise<GuardianCodesForClass> {
+  const classDoc = await ctx.db.get('classes', classId)
+  if (!classDoc) {
+    throw new Error('Class not found')
+  }
+
+  const enrollments = await ctx.db
+    .query('classEnrollments')
+    .withIndex('by_classId', (index) => index.eq('classId', classDoc._id))
+    .take(MAX_CLASS_STUDENTS + 1)
+  if (enrollments.length > MAX_CLASS_STUDENTS) {
+    throw new Error('Class is too large for a single guardian-code PDF')
+  }
+
+  const students: GuardianCodesForClass['students'] = []
+  for (const enrollment of enrollments) {
+    if (
+      enrollment.status !== 'active' ||
+      enrollment.organizationId !== classDoc.organizationId
+    ) {
+      continue
+    }
+    const orgStudent = await ctx.db.get('orgStudents', enrollment.orgStudentId)
+    if (orgStudent && orgStudent.organizationId === classDoc.organizationId) {
+      const studentUser = orgStudent.userId
+        ? await ctx.db.get('users', orgStudent.userId)
+        : null
+      const links = await listGuardianLinksForStudent(
+        ctx,
+        orgStudent._id,
+        orgStudent.organizationId,
+      )
+      const guardians = await Promise.all(
+        links.map(async (link) => {
+          const guardian = await ctx.db.get('users', link.guardianUserId)
+          return {
+            guardianUserId: link.guardianUserId,
+            name: guardian?.name,
+            linkedAt: link.linkedAt,
+          }
+        }),
+      )
+      students.push({
+        orgStudentId: orgStudent._id,
+        displayName:
+          studentUser?.name ?? studentUser?.email ?? orgStudent.displayName,
+        guardianCode: orgStudent.guardianCode,
+        guardians,
+      })
+    }
+  }
+  students.sort((left, right) =>
+    left.displayName.localeCompare(right.displayName),
+  )
+
+  return {
+    className: classDoc.name,
+    year: classDoc.year,
+    organizationId: classDoc.organizationId,
+    students,
+  }
+}

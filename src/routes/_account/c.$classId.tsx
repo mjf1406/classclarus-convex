@@ -101,15 +101,19 @@ const JOIN_CODE_ROLE: Record<JoinCodeType, ClassRole> = {
 
 function JoinCodesSection({
   classId,
+  codes,
   canRegenerate,
 }: {
   classId: Id<'classes'>
+  codes:
+    | {
+        studentCode: string
+        teacherCode: string | null
+        assistantTeacherCode: string | null
+      }
+    | undefined
   canRegenerate: boolean
 }) {
-  const { data: codes } = useQuery({
-    ...convexQuery(api.classes.getJoinCodes, { classId }),
-    gcTime: TEN_MINUTES,
-  })
   const regenerate = useMutation(api.classes.regenerateJoinCode)
   const [regenerating, setRegenerating] = useState<JoinCodeType | null>(null)
   const [sharing, setSharing] = useState<JoinCodeType | null>(null)
@@ -301,11 +305,20 @@ const MEMBER_ROLE_LABELS: Record<string, string> = {
   student: 'Student',
 }
 
-function ClassMembersSection({ classId }: { classId: Id<'classes'> }) {
-  const { data: members } = useQuery({
-    ...convexQuery(api.memberships.listClassMembers, { classId }),
-    gcTime: TEN_MINUTES,
-  })
+type ClassMember = {
+  userId: Id<'users'>
+  name?: string
+  email?: string
+  role: ClassRole
+}
+
+function ClassMembersSection({
+  classId,
+  members,
+}: {
+  classId: Id<'classes'>
+  members: Array<ClassMember> | undefined
+}) {
   const removeMember = useMutation(api.memberships.removeMember)
   const [removingUserId, setRemovingUserId] = useState<Id<'users'> | null>(null)
 
@@ -492,18 +505,14 @@ function ClassPage() {
   })
 
   // Client-side gating is UX only — every server function re-checks.
-  const { data: canManage } = useQuery({
-    ...convexQuery(api.permissions.checkClassPermission, {
-      classId: typedClassId,
-      permission: 'class:manage',
-    }),
-    gcTime: TEN_MINUTES,
-  })
-  const { data: canManageMembers } = useQuery({
-    ...convexQuery(api.permissions.checkClassPermission, {
-      classId: typedClassId,
-      permission: 'class:manageMembers',
-    }),
+  const canManage = classDoc?.canManage === true
+  const canManageMembers = classDoc?.canManageMembers === true
+
+  const { data: adminBundle } = useQuery({
+    ...convexQuery(
+      api.memberships.getClassAdminBundle,
+      canManageMembers ? { classId: typedClassId } : 'skip',
+    ),
     gcTime: TEN_MINUTES,
   })
 
@@ -544,9 +553,7 @@ function ClassPage() {
                   </h1>
                   <ClassRoleBadge role={classDoc.myRole} />
                 </div>
-                {canManage === true ? (
-                  <ClassManageActions classDoc={classDoc} />
-                ) : null}
+                {canManage ? <ClassManageActions classDoc={classDoc} /> : null}
               </div>
               {classDoc.description ? (
                 <p className="max-w-2xl text-muted-foreground">
@@ -555,19 +562,26 @@ function ClassPage() {
               ) : null}
             </header>
 
-            {canManageMembers === true ? (
+            {canManageMembers ? (
               <JoinCodesSection
                 classId={typedClassId}
-                canRegenerate={canManage === true}
+                codes={adminBundle?.joinCodes}
+                canRegenerate={canManage}
               />
             ) : null}
 
-            {canManage === true ? (
-              <ClassMembersSection classId={typedClassId} />
+            {canManage ? (
+              <ClassMembersSection
+                classId={typedClassId}
+                members={adminBundle?.members}
+              />
             ) : null}
 
-            {canManageMembers === true ? (
-              <ClassStudentsSection classId={typedClassId} />
+            {canManageMembers ? (
+              <ClassStudentsSection
+                classId={typedClassId}
+                data={adminBundle?.guardianRoster}
+              />
             ) : null}
           </>
         )}

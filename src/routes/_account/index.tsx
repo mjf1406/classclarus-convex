@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
+import { useConvexAuth } from '@convex-dev/auth/react'
 import { ArrowDown, ArrowUp, LayoutGrid, List } from 'lucide-react'
 
 import { ClassList } from '#/components/classes/ClassList'
@@ -16,6 +19,9 @@ import {
 } from '#/lib/classSort'
 import type { ClassSort, ClassSortField } from '#/lib/classSort'
 import type { ClassPublic } from '#/lib/classes'
+import { LIST_MY_CLASSES_ARGS } from '#/lib/classes'
+import { ONE_HOUR } from '#/lib/queryCache'
+import { api } from '../../../convex/_generated/api'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export const Route = createFileRoute('/_account/')({
@@ -42,12 +48,31 @@ const SORT_FIELD_LABELS: Record<ClassSortField, string> = {
 }
 
 function Home() {
+  const { isAuthenticated } = useConvexAuth()
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<FormMode>('create')
   const [editingClass, setEditingClass] = useState<ClassPublic | null>(null)
   const [view, setView] = useState<ClassListView>('grid')
   const [sort, setSort] = useState<ClassSort>(DEFAULT_CLASS_SORT)
   const editFrameRef = useRef<number | null>(null)
+
+  const { data: allClasses } = useQuery({
+    ...convexQuery(
+      api.memberships.listMyClasses,
+      isAuthenticated ? LIST_MY_CLASSES_ARGS : 'skip',
+    ),
+    placeholderData: (previousData) => previousData,
+    gcTime: ONE_HOUR,
+  })
+
+  const activeClasses =
+    allClasses === undefined
+      ? undefined
+      : allClasses.filter((classDoc) => classDoc.archivedTime === undefined)
+  const archivedClasses =
+    allClasses === undefined
+      ? undefined
+      : allClasses.filter((classDoc) => classDoc.archivedTime !== undefined)
 
   const activeSortField = getSortField(sort)
   const activeSortDirection = getSortDirection(sort)
@@ -152,6 +177,7 @@ function Home() {
       </div>
 
       <ClassList
+        classes={activeClasses}
         view={view}
         sort={sort}
         onCreateClick={() => {
@@ -181,7 +207,12 @@ function Home() {
 
       <section className="mt-12">
         <h2 className="mb-4 text-xl font-semibold tracking-tight">Archived</h2>
-        <ClassList view={view} sort={sort} archivedOnly />
+        <ClassList
+          classes={archivedClasses}
+          view={view}
+          sort={sort}
+          archivedOnly
+        />
       </section>
     </div>
   )

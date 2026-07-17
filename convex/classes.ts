@@ -49,9 +49,13 @@ export const classDisplayRoleValidator = v.union(
 // class cards and the class page render as a badge. Optional because access
 // can come from non-roster grants (e.g. Phase 2 org staff). Includes
 // `guardian` when access is via a linked child enrollment.
+// Permission flags are set by getClass so the page does not need separate
+// checkClassPermission subscriptions; list queries omit them.
 export const classDocWithMyRole = v.object({
   ...classDocPublic.fields,
   myRole: v.optional(classDisplayRoleValidator),
+  canManage: v.optional(v.boolean()),
+  canManageMembers: v.optional(v.boolean()),
 })
 
 export const classSort = v.union(
@@ -78,7 +82,11 @@ export type ClassPublic = {
 }
 
 export type ClassDisplayRole = ClassRole | 'guardian'
-export type ClassWithMyRole = ClassPublic & { myRole?: ClassDisplayRole }
+export type ClassWithMyRole = ClassPublic & {
+  myRole?: ClassDisplayRole
+  canManage?: boolean
+  canManageMembers?: boolean
+}
 
 export function toPublicClass(doc: Doc<'classes'>): ClassPublic {
   return {
@@ -114,8 +122,17 @@ export const getClass = query({
       'class:read',
     )
     if (canRead) {
-      const myRole = await getMyClassRole(ctx, user._id, args.classId)
-      return { ...toPublicClass(doc), myRole: myRole ?? undefined }
+      const [myRole, canManage, canManageMembers] = await Promise.all([
+        getMyClassRole(ctx, user._id, args.classId),
+        hasClassPermission(ctx, user._id, args.classId, 'class:manage'),
+        hasClassPermission(ctx, user._id, args.classId, 'class:manageMembers'),
+      ])
+      return {
+        ...toPublicClass(doc),
+        myRole: myRole ?? undefined,
+        canManage,
+        canManageMembers,
+      }
     }
 
     const isGuardian = await hasGuardianAccessToClass(
@@ -124,7 +141,12 @@ export const getClass = query({
       args.classId,
     )
     if (!isGuardian) return null
-    return { ...toPublicClass(doc), myRole: 'guardian' as const }
+    return {
+      ...toPublicClass(doc),
+      myRole: 'guardian' as const,
+      canManage: false,
+      canManageMembers: false,
+    }
   },
 })
 

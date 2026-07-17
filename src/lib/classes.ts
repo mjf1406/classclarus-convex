@@ -18,15 +18,19 @@ export type ClassDisplayRole = ClassRole | 'guardian'
 
 /**
  * The class shape returned by public queries: join codes and the display pin
- * are redacted server-side (codes are only available via getJoinCodes).
+ * are redacted server-side (codes are only available via getJoinCodes /
+ * getClassAdminBundle).
  * `myRole` is the caller's highest roster role, or `guardian` on getClass when
  * access is via a linked child enrollment.
+ * Permission flags are present on getClass; list queries omit them.
  */
 export type ClassPublic = Omit<
   Doc<'classes'>,
   'studentCode' | 'teacherCode' | 'assistantTeacherCode' | 'publicDisplayPin'
 > & {
   myRole: ClassDisplayRole | undefined
+  canManage?: boolean
+  canManageMembers?: boolean
 }
 
 type ListMyClass = {
@@ -46,12 +50,25 @@ type ListMyClass = {
 
 function toListMyClass(doc: ClassPublic): ListMyClass {
   return {
-    ...doc,
+    _id: doc._id,
+    _creationTime: doc._creationTime,
+    userId: doc.userId,
+    name: doc.name,
+    description: doc.description,
+    icon: doc.icon,
+    year: doc.year,
+    updatedTime: doc.updatedTime,
+    archivedTime: doc.archivedTime,
+    organizationId: doc.organizationId,
+    teamId: doc.teamId,
     myRole: doc.myRole === 'guardian' ? undefined : doc.myRole,
   }
 }
 
 const PENDING_ID_PREFIX = 'PENDING-'
+
+/** Home / optimistic-update query args — one subscription for active + archived. */
+export const LIST_MY_CLASSES_ARGS = { includeArchived: true } as const
 
 export function isPendingClass(classDoc: ClassPublic): boolean {
   return String(classDoc._id).startsWith(PENDING_ID_PREFIX)
@@ -173,11 +190,12 @@ export function useUpdateClass() {
       const updated = applyClassPatch(source, args, now)
       const isArchived = updated.archivedTime !== undefined
 
-      localStore.setQuery(
-        api.classes.getClass,
-        { classId: args.classId },
-        updated,
-      )
+      // getClass always returns permission flags; preserve them when patching.
+      localStore.setQuery(api.classes.getClass, { classId: args.classId }, {
+        ...updated,
+        canManage: updated.canManage ?? false,
+        canManageMembers: updated.canManageMembers ?? false,
+      })
 
       for (const { args: queryArgs, value } of localStore.getAllQueries(
         api.memberships.listMyClasses,

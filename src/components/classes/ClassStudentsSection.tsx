@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { convexQuery } from '@convex-dev/react-query'
 import { useMutation } from 'convex/react'
 import {
   ChevronDown,
@@ -32,7 +30,6 @@ import {
 } from '@/components/ui/collapsible'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatJoinCodeDisplay, getJoinUrl } from '@/lib/joinCode'
-import { TEN_MINUTES } from '@/lib/queryCache'
 
 type ListedGuardian = {
   guardianUserId: Id<'users'>
@@ -66,11 +63,25 @@ function formatGuardianSummary(guardianCount: number): string {
   return guardianCount === 1 ? '1 guardian' : `${guardianCount} guardians`
 }
 
-export function ClassStudentsSection({ classId }: { classId: Id<'classes'> }) {
-  const { data } = useQuery({
-    ...convexQuery(api.guardians.listGuardianCodesForClass, { classId }),
-    gcTime: TEN_MINUTES,
-  })
+export function ClassStudentsSection({
+  classId,
+  data,
+}: {
+  classId: Id<'classes'>
+  data:
+    | {
+        className: string
+        year: number
+        organizationId?: string
+        students: Array<{
+          orgStudentId: Id<'orgStudents'>
+          displayName: string
+          guardianCode: string
+          guardians: Array<ListedGuardian>
+        }>
+      }
+    | undefined
+}) {
   const unlinkGuardian = useMutation(api.guardians.unlinkGuardian)
   const unlinkAllGuardiansForStudent = useMutation(
     api.guardians.unlinkAllGuardiansForStudent,

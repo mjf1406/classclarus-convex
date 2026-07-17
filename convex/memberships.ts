@@ -1,7 +1,7 @@
 import { requireUser } from '#/lib/auth'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
 import { internalMutation, mutation, query } from './_generated/server'
-import type { MutationCtx } from './_generated/server'
+import type { MutationCtx, QueryCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { components, internal } from './_generated/api'
@@ -9,6 +9,7 @@ import { authz } from './authz'
 import {
   CLASS_ROLES_BY_PRECEDENCE,
   classScope,
+  hasClassPermission,
   highestClassRole,
   requireClassPermission,
 } from './lib/classAuth'
@@ -23,6 +24,7 @@ import {
   classSort,
   toPublicClass,
 } from './classes'
+import { loadGuardianCodesForClass } from './guardians'
 import { tryRedeemGuardianCode } from './lib/guardianLinks'
 import { rateLimiter } from './rateLimiter'
 import { JOIN_CODE_LENGTH } from './lib/joinCodes'
@@ -283,6 +285,66 @@ const memberValidator = v.object({
   role: classRoleValidator,
 })
 
+export type ClassMember = {
+  userId: Id<'users'>
+  name?: string
+  email?: string
+  role: ClassRole
+}
+
+/** Load roster members for a class. Caller must already have authorized. */
+export async function loadClassMembers(
+  ctx: QueryCtx | MutationCtx,
+  classId: Id<'classes'>,
+): Promise<Array<ClassMember>> {
+  const scope = classScope(classId)
+  const rolesByUserId = new Map<string, Array<string>>()
+
+  for (const role of CLASS_ROLES_BY_PRECEDENCE) {
+    const holders = await ctx.runQuery(
+      components.authz.queries.getUsersWithRole,
+      {
+        tenantId: 'classclarus',
+        role,
+        scope,
+      },
+    )
+    for (const holder of holders) {
+      const held = rolesByUserId.get(holder.userId)
+      if (held) {
+        held.push(role)
+      } else {
+        rolesByUserId.set(holder.userId, [role])
+      }
+    }
+  }
+
+  const members: Array<ClassMember> = []
+
+  for (const [userId, roles] of rolesByUserId) {
+    const highest = highestClassRole(roles)
+    if (!highest) continue
+    const member = await ctx.db.get(userId as Id<'users'>)
+    members.push({
+      userId: userId as Id<'users'>,
+      name: member?.name,
+      email: member?.email,
+      role: highest,
+    })
+  }
+
+  members.sort((a, b) => {
+    const aIdx = CLASS_ROLES_BY_PRECEDENCE.indexOf(a.role)
+    const bIdx = CLASS_ROLES_BY_PRECEDENCE.indexOf(b.role)
+    if (aIdx !== bIdx) return aIdx - bIdx
+    return (a.name ?? a.email ?? a.userId).localeCompare(
+      b.name ?? b.email ?? b.userId,
+    )
+  })
+
+  return members
+}
+
 /** Roster members for a class. Gated on class:manage (creator). */
 export const listClassMembers = query({
   args: {
@@ -292,58 +354,86 @@ export const listClassMembers = query({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
     await requireClassPermission(ctx, user._id, args.classId, 'class:manage')
+    return await loadClassMembers(ctx, args.classId)
+  },
+})
 
-    const scope = classScope(args.classId)
-    const rolesByUserId = new Map<string, Array<string>>()
+const joinCodesValidator = v.object({
+  studentCode: v.string(),
+  teacherCode: v.union(v.string(), v.null()),
+  assistantTeacherCode: v.union(v.string(), v.null()),
+})
 
-    for (const role of CLASS_ROLES_BY_PRECEDENCE) {
-      const holders = await ctx.runQuery(
-        components.authz.queries.getUsersWithRole,
-        {
-          tenantId: 'classclarus',
-          role,
-          scope,
-        },
-      )
-      for (const holder of holders) {
-        const held = rolesByUserId.get(holder.userId)
-        if (held) {
-          held.push(role)
-        } else {
-          rolesByUserId.set(holder.userId, [role])
-        }
-      }
+const guardianRosterValidator = v.object({
+  className: v.string(),
+  year: v.number(),
+  organizationId: v.optional(v.string()),
+  students: v.array(
+    v.object({
+      orgStudentId: v.id('orgStudents'),
+      displayName: v.string(),
+      guardianCode: v.string(),
+      guardians: v.array(
+        v.object({
+          guardianUserId: v.id('users'),
+          name: v.optional(v.string()),
+          linkedAt: v.number(),
+        }),
+      ),
+    }),
+  ),
+})
+
+/**
+ * Single subscription for class manage UI: join codes, members (if creator),
+ * and guardian roster. Gated on class:manageMembers.
+ */
+export const getClassAdminBundle = query({
+  args: {
+    classId: v.id('classes'),
+  },
+  returns: v.object({
+    joinCodes: joinCodesValidator,
+    members: v.array(memberValidator),
+    guardianRoster: guardianRosterValidator,
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    await requireClassPermission(
+      ctx,
+      user._id,
+      args.classId,
+      'class:manageMembers',
+    )
+
+    const doc = await ctx.db.get(args.classId)
+    if (!doc) {
+      throw new Error('Class not found')
     }
 
-    const members: Array<{
-      userId: Id<'users'>
-      name?: string
-      email?: string
-      role: ClassRole
-    }> = []
+    const canManage = await hasClassPermission(
+      ctx,
+      user._id,
+      args.classId,
+      'class:manage',
+    )
 
-    for (const [userId, roles] of rolesByUserId) {
-      const highest = highestClassRole(roles)
-      if (!highest) continue
-      const member = await ctx.db.get(userId as Id<'users'>)
-      members.push({
-        userId: userId as Id<'users'>,
-        name: member?.name,
-        email: member?.email,
-        role: highest,
-      })
+    const [members, guardianRoster] = await Promise.all([
+      canManage
+        ? loadClassMembers(ctx, args.classId)
+        : Promise.resolve([] as Array<ClassMember>),
+      loadGuardianCodesForClass(ctx, args.classId),
+    ])
+
+    return {
+      joinCodes: {
+        studentCode: doc.studentCode,
+        teacherCode: canManage ? doc.teacherCode : null,
+        assistantTeacherCode: canManage ? doc.assistantTeacherCode : null,
+      },
+      members,
+      guardianRoster,
     }
-
-    members.sort((a, b) => {
-      const aIdx = CLASS_ROLES_BY_PRECEDENCE.indexOf(a.role)
-      const bIdx = CLASS_ROLES_BY_PRECEDENCE.indexOf(b.role)
-      if (aIdx !== bIdx) return aIdx - bIdx
-      return (a.name ?? a.email ?? a.userId).localeCompare(
-        b.name ?? b.email ?? b.userId,
-      )
-    })
-
-    return members
   },
 })
 

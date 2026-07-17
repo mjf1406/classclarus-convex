@@ -1,8 +1,5 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { convexQuery } from '@convex-dev/react-query'
-import { useConvexAuth } from '@convex-dev/auth/react'
 import {
   Archive,
   ArchiveRestore,
@@ -21,9 +18,7 @@ import {
 } from '#/lib/classes'
 import type { ClassPublic, ClassSort } from '#/lib/classes'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
-import { ONE_HOUR } from '#/lib/queryCache'
 import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
-import { api } from '../../../convex/_generated/api'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +47,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 export type ClassListView = 'grid' | 'list'
 
 type ClassListProps = {
+  /** Undefined while the parent query is still loading. */
+  classes: Array<ClassPublic> | undefined
   view?: ClassListView
   sort?: ClassSort
   archivedOnly?: boolean
@@ -401,22 +398,13 @@ function EmptyState({
 }
 
 export function ClassList({
+  classes,
   view = 'grid',
   sort = DEFAULT_CLASS_SORT,
   archivedOnly = false,
   onCreateClick,
   onEdit,
 }: ClassListProps) {
-  const { isAuthenticated } = useConvexAuth()
-  const listArgs = archivedOnly ? { archivedOnly: true, sort } : { sort }
-  const { data: classes } = useQuery({
-    ...convexQuery(
-      api.memberships.listMyClasses,
-      isAuthenticated ? listArgs : 'skip',
-    ),
-    placeholderData: (previousData) => previousData,
-    gcTime: ONE_HOUR,
-  })
   const sortedClasses = classes ? sortClasses(classes, sort) : undefined
   const removeClass = useRemoveClass()
   const updateClass = useUpdateClass()
