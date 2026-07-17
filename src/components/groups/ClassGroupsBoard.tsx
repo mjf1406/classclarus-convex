@@ -11,7 +11,8 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { useQuery } from 'convex/react'
+import { useQuery } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
 import {
   Download,
   MoreVertical,
@@ -31,6 +32,7 @@ import {
 } from '@/components/groups/GroupEntityFormCredenza'
 import { FontAwesomeIconFromId } from '@/components/icons/FontAwesomeIconFromId'
 import { useAssignStudent, useDeleteGroup, useDeleteTeam } from '@/lib/groups'
+import { ONE_HOUR } from '@/lib/queryCache'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -93,8 +95,11 @@ function parseStudentDragId(id: string): Id<'orgStudents'> | null {
 
 function StudentChip({
   student,
+  forceHidden = false,
 }: {
   student: BoardStudent
+  /** Keep hidden after drag ends until the optimistic board move paints. */
+  forceHidden?: boolean
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: studentDragId(student.orgStudentId),
@@ -108,7 +113,7 @@ function StudentChip({
       className={cn(
         'rounded-md border bg-background px-2.5 py-1.5 text-left text-sm shadow-xs',
         'cursor-grab active:cursor-grabbing hover:bg-muted/60',
-        isDragging && 'invisible',
+        (isDragging || forceHidden) && 'invisible',
       )}
       {...listeners}
       {...attributes}
@@ -175,7 +180,10 @@ type PendingDelete =
 
 export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
   const { t } = useTranslation(['classes', 'common'])
-  const board = useQuery(api.groups.listGroupsBoard, { classId })
+  const { data: board } = useQuery({
+    ...convexQuery(api.groups.listGroupsBoard, { classId }),
+    gcTime: ONE_HOUR,
+  })
   const assignStudent = useAssignStudent()
   const deleteGroup = useDeleteGroup()
   const deleteTeam = useDeleteTeam()
@@ -204,6 +212,16 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
   const handleDragStart = (event: DragStartEvent) => {
     const student = event.active.data.current?.student as BoardStudent | undefined
     setActiveStudent(student ?? null)
+  }
+
+  const clearActiveStudentAfterPaint = () => {
+    // Double rAF: wait until after the optimistic TanStack board update commits
+    // so the chip is already in the drop target when the overlay is removed.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setActiveStudent(null)
+      })
+    })
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -240,16 +258,11 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
       })
     }
 
-    // Let the optimistic board update paint before removing the overlay.
-    window.requestAnimationFrame(() => {
-      setActiveStudent(null)
-    })
+    clearActiveStudentAfterPaint()
   }
 
   const handleDragCancel = () => {
-    window.requestAnimationFrame(() => {
-      setActiveStudent(null)
-    })
+    clearActiveStudentAfterPaint()
   }
 
   const handleExport = async () => {
@@ -354,7 +367,13 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
               <p className="text-sm text-muted-foreground">{t('noUngrouped')}</p>
             ) : (
               board.ungrouped.map((student) => (
-                <StudentChip key={student.orgStudentId} student={student} />
+                <StudentChip
+                  key={student.orgStudentId}
+                  student={student}
+                  forceHidden={
+                    activeStudent?.orgStudentId === student.orgStudentId
+                  }
+                />
               ))
             )}
           </DropZone>
@@ -446,6 +465,9 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
                       <StudentChip
                         key={student.orgStudentId}
                         student={student}
+                        forceHidden={
+                          activeStudent?.orgStudentId === student.orgStudentId
+                        }
                       />
                     ))}
                     {group.studentsWithoutTeam.length === 0 &&
@@ -517,6 +539,10 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
                             <StudentChip
                               key={student.orgStudentId}
                               student={student}
+                              forceHidden={
+                                activeStudent?.orgStudentId ===
+                                student.orgStudentId
+                              }
                             />
                           ))}
                           {team.students.length === 0 ? (

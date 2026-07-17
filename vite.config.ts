@@ -11,8 +11,26 @@ import { VitePWA } from 'vite-plugin-pwa'
 const PDF_PRECACHE_SKIP =
   /(?:^|\/)(?:guardianCodesPdf|html2canvas|index\.es|purify\.es)-[^/]+\.js$/
 
+/** Font Awesome letter-bucket chunks — load on demand when resolving icons. */
+const FA_ICON_PRECACHE_SKIP = /(?:^|\/)fa-pack-[^/]+\.js$/
+
+function faPackChunkName(moduleId: string): string | undefined {
+  const match = moduleId.match(
+    /[\\/]fa-packs[\\/](solid|regular)[\\/]([^\\/]+?)(?:\.ts)?$/,
+  )
+  if (!match) return undefined
+  const style = match[1]
+  const bucket = match[2]?.replace(/\.ts$/, '')
+  if (!style || !bucket) return undefined
+  return `fa-pack-${style}-${bucket}`
+}
+
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  optimizeDeps: {
+    // Prebundle the picker's single FA deep import so Vite never rediscovers it mid-session.
+    include: ['@fortawesome/free-solid-svg-icons/faImage'],
+  },
   build: {
     rolldownOptions: {
       output: {
@@ -35,6 +53,11 @@ const config = defineConfig({
             {
               name: 'i18n-vendor',
               test: /node_modules[\\/](i18next|react-i18next)[\\/]/,
+            },
+            {
+              name: faPackChunkName,
+              test: /[\\/]fa-packs[\\/]/,
+              priority: 20,
             },
           ],
         },
@@ -92,7 +115,9 @@ const config = defineConfig({
         manifestTransforms: [
           async (entries) => ({
             manifest: entries.filter(
-              (entry) => !PDF_PRECACHE_SKIP.test(entry.url),
+              (entry) =>
+                !PDF_PRECACHE_SKIP.test(entry.url) &&
+                !FA_ICON_PRECACHE_SKIP.test(entry.url),
             ),
             warnings: [],
           }),
@@ -105,6 +130,17 @@ const config = defineConfig({
               cacheName: 'pdf-chunks',
               expiration: {
                 maxEntries: 8,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          {
+            urlPattern: FA_ICON_PRECACHE_SKIP,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fa-icon-chunks',
+              expiration: {
+                maxEntries: 80,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
             },

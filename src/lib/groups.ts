@@ -229,54 +229,53 @@ export function useUpdateTeam() {
 export function useAssignStudent() {
   return useMutation(api.groups.assignStudent).withOptimisticUpdate(
     (localStore, args) => {
-      const board = localStore.getQuery(api.groups.listGroupsBoard, {
-        classId: args.classId,
-      })
-      if (!board) return
+      for (const { args: queryArgs, value: board } of localStore.getAllQueries(
+        api.groups.listGroupsBoard,
+      )) {
+        if (!board || !queryArgs) continue
+        if (queryArgs.classId !== args.classId) continue
 
-      const student = findStudentOnBoard(board, args.orgStudentId)
-      if (!student) return
+        const student = findStudentOnBoard(board, args.orgStudentId)
+        if (!student) return
 
-      let next = removeStudentFromBoard(board, args.orgStudentId)
+        let next = removeStudentFromBoard(board, args.orgStudentId)
 
-      if (args.groupId === null) {
-        next = {
-          ...next,
-          ungrouped: insertStudentSorted(next.ungrouped, student),
-        }
-      } else {
-        next = {
-          ...next,
-          groups: next.groups.map((group) => {
-            if (group._id !== args.groupId) return group
-            if (args.teamId === null) {
+        if (args.groupId === null) {
+          next = {
+            ...next,
+            ungrouped: insertStudentSorted(next.ungrouped, student),
+          }
+        } else {
+          next = {
+            ...next,
+            groups: next.groups.map((group) => {
+              if (group._id !== args.groupId) return group
+              if (args.teamId === null) {
+                return {
+                  ...group,
+                  studentsWithoutTeam: insertStudentSorted(
+                    group.studentsWithoutTeam,
+                    student,
+                  ),
+                }
+              }
               return {
                 ...group,
-                studentsWithoutTeam: insertStudentSorted(
-                  group.studentsWithoutTeam,
-                  student,
-                ),
+                teams: group.teams.map((team) => {
+                  if (team._id !== args.teamId) return team
+                  return {
+                    ...team,
+                    students: insertStudentSorted(team.students, student),
+                  }
+                }),
               }
-            }
-            return {
-              ...group,
-              teams: group.teams.map((team) => {
-                if (team._id !== args.teamId) return team
-                return {
-                  ...team,
-                  students: insertStudentSorted(team.students, student),
-                }
-              }),
-            }
-          }),
+            }),
+          }
         }
-      }
 
-      localStore.setQuery(
-        api.groups.listGroupsBoard,
-        { classId: args.classId },
-        next,
-      )
+        localStore.setQuery(api.groups.listGroupsBoard, queryArgs, next)
+        return
+      }
     },
   )
 }

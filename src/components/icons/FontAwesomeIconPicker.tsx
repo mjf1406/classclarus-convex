@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-solid-svg-icons";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { resolveIconId } from "./fontawesome-icon-catalog";

@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
+    "generate-fa-icon-packs": "bun run scripts/generate-fa-icon-packs.ts",
     "build": "vite build",
     "preview": "vite preview --port 3000",
     "test": "vitest run",
