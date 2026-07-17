@@ -5,6 +5,7 @@ import { compareClasses, DEFAULT_CLASS_SORT } from './classSort'
 import type { ClassSort } from './classSort'
 import type { AppLanguage } from '#/i18n/locales'
 import { DEFAULT_APP_LANGUAGE } from '#/i18n/locales'
+import i18n from '#/i18n'
 
 export type { ClassSort } from './classSort'
 
@@ -103,7 +104,8 @@ function insertSorted(
 ): ListMyClass[] {
   const next = [...list]
   const insertAt = next.findIndex(
-    (existing) => compareClasses(doc, existing, sort) < 0,
+    (existing) =>
+      compareClasses(doc, existing, sort, i18n.language) < 0,
   )
   next.splice(insertAt === -1 ? next.length : insertAt, 0, toListMyClass(doc))
   return next

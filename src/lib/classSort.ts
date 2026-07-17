@@ -1,5 +1,8 @@
-import i18n from '#/i18n'
-import { LANGUAGE_BCP47, coerceAppLanguage } from '#/i18n/locales'
+import {
+  DEFAULT_APP_LANGUAGE,
+  LANGUAGE_BCP47,
+  coerceAppLanguage,
+} from '#/i18n/locales'
 
 export const CLASS_SORTS = [
   'createdDesc',
@@ -75,18 +78,27 @@ type SortableClass = {
   updatedTime?: number
 }
 
-function activeBcp47(): string {
-  return LANGUAGE_BCP47[coerceAppLanguage(i18n.language)]
+function localeForCompare(language?: string): string {
+  return LANGUAGE_BCP47[
+    coerceAppLanguage(language ?? DEFAULT_APP_LANGUAGE)
+  ]
 }
 
-function compareNames(left: string, right: string): number {
-  return left.localeCompare(right, activeBcp47(), { sensitivity: 'base' })
+function compareNames(
+  left: string,
+  right: string,
+  language?: string,
+): number {
+  return left.localeCompare(right, localeForCompare(language), {
+    sensitivity: 'base',
+  })
 }
 
 export function compareClasses(
   left: SortableClass,
   right: SortableClass,
   sort: ClassSort,
+  language?: string,
 ): number {
   let comparison: number
 
@@ -108,10 +120,10 @@ export function compareClasses(
         (left.updatedTime ?? left._creationTime)
       break
     case 'nameAsc':
-      comparison = compareNames(left.name, right.name)
+      comparison = compareNames(left.name, right.name, language)
       break
     case 'nameDesc':
-      comparison = compareNames(right.name, left.name)
+      comparison = compareNames(right.name, left.name, language)
       break
   }
 
@@ -120,12 +132,18 @@ export function compareClasses(
   const creationComparison = right._creationTime - left._creationTime
   if (creationComparison !== 0) return creationComparison
 
-  return String(left._id).localeCompare(String(right._id), activeBcp47())
+  return String(left._id).localeCompare(
+    String(right._id),
+    localeForCompare(language),
+  )
 }
 
 export function sortClasses<T extends SortableClass>(
   classes: readonly T[],
   sort: ClassSort,
+  language?: string,
 ): T[] {
-  return [...classes].sort((left, right) => compareClasses(left, right, sort))
+  return [...classes].sort((left, right) =>
+    compareClasses(left, right, sort, language),
+  )
 }

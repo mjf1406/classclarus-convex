@@ -38,7 +38,9 @@ const catalogs = {
 export const i18nNamespaces = ['common', 'auth', 'pwa', 'home', 'join', 'classes'] as const
 
 const initialLanguage = getInitialPersonalLanguage()
-document.documentElement.lang = LANGUAGE_BCP47[initialLanguage]
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = LANGUAGE_BCP47[initialLanguage]
+}
 
 function toResources() {
   const resources: Record<

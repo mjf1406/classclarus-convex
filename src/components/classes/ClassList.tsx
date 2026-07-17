@@ -427,8 +427,10 @@ export function ClassList({
   onCreateClick,
   onEdit,
 }: ClassListProps) {
-  const { t } = useTranslation(['home', 'classes', 'common'])
-  const sortedClasses = classes ? sortClasses(classes, sort) : undefined
+  const { t, i18n } = useTranslation(['home', 'classes', 'common'])
+  const sortedClasses = classes
+    ? sortClasses(classes, sort, i18n.language)
+    : undefined
   const removeClass = useRemoveClass()
   const updateClass = useUpdateClass()
 
