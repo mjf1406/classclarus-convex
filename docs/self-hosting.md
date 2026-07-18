@@ -428,21 +428,24 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
 
 ### Auth stuck on login / session token rejected
 
-After password **Sign up** or **Sign in**, the form may finish without an error but you stay on `/login`. The login UI may eventually show “Server rejected the session token…”.
+After password **Sign up** or **Sign in**, the form may finish without an error but you stay on `/login`. The login UI may show “did not return a session token” or “Server rejected the session token…”.
 
-**Cause:** Self-hosted Convex validates JWTs with `customJwt` and requires a `kid` (key ID) in both the JWT header and the JWKS. Older bootstrap keys / unsigned headers lacked `kid`, so the WebSocket auth step silently failed while account creation still succeeded.
+**DB clue:** `users` / `authAccounts` have rows but `authSessions` / `authRefreshTokens` are empty — account creation committed, then JWT minting failed in a second mutation. Open **Dashboard → Logs** and filter `auth:signIn` (often `Missing environment variable \`JWT_PRIVATE_KEY\`` / `CONVEX_SITE_URL`, or PKCS8 parse errors).
+
+**Also:** Self-hosted `customJwt` requires a `kid` in both the JWT header and JWKS. Older keys lacked `kid` (sessions exist, WebSocket auth fails). Current deploy migrates JWKS and sets `JWT_KID`.
 
 **Fix:**
 
-1. Pull latest code and **rebuild** `deploy` + `web` (do **not** delete volumes — existing JWT keys are migrated in place).
-2. Confirm `deploy` logs include `JWT kid: …` and `Deploy complete`.
+1. Pull latest code and **rebuild** `deploy` + `web` (do **not** delete volumes).
+2. Confirm `deploy` logs include `verify-auth-keys ok`, `auth diagnostics: ok`, `JWT kid: …`, and `Deploy complete`.
 3. Verify JWKS includes `kid`:
 
    ```bash
    curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
    ```
 
-4. Clear site data for the app origin, hard refresh, then **Sign up** again (or Sign in if the account still exists).
+4. Optionally delete orphan auth account rows from failed attempts.
+5. Clear site data for the app origin, hard refresh, then **Sign up** again.
 
 Do **not** wipe auth tables unless you also clear browser site data — leftover tokens create a “zombie” session.
 

@@ -30,8 +30,9 @@ function passwordErrorMessage(
   ) {
     return t('passwordNoAccount')
   }
-  if (err instanceof Error && err.message) {
-    return err.message
+  // Prefer the server message — often "Missing environment variable `JWT_…`"
+  if (raw.trim().length > 0 && raw !== '[object Object]') {
+    return raw
   }
   return t('passwordAuthFailed')
 }
@@ -81,9 +82,14 @@ export function SignInWithPassword({
 
     const formData = new FormData(event.currentTarget)
     void signIn('password', formData)
-      .then(() => {
-        // signIn can succeed while the backend still rejects the JWT (e.g. missing kid).
-        // Wait for useConvexAuth before clearing the spinner.
+      .then((result) => {
+        // tokens: null resolves without throwing — treat as hard failure
+        if (result.signingIn !== true) {
+          setIsLoading(false)
+          setError(t('signInNoTokens'))
+          return
+        }
+        // Wait for useConvexAuth before clearing the spinner (JWT may still be rejected).
         awaitingAuthRef.current = true
         timeoutRef.current = setTimeout(() => {
           if (!awaitingAuthRef.current) return

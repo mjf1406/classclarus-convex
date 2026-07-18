@@ -62,6 +62,8 @@ const uk: Catalog = {
       'Немає акаунта з цією поштою. Використайте «Зареєструватися», щоб створити його.',
     sessionRejected:
       'Сервер відхилив токен сесії. Для self-host перебудуйте deploy/web і очистіть дані сайту (див. документацію self-hosting).',
+    signInNoTokens:
+      'Токен сесії не повернуто. Перевірте Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Це додаток ClassClarus.',
     signInWithGoogle: 'Увійти через Google',
     continueWithGoogle: 'Продовжити через Google',

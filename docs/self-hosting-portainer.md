@@ -327,17 +327,20 @@ Common causes (a valid key still fails for the last two):
 
 ### Auth stuck on login / session token rejected
 
-If password **Sign up** / **Sign in** finishes but you stay on the login page (or see “Server rejected the session token…”):
+If password **Sign up** / **Sign in** finishes but you stay on the login page (or see “Server rejected the session token…” / “did not return a session token”):
 
-1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Keep volumes — JWT keys are migrated to include a `kid`.
-2. Confirm the `deploy` container exits **0** and logs include `JWT kid: …` and `Deploy complete`.
+**DB clue:** `users` / `authAccounts` have rows but `authSessions` / `authRefreshTokens` are empty — account creation succeeded, JWT minting failed. Open **Dashboard → Logs** and filter `auth:signIn` for the real exception (often `Missing environment variable \`JWT_PRIVATE_KEY\`` or `CONVEX_SITE_URL`, or a PKCS8 parse error).
+
+1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Keep volumes.
+2. Confirm the `deploy` container exits **0** and logs include `verify-auth-keys ok`, `auth diagnostics: ok`, `JWT kid: …`, and `Deploy complete`.
 3. Check JWKS has a `kid`:
 
    ```bash
    curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
    ```
 
-4. Clear site data for the app origin, hard refresh, then **Sign up** again (or Sign in if the account still exists).
+4. Optionally delete orphan `users` / `authAccounts` rows from failed attempts.
+5. Clear site data for the app origin, hard refresh, then **Sign up** again.
 
 ### Auth stuck on skeletons / `Auth provider discovery failed`
 

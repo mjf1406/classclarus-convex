@@ -54,6 +54,8 @@ const en = {
       'No account found for that email. Use Sign up to create one.',
     sessionRejected:
       'Server rejected the session token. For self-host, rebuild deploy/web and clear site data (see self-hosting docs).',
+    signInNoTokens:
+      'Sign-in did not return a session token. Check Dashboard Logs for auth:signIn (often a JWT_PRIVATE_KEY / CONVEX_SITE_URL error).',
     appFooter: 'This is the ClassClarus app.',
     signInWithGoogle: 'Sign in with Google',
     continueWithGoogle: 'Continue with Google',

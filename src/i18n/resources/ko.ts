@@ -62,7 +62,9 @@ const ko: Catalog = {
       '해당 이메일의 계정이 없습니다. 가입으로 새 계정을 만드세요.',
     sessionRejected:
       '서버가 세션 토큰을 거부했습니다. 셀프호스트라면 deploy/web을 다시 빌드하고 사이트 데이터를 지우세요(셀프호스팅 문서 참고).',
-    appFooter: '이것은 ClassClarus 앱입니다.',
+        signInNoTokens:
+      '세션 토큰이 반환되지 않았습니다. 대시보드 Logs에서 auth:signIn을 확인하세요 (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
+appFooter: '이것은 ClassClarus 앱입니다.',
     signInWithGoogle: 'Google로 로그인',
     continueWithGoogle: 'Google로 계속',
   },

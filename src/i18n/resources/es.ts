@@ -62,6 +62,8 @@ const es: Catalog = {
       'No hay cuenta con ese correo. Usa Registrarte para crear una.',
     sessionRejected:
       'El servidor rechazó el token de sesión. En self-host, reconstruye deploy/web y borra los datos del sitio (consulta la documentación de self-hosting).',
+    signInNoTokens:
+      'No se devolvió un token de sesión. Revisa Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Esta es la aplicación ClassClarus.',
     signInWithGoogle: 'Iniciar sesión con Google',
     continueWithGoogle: 'Continuar con Google',

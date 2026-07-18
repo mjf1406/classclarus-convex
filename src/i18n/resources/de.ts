@@ -62,6 +62,8 @@ const de: Catalog = {
       'Kein Konto für diese E-Mail. Nutzen Sie „Registrieren“, um eines zu erstellen.',
     sessionRejected:
       'Der Server hat das Sitzungstoken abgelehnt. Bei Self-Host deploy/web neu bauen und Websitedaten löschen (siehe Self-Hosting-Doku).',
+    signInNoTokens:
+      'Kein Sitzungstoken erhalten. Prüfe Dashboard Logs auf auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Dies ist die ClassClarus-App.',
     signInWithGoogle: 'Mit Google anmelden',
     continueWithGoogle: 'Mit Google fortfahren',

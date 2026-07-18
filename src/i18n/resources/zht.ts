@@ -60,6 +60,8 @@ const zht: Catalog = {
     passwordNoAccount: '該電子郵件尚無帳號。請使用「註冊」建立。',
     sessionRejected:
       '伺服器拒絕了工作階段權杖。若為自架主機，請重建 deploy/web 並清除網站資料（請參閱自架文件）。',
+    signInNoTokens:
+      '未回傳工作階段權杖。請在儀表板 Logs 查看 auth:signIn（JWT_PRIVATE_KEY / CONVEX_SITE_URL）。',
     appFooter: '這是 ClassClarus 應用程式。',
     signInWithGoogle: '使用 Google 登入',
     continueWithGoogle: '使用 Google 繼續',
