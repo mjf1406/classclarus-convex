@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react'
 import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { Button } from '../ui/button'
 import { api } from '../../../convex/_generated/api'
@@ -59,13 +60,23 @@ function getDisplayName(user: CurrentUser) {
 export function UserMenu() {
   const { t } = useTranslation('common')
   const { isLoading, isAuthenticated } = useConvexAuth()
-  const { data: user } = useQuery({
+  const { data: user, isFetched: userFetched } = useQuery({
     ...convexQuery(api.users.current, isAuthenticated ? {} : 'skip'),
     gcTime: ONE_HOUR,
   })
   const { signOut } = useAuthActions()
 
-  if (isLoading || (isAuthenticated && user === undefined)) {
+  useEffect(() => {
+    if (isAuthenticated && userFetched && user === null) {
+      void signOut()
+    }
+  }, [isAuthenticated, userFetched, user, signOut])
+
+  if (
+    isLoading ||
+    (isAuthenticated && user === undefined) ||
+    (isAuthenticated && user === null)
+  ) {
     return (
       <Avatar>
         <AvatarFallback>...</AvatarFallback>

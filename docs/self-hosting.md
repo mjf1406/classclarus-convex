@@ -447,6 +447,7 @@ That means JWT validation could not reach the site proxy’s OIDC discovery URL 
 
 3. In the browser, clear site data for the app origin (e.g. `http://YOUR_SERVER_IP:3000`), hard refresh, then open login again.
 4. Create the **first** account with **Sign up**, not Sign in. Sign in before any account exists returns “no account” / `InvalidAccountId`.
+5. If you wipe `users` / auth tables in the Convex dashboard, also clear browser site data — leftover tokens look “signed in” on the client while the server has no user (Sign In button + endless skeletons). After redeploy, confirm `Deploy complete`, then Sign up once.
 
 Optional health check (useful, not required for JWT validation after the static-JWKS fix):
 

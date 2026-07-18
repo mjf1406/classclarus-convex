@@ -329,6 +329,7 @@ If password auth leaves the UI on endless skeletons and the browser console show
 1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Do **not** delete the stack volumes.
 2. Confirm the `deploy` container exits **0** and logs include `AUTH_PASSWORD_ENABLED` and `Deploy complete`.
 3. Clear site data for the app origin in the browser, hard refresh, then use **Sign up** for the first account (Sign in before any account exists fails with no-account / `InvalidAccountId`).
+4. If you delete rows from `users` / auth tables in the dashboard, clear browser site data too — stale tokens leave a “zombie” session (Sign In in the navbar + permanent skeletons).
 
 Optional checks:
 

@@ -284,9 +284,12 @@ function Home() {
     }
   }, [prefs?.homeSectionOrder])
 
-  const allClasses = accountHome?.classes
-  const allSchools = accountHome?.schools
-  const children = accountHome?.children
+  const allClasses =
+    accountHome === undefined ? undefined : (accountHome?.classes ?? [])
+  const allSchools =
+    accountHome === undefined ? undefined : (accountHome?.schools ?? [])
+  const children =
+    accountHome === undefined ? undefined : (accountHome?.children ?? [])
 
   const matchesClassRole = (classDoc: ClassPublic) =>
     classRoleFilter === 'all' || classDoc.myRole === classRoleFilter
