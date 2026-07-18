@@ -122,7 +122,9 @@ docker volume ls | grep bootstrap
 docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
 
-Paste that key into the dashboard login screen.
+The value looks like `convex-self-hosted|a1b2c3d4e5f6...` — that is `INSTANCE_NAME`, a `|`, then hex. Paste the **entire** string into the dashboard login screen (including the name and `|`). The hex alone will not work.
+
+If you open the dashboard from another device on your LAN, see [Access from another device on your LAN](#access-from-another-device-on-your-lan) — `NEXT_PUBLIC_DEPLOYMENT_URL` must use the server IP, not `127.0.0.1`.
 
 ---
 
@@ -235,6 +237,29 @@ After a successful first boot, the **`bootstrap`** volume contains:
 Keep this volume. Removing it can break auth until you redeploy with new keys.
 
 Your **app data** (classes, users, etc.) lives in the Docker volume **`data`** (e.g. `classclarus-convex_data`).
+
+---
+
+## Access from another device on your LAN
+
+Defaults use `127.0.0.1` / `localhost`, which only work when the **browser** is on the Docker host. To use the app or dashboard from a phone or another PC, put the server’s LAN IP in `.env`:
+
+```env
+SITE_URL=http://YOUR_SERVER_IP:3000
+CONVEX_CLOUD_ORIGIN=http://YOUR_SERVER_IP:3210
+CONVEX_SITE_ORIGIN=http://YOUR_SERVER_IP:3211
+NEXT_PUBLIC_DEPLOYMENT_URL=http://YOUR_SERVER_IP:3210
+VITE_CONVEX_URL=http://YOUR_SERVER_IP:3210
+```
+
+Replace `YOUR_SERVER_IP` with the host address (e.g. `192.168.0.148`). Then rebuild so `web` and `dashboard` pick up the URLs:
+
+```bash
+docker compose up -d --build
+```
+
+- Dashboard login uses `NEXT_PUBLIC_DEPLOYMENT_URL` in the browser — with `127.0.0.1` still set, paste of a valid admin key will fail from another device.
+- From that other device, check: `curl http://YOUR_SERVER_IP:3210/version`
 
 ---
 
@@ -356,7 +381,11 @@ Common causes: backend not healthy yet, missing `INSTANCE_SECRET`, or network/DN
 docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
 
-Use the **entire** string (no extra spaces). If you changed `INSTANCE_SECRET` after the first boot, regenerate:
+Paste the **full** key: `INSTANCE_NAME|hex` (example `convex-self-hosted|a1b2...`). The hex portion alone is not enough.
+
+If you open the dashboard from another machine, set `NEXT_PUBLIC_DEPLOYMENT_URL` to `http://YOUR_SERVER_IP:3210` (not `127.0.0.1`), recreate `dashboard`, and retry — see [Access from another device on your LAN](#access-from-another-device-on-your-lan).
+
+If you changed `INSTANCE_SECRET` after the first boot, regenerate:
 
 ```bash
 docker compose up -d --build admin-key deploy

@@ -59,7 +59,7 @@ In the stack’s **Environment variables** section, add at least:
 | `SITE_URL` | `http://localhost:3000` or `http://YOUR_SERVER_IP:3000` |
 | `CONVEX_CLOUD_ORIGIN` | `http://127.0.0.1:3210` (or `http://YOUR_SERVER_IP:3210` if browsers are not on the same machine) |
 | `CONVEX_SITE_ORIGIN` | `http://127.0.0.1:3211` (same idea as above) |
-| `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` |
+| `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` — used by the **dashboard** UI in the browser |
 | `VITE_CONVEX_URL` | Same as `CONVEX_CLOUD_ORIGIN` (baked into the site image at build time) |
 | `CONVEX_IMAGE_TAG` | Leave the value from [`.env.example`](../.env.example) unless you intentionally upgrade |
 
@@ -72,7 +72,7 @@ AUTH_GOOGLE_SECRET=...
 
 You can copy the full list from [`.env.example`](../.env.example). Do **not** upload a committed `.env` with real secrets into git.
 
-**URL tip:** Values used by the **browser** (`VITE_CONVEX_URL`, `CONVEX_CLOUD_ORIGIN`, `SITE_URL`, etc.) must be reachable from the user’s machine. Never use Docker-internal names like `http://backend:3210` there.
+**URL tip:** Values used by the **browser** (`VITE_CONVEX_URL`, `NEXT_PUBLIC_DEPLOYMENT_URL`, `CONVEX_CLOUD_ORIGIN`, `SITE_URL`, etc.) must be reachable from the user’s machine. Never use Docker-internal names like `http://backend:3210` there. Use `http://127.0.0.1:...` only when the browser is on the Docker host; from another LAN device use `http://YOUR_SERVER_IP:...`.
 
 ---
 
@@ -115,8 +115,24 @@ If your stack name differs, use the matching `*_bootstrap` volume from `docker v
 
 ### Log in to the dashboard
 
-1. Open `http://<host>:6791`
-2. Paste the **entire** admin key (no extra spaces)
+The key looks like:
+
+```text
+convex-self-hosted|a1b2c3d4e5f6...
+```
+
+That is `INSTANCE_NAME`, a `|`, then a long hex string. Paste the **entire** value (including the name and `|`), with no extra spaces or line breaks. The hex alone will not work.
+
+1. Open `http://<host>:6791` (use the same host/IP you put in the stack env).
+2. Paste the full admin key.
+
+**LAN / another device:** The dashboard page runs in *your* browser and talks to `NEXT_PUBLIC_DEPLOYMENT_URL`. If that is still `http://127.0.0.1:3210` while you open `http://YOUR_SERVER_IP:6791` from a laptop or phone, login fails even with a valid key. Set `NEXT_PUBLIC_DEPLOYMENT_URL` (and the other browser URLs) to `http://YOUR_SERVER_IP:3210`, update the stack so `dashboard` recreates, then try again.
+
+From the client machine, confirm the API is reachable:
+
+```bash
+curl http://YOUR_SERVER_IP:3210/version
+```
 
 ---
 
@@ -278,6 +294,8 @@ Change `WEB_PORT`, `PORT`, `SITE_PROXY_PORT`, `DASHBOARD_PORT` in stack env, and
 
 ### Dashboard rejects the key
 
+- Paste the **full** key: `INSTANCE_NAME|hex` (example `convex-self-hosted|a1b2...`). The hex portion alone is not enough.
+- If you open the dashboard from another machine, `NEXT_PUBLIC_DEPLOYMENT_URL` must be `http://YOUR_SERVER_IP:3210` (not `127.0.0.1`). Update the stack and recreate `dashboard`, then retry.
 - Re-read `admin_key` from the `*_bootstrap` volume (Option B above).
 - If you changed `INSTANCE_SECRET`, update the stack so `admin-key` and `deploy` run again, then use the new key.
 
