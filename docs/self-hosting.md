@@ -25,7 +25,7 @@ Install these before you start:
 
 Optional later:
 
-- A Google Cloud project (only if you want **Sign in with Google**)
+- A Google Cloud project (only if you want **Sign in with Google** in addition to email/password)
 - [Bun](https://bun.sh) (only if you want helper scripts outside Docker)
 
 Check Docker works:
@@ -85,7 +85,7 @@ INSTANCE_NAME=convex-self-hosted
 INSTANCE_SECRET=paste_your_64_character_hex_here
 ```
 
-Leave the other defaults as-is for local use. You can add Google login later.
+Leave the other defaults as-is for local use. Email/password sign-in is enabled automatically. You can add Google login later if you want.
 
 > Treat `INSTANCE_SECRET` like a password. Anyone with it can administer your Convex instance. Do not commit `.env` to git.
 
@@ -144,6 +144,7 @@ In the browser:
 
 - http://localhost:3000 loads the ClassClarus UI
 - http://localhost:6791 accepts your admin key and shows data / logs
+- On the login page you can **sign up / sign in with email and password** (enabled automatically for Docker self-host)
 
 If something failed, jump to [Troubleshooting](#troubleshooting).
 
@@ -185,11 +186,25 @@ docker compose up -d --build web
 
 ---
 
+## Sign in with email and password (default)
+
+Self-host Docker Compose always enables Convex Auth **email/password**. It works from any device that can reach the app (including phones on your LAN) — no Google account and no HTTPS domain required.
+
+1. Open the app → login page
+2. Accept the terms, then use **Sign up** with an email and password
+3. After you are signed in, create a school or redeem an invite code in the app (same as cloud)
+
+Password reset by email is **not** configured yet. Keep passwords somewhere safe (or create a new account if you forget).
+
+Cloud / production ClassClarus does **not** enable this method — it stays Google-only.
+
+---
+
 ## Enable Sign in with Google (optional)
 
-Local defaults work without Google, but login needs OAuth credentials.
+Email/password works without Google. Google is optional for self-host.
 
-> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (`http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN — even if you followed [Access from another device on your LAN](#access-from-another-device-on-your-lan). To use Google login from other devices, put the app on a real domain with HTTPS (see [Public server / domain](#public-server--domain)).
+> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (`http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN — even if you followed [Access from another device on your LAN](#access-from-another-device-on-your-lan). To use Google login from other devices, put the app on a real domain with HTTPS (see [Public server / domain](#public-server--domain)). Use **email/password** on LAN instead.
 
 ### 1. Create OAuth credentials
 
@@ -265,7 +280,7 @@ docker compose up -d --build
 That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebuilds `web` (needs the new `VITE_CONVEX_URL`).
 
 - **Dashboard login** talks to `NEXT_PUBLIC_DEPLOYMENT_URL` from the browser. With `127.0.0.1` still set, a valid full admin key (`INSTANCE_NAME|hex`) still fails from another device.
-- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. See [Enable Sign in with Google](#enable-sign-in-with-google-optional).
+- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. Use **email/password** from other devices, or see [Enable Sign in with Google](#enable-sign-in-with-google-optional).
 - From that other device, check: `curl http://YOUR_SERVER_IP:3210/version`
 - Paste the **full** admin key from the bootstrap volume, not the hex alone.
 
@@ -403,7 +418,7 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
 
 ### Google sign-in fails
 
-1. Confirm you are signing in from a browser on the **host machine** (`http://localhost:3000`). Google OAuth will not work from another device on the LAN — use the host, or set up a [public domain](#public-server--domain).
+1. Confirm you are signing in from a browser on the **host machine** (`http://localhost:3000`). Google OAuth will not work from another device on the LAN — use the host, or set up a [public domain](#public-server--domain). From other devices, use **email/password** instead.
 2. Confirm `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` are in `.env`
 3. Confirm redirect URI is exactly  
    `http://127.0.0.1:3211/api/auth/callback/google` (local)  

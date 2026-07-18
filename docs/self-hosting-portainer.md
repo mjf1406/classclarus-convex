@@ -155,9 +155,21 @@ curl http://127.0.0.1:3210/version
 
 ---
 
+## Sign in with email and password (default)
+
+Self-host stacks always enable Convex Auth **email/password**. It works from any device that can reach the app (including phones on your LAN) — no Google account required.
+
+1. Open the app → login page
+2. Accept the terms, then **Sign up** with email and password
+3. Create a school or redeem an invite in the app after sign-in
+
+Password reset by email is not configured yet. Cloud / production ClassClarus stays Google-only.
+
+---
+
 ## Enable Google sign-in (optional)
 
-> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (e.g. `http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN. For Google login from other devices, use a real domain with HTTPS — see [self-hosting.md](self-hosting.md#public-server--domain).
+> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (e.g. `http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN. For Google login from other devices, use a real domain with HTTPS — see [self-hosting.md](self-hosting.md#public-server--domain). Prefer **email/password** on LAN.
 
 1. In [Google Cloud Console](https://console.cloud.google.com/) create a **Web application** OAuth client.
 2. Authorized JavaScript origin: your `SITE_URL` (local: `http://localhost:3000`). For a public domain, use that origin instead.

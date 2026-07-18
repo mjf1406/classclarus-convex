@@ -80,6 +80,9 @@ printf '%s' "$JWKS_VALUE" > "${OUTPUT_DIR}/jwks"
 set_env_file JWT_PRIVATE_KEY "${OUTPUT_DIR}/jwt_private_key"
 set_env_file JWKS "${OUTPUT_DIR}/jwks"
 
+# Self-host always enables email/password (cloud must not set this)
+set_env_value AUTH_PASSWORD_ENABLED true
+
 if [ -n "${AUTH_GOOGLE_ID:-}" ] && [ -n "${AUTH_GOOGLE_SECRET:-}" ]; then
   set_env_value AUTH_GOOGLE_ID "$AUTH_GOOGLE_ID"
   set_env_value AUTH_GOOGLE_SECRET "$AUTH_GOOGLE_SECRET"
