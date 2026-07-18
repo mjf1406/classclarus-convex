@@ -61,6 +61,8 @@ const ja: Catalog = {
       'ログインに失敗しました。メールとパスワードを確認してください。',
     passwordNoAccount:
       'そのメールのアカウントがありません。「新規登録」で作成してください。',
+    sessionRejected:
+      'サーバーがセッショントークンを拒否しました。セルフホストの場合は deploy/web を再ビルドし、サイトデータを消去してください（セルフホスティングのドキュメント参照）。',
     appFooter: 'これはClassClarusアプリです。',
     signInWithGoogle: 'Googleでログイン',
     continueWithGoogle: 'Googleで続行',

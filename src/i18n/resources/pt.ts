@@ -60,6 +60,8 @@ const pt: Catalog = {
     passwordAuthFailed: 'Falha ao entrar. Verifique o e-mail e a senha.',
     passwordNoAccount:
       'Nenhuma conta com esse e-mail. Use Criar conta para criar uma.',
+    sessionRejected:
+      'O servidor rejeitou o token de sessão. Em self-host, reconstrua deploy/web e limpe os dados do site (veja a documentação de self-hosting).',
     appFooter: 'Este é o app ClassClarus.',
     signInWithGoogle: 'Entrar com Google',
     continueWithGoogle: 'Continuar com Google',

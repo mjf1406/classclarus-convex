@@ -60,6 +60,8 @@ const fr: Catalog = {
     passwordAuthFailed: 'Échec de la connexion. Vérifiez votre e-mail et mot de passe.',
     passwordNoAccount:
       'Aucun compte pour cet e-mail. Utilisez Créer un compte pour en créer un.',
+    sessionRejected:
+      'Le serveur a rejeté le jeton de session. En self-host, reconstruisez deploy/web et effacez les données du site (voir la doc self-hosting).',
     appFooter: 'Ceci est l’application ClassClarus.',
     signInWithGoogle: 'Se connecter avec Google',
     continueWithGoogle: 'Continuer avec Google',

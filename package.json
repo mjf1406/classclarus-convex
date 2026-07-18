@@ -92,5 +92,8 @@
       "esbuild",
       "lightningcss"
     ]
+  },
+  "patchedDependencies": {
+    "@convex-dev/auth@0.0.94": "patches/@convex-dev%2Fauth@0.0.94.patch"
   }
 }

@@ -58,6 +58,8 @@ const zht: Catalog = {
     loadingSignIn: '正在載入登入選項…',
     passwordAuthFailed: '登入失敗。請檢查電子郵件和密碼。',
     passwordNoAccount: '該電子郵件尚無帳號。請使用「註冊」建立。',
+    sessionRejected:
+      '伺服器拒絕了工作階段權杖。若為自架主機，請重建 deploy/web 並清除網站資料（請參閱自架文件）。',
     appFooter: '這是 ClassClarus 應用程式。',
     signInWithGoogle: '使用 Google 登入',
     continueWithGoogle: '使用 Google 繼續',

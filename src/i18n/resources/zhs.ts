@@ -58,6 +58,8 @@ const zhs: Catalog = {
     loadingSignIn: '正在加载登录选项…',
     passwordAuthFailed: '登录失败。请检查邮箱和密码。',
     passwordNoAccount: '该邮箱尚无账号。请使用“注册”创建。',
+    sessionRejected:
+      '服务器拒绝了会话令牌。若为自托管，请重建 deploy/web 并清除站点数据（参见自托管文档）。',
     appFooter: '这是 ClassClarus 应用。',
     signInWithGoogle: '使用 Google 登录',
     continueWithGoogle: '使用 Google 继续',

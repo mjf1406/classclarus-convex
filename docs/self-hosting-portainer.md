@@ -325,12 +325,26 @@ Common causes (a valid key still fails for the last two):
 - Re-read `admin_key` from the `*_bootstrap` volume (Option B above) in case of a copy/paste error
 - Changed `INSTANCE_SECRET` after first boot — update the stack so `admin-key` and `deploy` run again, then use the new key
 
+### Auth stuck on login / session token rejected
+
+If password **Sign up** / **Sign in** finishes but you stay on the login page (or see “Server rejected the session token…”):
+
+1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Keep volumes — JWT keys are migrated to include a `kid`.
+2. Confirm the `deploy` container exits **0** and logs include `JWT kid: …` and `Deploy complete`.
+3. Check JWKS has a `kid`:
+
+   ```bash
+   curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+   ```
+
+4. Clear site data for the app origin, hard refresh, then **Sign up** again (or Sign in if the account still exists).
+
 ### Auth stuck on skeletons / `Auth provider discovery failed`
 
 If password auth leaves the UI on endless skeletons and the browser console shows `Auth provider discovery of http://YOUR_SERVER_IP:3211 failed`:
 
 1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Do **not** delete the stack volumes.
-2. Confirm the `deploy` container exits **0** and logs include `AUTH_PASSWORD_ENABLED` and `Deploy complete`.
+2. Confirm the `deploy` container exits **0** and logs include `JWT kid: …`, `AUTH_PASSWORD_ENABLED`, and `Deploy complete`.
 3. Clear site data for the app origin in the browser, hard refresh, then use **Sign up** for the first account (Sign in before any account exists fails with no-account / `InvalidAccountId`).
 4. If you delete rows from `users` / auth tables in the dashboard, clear browser site data too — stale tokens leave a “zombie” session (Sign In in the navbar + permanent skeletons).
 
@@ -339,6 +353,7 @@ Optional checks:
 ```bash
 curl http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
 curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+# Expect each key in JWKS to include a "kid" field
 ```
 
 ### Reset the stack (destructive)

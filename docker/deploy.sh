@@ -77,8 +77,17 @@ set_env_file() {
 set_env_value SITE_URL "$SITE_URL"
 printf '%s' "$JWT_PRIVATE_KEY_VALUE" > "${OUTPUT_DIR}/jwt_private_key"
 printf '%s' "$JWKS_VALUE" > "${OUTPUT_DIR}/jwks"
+
+# Self-hosted customJwt requires kid in both JWKS and JWT header (JWT_KID).
+# Migrates existing bootstrap keys that were generated without a kid.
+JWT_KID_VALUE="$(bun /app/scripts/ensure-jwks-kid.mjs "${OUTPUT_DIR}/jwks")"
+printf '%s' "$JWT_KID_VALUE" > "${OUTPUT_DIR}/jwt_kid"
+JWKS_VALUE="$(cat "${OUTPUT_DIR}/jwks")"
+echo "==> JWT kid: ${JWT_KID_VALUE}"
+
 set_env_file JWT_PRIVATE_KEY "${OUTPUT_DIR}/jwt_private_key"
 set_env_file JWKS "${OUTPUT_DIR}/jwks"
+set_env_value JWT_KID "$JWT_KID_VALUE"
 
 # Self-host always enables email/password (cloud must not set this)
 set_env_value AUTH_PASSWORD_ENABLED true
@@ -103,3 +112,4 @@ echo "==> Deploy complete"
 echo "    App:       ${SITE_URL}"
 echo "    Dashboard: http://localhost:6791"
 echo "    Admin key: ${OUTPUT_DIR}/admin_key"
+echo "    JWT kid:   ${JWT_KID_VALUE}"

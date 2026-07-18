@@ -60,6 +60,8 @@ const ru: Catalog = {
     passwordAuthFailed: 'Не удалось войти. Проверьте почту и пароль.',
     passwordNoAccount:
       'Нет аккаунта с этой почтой. Используйте «Зарегистрироваться», чтобы создать его.',
+    sessionRejected:
+      'Сервер отклонил токен сессии. Для self-host пересоберите deploy/web и очистите данные сайта (см. документацию self-hosting).',
     appFooter: 'Это приложение ClassClarus.',
     signInWithGoogle: 'Войти через Google',
     continueWithGoogle: 'Продолжить через Google',

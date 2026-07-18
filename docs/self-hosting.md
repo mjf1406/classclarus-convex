@@ -251,7 +251,8 @@ After a successful first boot, the **`bootstrap`** volume contains:
 |------|---------|
 | `admin_key` | Paste into the Convex dashboard |
 | `jwt_private_key` | Convex Auth signing key (auto-created if you left JWT vars blank) |
-| `jwks` | Matching public JWKS |
+| `jwks` | Matching public JWKS (includes RFC 7638 `kid`) |
+| `jwt_kid` | Key ID written to Convex env as `JWT_KID` (matches JWKS / JWT header) |
 
 Keep this volume. Removing it can break auth until you redeploy with new keys.
 
@@ -425,6 +426,26 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
    or your production `CONVEX_SITE_ORIGIN` + `/api/auth/callback/google`
 4. Redeploy: `docker compose up -d --build deploy`
 
+### Auth stuck on login / session token rejected
+
+After password **Sign up** or **Sign in**, the form may finish without an error but you stay on `/login`. The login UI may eventually show “Server rejected the session token…”.
+
+**Cause:** Self-hosted Convex validates JWTs with `customJwt` and requires a `kid` (key ID) in both the JWT header and the JWKS. Older bootstrap keys / unsigned headers lacked `kid`, so the WebSocket auth step silently failed while account creation still succeeded.
+
+**Fix:**
+
+1. Pull latest code and **rebuild** `deploy` + `web` (do **not** delete volumes — existing JWT keys are migrated in place).
+2. Confirm `deploy` logs include `JWT kid: …` and `Deploy complete`.
+3. Verify JWKS includes `kid`:
+
+   ```bash
+   curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+   ```
+
+4. Clear site data for the app origin, hard refresh, then **Sign up** again (or Sign in if the account still exists).
+
+Do **not** wipe auth tables unless you also clear browser site data — leftover tokens create a “zombie” session.
+
 ### Auth stuck on skeletons / `Auth provider discovery failed`
 
 After password sign-in/sign-up the UI may show endless skeletons, and the console may show:
@@ -433,7 +454,7 @@ After password sign-in/sign-up the UI may show endless skeletons, and the consol
 Auth provider discovery of http://YOUR_SERVER_IP:3211 failed
 ```
 
-That means JWT validation could not reach the site proxy’s OIDC discovery URL (common with LAN IPs from inside Docker). Current builds avoid that by validating with a **static JWKS** from the bootstrap deploy. To recover:
+That means JWT validation could not reach the site proxy’s OIDC discovery URL (common with LAN IPs from inside Docker). Current builds avoid that by validating with a **static JWKS** (with `kid`) from the bootstrap deploy. To recover:
 
 1. Pull latest code and **rebuild** `deploy` + `web` (Portainer “re-pull image” alone is not enough). Do **not** use `docker compose down -v` — that deletes your data.
 2. Force the one-shot deploy to run again:
@@ -441,7 +462,7 @@ That means JWT validation could not reach the site proxy’s OIDC discovery URL 
    ```bash
    docker compose build --no-cache deploy web
    docker compose up --build admin-key
-   docker compose up --build deploy   # expect "Deploy complete"
+   docker compose up --build deploy   # expect "Deploy complete" and "JWT kid: …"
    docker compose up -d --build web
    ```
 
@@ -454,6 +475,7 @@ Optional health check (useful, not required for JWT validation after the static-
 ```bash
 curl http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
 curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+# Expect each key in JWKS to include a "kid" field
 ```
 
 ### Reset everything (destructive)

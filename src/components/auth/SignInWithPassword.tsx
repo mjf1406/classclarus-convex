@@ -1,10 +1,13 @@
-import { useState, type FormEvent } from 'react'
-import { useAuthActions } from '@convex-dev/auth/react'
+import { useEffect, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
+import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
+
+const AUTH_ESTABLISH_TIMEOUT_MS = 8_000
 
 interface SignInWithPasswordProps {
   termsAccepted?: boolean
@@ -38,10 +41,31 @@ export function SignInWithPassword({
   defaultFlow = 'signIn',
 }: SignInWithPasswordProps) {
   const { signIn } = useAuthActions()
+  const { isAuthenticated } = useConvexAuth()
   const { t } = useTranslation('auth')
   const [flow, setFlow] = useState<'signIn' | 'signUp'>(defaultFlow)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const awaitingAuthRef = useRef(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!awaitingAuthRef.current) return
+    if (!isAuthenticated) return
+
+    awaitingAuthRef.current = false
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsLoading(false)
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -49,13 +73,32 @@ export function SignInWithPassword({
 
     setIsLoading(true)
     setError(null)
+    awaitingAuthRef.current = false
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
 
     const formData = new FormData(event.currentTarget)
     void signIn('password', formData)
       .then(() => {
-        setIsLoading(false)
+        // signIn can succeed while the backend still rejects the JWT (e.g. missing kid).
+        // Wait for useConvexAuth before clearing the spinner.
+        awaitingAuthRef.current = true
+        timeoutRef.current = setTimeout(() => {
+          if (!awaitingAuthRef.current) return
+          awaitingAuthRef.current = false
+          timeoutRef.current = null
+          setIsLoading(false)
+          setError(t('sessionRejected'))
+        }, AUTH_ESTABLISH_TIMEOUT_MS)
       })
       .catch((err: unknown) => {
+        awaitingAuthRef.current = false
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+          timeoutRef.current = null
+        }
         setIsLoading(false)
         setError(passwordErrorMessage(err, flow, t))
       })

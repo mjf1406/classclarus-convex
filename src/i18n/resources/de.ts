@@ -60,6 +60,8 @@ const de: Catalog = {
     passwordAuthFailed: 'Anmeldung fehlgeschlagen. E-Mail und Passwort prüfen.',
     passwordNoAccount:
       'Kein Konto für diese E-Mail. Nutzen Sie „Registrieren“, um eines zu erstellen.',
+    sessionRejected:
+      'Der Server hat das Sitzungstoken abgelehnt. Bei Self-Host deploy/web neu bauen und Websitedaten löschen (siehe Self-Hosting-Doku).',
     appFooter: 'Dies ist die ClassClarus-App.',
     signInWithGoogle: 'Mit Google anmelden',
     continueWithGoogle: 'Mit Google fortfahren',

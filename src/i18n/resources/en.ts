@@ -52,6 +52,8 @@ const en = {
     passwordAuthFailed: 'Sign-in failed. Check your email and password.',
     passwordNoAccount:
       'No account found for that email. Use Sign up to create one.',
+    sessionRejected:
+      'Server rejected the session token. For self-host, rebuild deploy/web and clear site data (see self-hosting docs).',
     appFooter: 'This is the ClassClarus app.',
     signInWithGoogle: 'Sign in with Google',
     continueWithGoogle: 'Continue with Google',

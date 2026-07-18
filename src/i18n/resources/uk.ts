@@ -60,6 +60,8 @@ const uk: Catalog = {
     passwordAuthFailed: 'Не вдалося увійти. Перевірте пошту та пароль.',
     passwordNoAccount:
       'Немає акаунта з цією поштою. Використайте «Зареєструватися», щоб створити його.',
+    sessionRejected:
+      'Сервер відхилив токен сесії. Для self-host перебудуйте deploy/web і очистіть дані сайту (див. документацію self-hosting).',
     appFooter: 'Це додаток ClassClarus.',
     signInWithGoogle: 'Увійти через Google',
     continueWithGoogle: 'Продовжити через Google',
