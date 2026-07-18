@@ -11,6 +11,7 @@ import { ClassList } from '#/components/classes/ClassList'
 import type { ClassListView } from '#/components/classes/ClassList'
 import { ClassFormCredenza } from '#/components/classes/ClassFormCredenza'
 import { LinkedStudentsSection } from '#/components/classes/LinkedStudentsSection'
+import { translateClassRole } from '#/i18n/roleLabels'
 import {
   DEFAULT_CLASS_SORT,
   getSortDirection,
@@ -20,9 +21,16 @@ import {
   toggleClassSort,
 } from '#/lib/classSort'
 import type { ClassSort, ClassSortField } from '#/lib/classSort'
-import type { ClassPublic } from '#/lib/classes'
+import type { ClassDisplayRole, ClassPublic } from '#/lib/classes'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export const Route = createFileRoute('/_account/')({
@@ -42,8 +50,26 @@ export const Route = createFileRoute('/_account/')({
 
 type FormMode = 'create' | 'edit'
 
+type RoleFilter = 'all' | ClassDisplayRole
+
+const ROLE_FILTER_OPTIONS = [
+  'creator',
+  'classTeacher',
+  'assistantTeacher',
+  'student',
+  'guardian',
+] as const satisfies readonly ClassDisplayRole[]
+
+function isRoleFilter(value: string): value is RoleFilter {
+  return (
+    value === 'all' ||
+    (ROLE_FILTER_OPTIONS as readonly string[]).includes(value)
+  )
+}
+
 function Home() {
   const { t } = useTranslation('home')
+  const { t: tClasses } = useTranslation('classes')
   const { isAuthenticated } = useConvexAuth()
 
   const sortFieldLabels: Record<ClassSortField, string> = {
@@ -56,6 +82,7 @@ function Home() {
   const [editingClass, setEditingClass] = useState<ClassPublic | null>(null)
   const [view, setView] = useState<ClassListView>('grid')
   const [sort, setSort] = useState<ClassSort>(DEFAULT_CLASS_SORT)
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all')
   const editFrameRef = useRef<number | null>(null)
 
   const { data: accountHome } = useQuery({
@@ -69,15 +96,23 @@ function Home() {
 
   const allClasses = accountHome?.classes
   const children = accountHome?.children
+  const roleFiltered = roleFilter !== 'all'
+
+  const matchesRole = (classDoc: ClassPublic) =>
+    roleFilter === 'all' || classDoc.myRole === roleFilter
 
   const activeClasses =
     allClasses === undefined
       ? undefined
-      : allClasses.filter((classDoc) => classDoc.archivedTime === undefined)
+      : allClasses
+          .filter((classDoc) => classDoc.archivedTime === undefined)
+          .filter(matchesRole)
   const archivedClasses =
     allClasses === undefined
       ? undefined
-      : allClasses.filter((classDoc) => classDoc.archivedTime !== undefined)
+      : allClasses
+          .filter((classDoc) => classDoc.archivedTime !== undefined)
+          .filter(matchesRole)
 
   const activeSortField = getSortField(sort)
   const activeSortDirection = getSortDirection(sort)
@@ -106,6 +141,30 @@ function Home() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={roleFilter}
+            onValueChange={(value) => {
+              if (isRoleFilter(value)) {
+                setRoleFilter(value)
+              }
+            }}
+          >
+            <SelectTrigger
+              size="sm"
+              aria-label={t('filterByRole')}
+              className="min-w-36 rounded-lg"
+            >
+              <SelectValue placeholder={t('filterByRole')} />
+            </SelectTrigger>
+            <SelectContent position="popper" align="end">
+              <SelectItem value="all">{t('filterRoleAll')}</SelectItem>
+              {ROLE_FILTER_OPTIONS.map((role) => (
+                <SelectItem key={role} value={role}>
+                  {translateClassRole(tClasses, role)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <ToggleGroup
             type="single"
             value={activeSortField}
@@ -188,6 +247,7 @@ function Home() {
         classes={activeClasses}
         view={view}
         sort={sort}
+        roleFiltered={roleFiltered}
         onCreateClick={() => {
           if (editFrameRef.current !== null) {
             cancelAnimationFrame(editFrameRef.current)
@@ -222,6 +282,7 @@ function Home() {
           view={view}
           sort={sort}
           archivedOnly
+          roleFiltered={roleFiltered}
         />
       </section>
     </div>

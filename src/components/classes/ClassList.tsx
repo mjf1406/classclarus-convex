@@ -55,6 +55,8 @@ type ClassListProps = {
   view?: ClassListView
   sort?: ClassSort
   archivedOnly?: boolean
+  /** True when a role filter is active and may empty the list. */
+  roleFiltered?: boolean
   onCreateClick?: () => void
   onEdit?: (classDoc: ClassPublic) => void
 }
@@ -455,26 +457,34 @@ function ClassListSkeleton({ view }: { view: ClassListView }) {
 
 function EmptyState({
   archivedOnly,
+  roleFiltered,
   onCreateClick,
 }: {
   archivedOnly?: boolean
+  roleFiltered?: boolean
   onCreateClick?: () => void
 }) {
   const { t } = useTranslation('home')
+  const title = roleFiltered
+    ? archivedOnly
+      ? t('noArchivedClassesForRole')
+      : t('noClassesForRole')
+    : archivedOnly
+      ? t('noArchivedClasses')
+      : t('noClasses')
+
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
       <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <BookText className="size-6" />
       </div>
-      <h2 className="text-lg font-semibold">
-        {archivedOnly ? t('noArchivedClasses') : t('noClasses')}
-      </h2>
-      {!archivedOnly && (
+      <h2 className="text-lg font-semibold">{title}</h2>
+      {!roleFiltered && !archivedOnly && (
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           {t('emptyCta')}
         </p>
       )}
-      {!archivedOnly && onCreateClick && (
+      {!roleFiltered && !archivedOnly && onCreateClick && (
         <Button className="mt-6" onClick={onCreateClick}>
           <Plus data-icon="inline-start" />
           {t('createClass')}
@@ -489,6 +499,7 @@ export function ClassList({
   view = 'grid',
   sort = DEFAULT_CLASS_SORT,
   archivedOnly = false,
+  roleFiltered = false,
   onCreateClick,
   onEdit,
 }: ClassListProps) {
@@ -545,7 +556,11 @@ export function ClassList({
 
   if (sortedClasses.length === 0) {
     return (
-      <EmptyState archivedOnly={archivedOnly} onCreateClick={onCreateClick} />
+      <EmptyState
+        archivedOnly={archivedOnly}
+        roleFiltered={roleFiltered}
+        onCreateClick={onCreateClick}
+      />
     )
   }
 
