@@ -10,7 +10,6 @@
 
 import type * as app from "../app.js";
 import type * as auth from "../auth.js";
-import type * as authProviders from "../authProviders.js";
 import type * as authz from "../authz.js";
 import type * as authzOps from "../authzOps.js";
 import type * as classes from "../classes.js";
@@ -46,7 +45,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   app: typeof app;
   auth: typeof auth;
-  authProviders: typeof authProviders;
   authz: typeof authz;
   authzOps: typeof authzOps;
   classes: typeof classes;

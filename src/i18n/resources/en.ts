@@ -39,23 +39,6 @@ const en = {
     and: 'and',
     googleOnlyNote:
       "We're sorry that we only support Google at the moment. We're working on adding more options.",
-    emailLabel: 'Email',
-    emailPlaceholder: 'you@example.com',
-    passwordLabel: 'Password',
-    passwordPlaceholder: 'At least 8 characters',
-    signIn: 'Sign in',
-    signUp: 'Sign up',
-    signInInstead: 'Already have an account? Sign in',
-    signUpInstead: 'Need an account? Sign up',
-    orContinueWith: 'or continue with',
-    loadingSignIn: 'Loading sign-in options…',
-    passwordAuthFailed: 'Sign-in failed. Check your email and password.',
-    passwordNoAccount:
-      'No account found for that email. Use Sign up to create one.',
-    sessionRejected:
-      'Server rejected the session token. For self-host, rebuild deploy/web and clear site data (see self-hosting docs).',
-    signInNoTokens:
-      'Sign-in did not return a session token. Check Dashboard Logs for auth:signIn (often a JWT_PRIVATE_KEY / CONVEX_SITE_URL error).',
     appFooter: 'This is the ClassClarus app.',
     signInWithGoogle: 'Sign in with Google',
     continueWithGoogle: 'Continue with Google',

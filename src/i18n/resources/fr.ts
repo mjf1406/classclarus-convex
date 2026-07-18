@@ -47,23 +47,6 @@ const fr: Catalog = {
     and: 'et',
     googleOnlyNote:
       'Nous ne prenons en charge que Google pour le moment. D’autres options arrivent.',
-    emailLabel: 'E-mail',
-    emailPlaceholder: 'vous@exemple.com',
-    passwordLabel: 'Mot de passe',
-    passwordPlaceholder: 'Au moins 8 caractères',
-    signIn: 'Se connecter',
-    signUp: 'Créer un compte',
-    signInInstead: 'Déjà un compte ? Se connecter',
-    signUpInstead: 'Besoin d’un compte ? Créer un compte',
-    orContinueWith: 'ou continuer avec',
-    loadingSignIn: 'Chargement des options de connexion…',
-    passwordAuthFailed: 'Échec de la connexion. Vérifiez votre e-mail et mot de passe.',
-    passwordNoAccount:
-      'Aucun compte pour cet e-mail. Utilisez Créer un compte pour en créer un.',
-    sessionRejected:
-      'Le serveur a rejeté le jeton de session. En self-host, reconstruisez deploy/web et effacez les données du site (voir la doc self-hosting).',
-    signInNoTokens:
-      'Aucun jeton de session renvoyé. Vérifiez Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Ceci est l’application ClassClarus.',
     signInWithGoogle: 'Se connecter avec Google',
     continueWithGoogle: 'Continuer avec Google',

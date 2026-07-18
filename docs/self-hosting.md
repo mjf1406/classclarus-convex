@@ -25,7 +25,7 @@ Install these before you start:
 
 Optional later:
 
-- A Google Cloud project (only if you want **Sign in with Google** in addition to email/password)
+- A Google Cloud project (only if you want **Sign in with Google**)
 - [Bun](https://bun.sh) (only if you want helper scripts outside Docker)
 
 Check Docker works:
@@ -85,7 +85,7 @@ INSTANCE_NAME=convex-self-hosted
 INSTANCE_SECRET=paste_your_64_character_hex_here
 ```
 
-Leave the other defaults as-is for local use. Email/password sign-in is enabled automatically. You can add Google login later if you want.
+Leave the other defaults as-is for local use. You can add Google login later.
 
 > Treat `INSTANCE_SECRET` like a password. Anyone with it can administer your Convex instance. Do not commit `.env` to git.
 
@@ -144,7 +144,6 @@ In the browser:
 
 - http://localhost:3000 loads the ClassClarus UI
 - http://localhost:6791 accepts your admin key and shows data / logs
-- On the login page you can **sign up / sign in with email and password** (enabled automatically for Docker self-host)
 
 If something failed, jump to [Troubleshooting](#troubleshooting).
 
@@ -186,25 +185,11 @@ docker compose up -d --build web
 
 ---
 
-## Sign in with email and password (default)
-
-Self-host Docker Compose always enables Convex Auth **email/password**. It works from any device that can reach the app (including phones on your LAN) — no Google account and no HTTPS domain required.
-
-1. Open the app → login page
-2. Accept the terms, then use **Sign up** with an email and password
-3. After you are signed in, create a school or redeem an invite code in the app (same as cloud)
-
-Password reset by email is **not** configured yet. Keep passwords somewhere safe (or create a new account if you forget).
-
-Cloud / production ClassClarus does **not** enable this method — it stays Google-only.
-
----
-
 ## Enable Sign in with Google (optional)
 
-Email/password works without Google. Google is optional for self-host.
+Local defaults work without Google, but login needs OAuth credentials.
 
-> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (`http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN — even if you followed [Access from another device on your LAN](#access-from-another-device-on-your-lan). To use Google login from other devices, put the app on a real domain with HTTPS (see [Public server / domain](#public-server--domain)). Use **email/password** on LAN instead.
+> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (`http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN — even if you followed [Access from another device on your LAN](#access-from-another-device-on-your-lan). To use Google login from other devices, put the app on a real domain with HTTPS (see [Public server / domain](#public-server--domain)).
 
 ### 1. Create OAuth credentials
 
@@ -251,8 +236,7 @@ After a successful first boot, the **`bootstrap`** volume contains:
 |------|---------|
 | `admin_key` | Paste into the Convex dashboard |
 | `jwt_private_key` | Convex Auth signing key (auto-created if you left JWT vars blank) |
-| `jwks` | Matching public JWKS (includes RFC 7638 `kid`) |
-| `jwt_kid` | Key ID written to Convex env as `JWT_KID` (matches JWKS / JWT header) |
+| `jwks` | Matching public JWKS |
 
 Keep this volume. Removing it can break auth until you redeploy with new keys.
 
@@ -281,7 +265,7 @@ docker compose up -d --build
 That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebuilds `web` (needs the new `VITE_CONVEX_URL`).
 
 - **Dashboard login** talks to `NEXT_PUBLIC_DEPLOYMENT_URL` from the browser. With `127.0.0.1` still set, a valid full admin key (`INSTANCE_NAME|hex`) still fails from another device.
-- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. Use **email/password** from other devices, or see [Enable Sign in with Google](#enable-sign-in-with-google-optional).
+- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. See [Enable Sign in with Google](#enable-sign-in-with-google-optional).
 - From that other device, check: `curl http://YOUR_SERVER_IP:3210/version`
 - Paste the **full** admin key from the bootstrap volume, not the hex alone.
 
@@ -419,67 +403,12 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
 
 ### Google sign-in fails
 
-1. Confirm you are signing in from a browser on the **host machine** (`http://localhost:3000`). Google OAuth will not work from another device on the LAN — use the host, or set up a [public domain](#public-server--domain). From other devices, use **email/password** instead.
+1. Confirm you are signing in from a browser on the **host machine** (`http://localhost:3000`). Google OAuth will not work from another device on the LAN — use the host, or set up a [public domain](#public-server--domain).
 2. Confirm `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` are in `.env`
 3. Confirm redirect URI is exactly  
    `http://127.0.0.1:3211/api/auth/callback/google` (local)  
    or your production `CONVEX_SITE_ORIGIN` + `/api/auth/callback/google`
 4. Redeploy: `docker compose up -d --build deploy`
-
-### Auth stuck on login / session token rejected
-
-After password **Sign up** or **Sign in**, the form may finish without an error but you stay on `/login`. The login UI may show “did not return a session token” or “Server rejected the session token…”.
-
-**DB clue:** `users` / `authAccounts` have rows but `authSessions` / `authRefreshTokens` are empty — account creation committed, then JWT minting failed in a second mutation. Open **Dashboard → Logs** and filter `auth:signIn` (often `Missing environment variable \`JWT_PRIVATE_KEY\`` / `CONVEX_SITE_URL`, or PKCS8 parse errors).
-
-**Also:** Self-hosted `customJwt` requires a `kid` in both the JWT header and JWKS. Older keys lacked `kid` (sessions exist, WebSocket auth fails). Current deploy migrates JWKS and sets `JWT_KID`.
-
-**Fix:**
-
-1. Pull latest code and **rebuild** `deploy` + `web` (do **not** delete volumes).
-2. Confirm `deploy` logs include `verify-auth-keys ok`, `auth diagnostics: ok`, `JWT kid: …`, and `Deploy complete`.
-3. Verify JWKS includes `kid`:
-
-   ```bash
-   curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
-   ```
-
-4. Optionally delete orphan auth account rows from failed attempts.
-5. Clear site data for the app origin, hard refresh, then **Sign up** again.
-
-Do **not** wipe auth tables unless you also clear browser site data — leftover tokens create a “zombie” session.
-
-### Auth stuck on skeletons / `Auth provider discovery failed`
-
-After password sign-in/sign-up the UI may show endless skeletons, and the console may show:
-
-```text
-Auth provider discovery of http://YOUR_SERVER_IP:3211 failed
-```
-
-That means JWT validation could not reach the site proxy’s OIDC discovery URL (common with LAN IPs from inside Docker). Current builds avoid that by validating with a **static JWKS** (with `kid`) from the bootstrap deploy. To recover:
-
-1. Pull latest code and **rebuild** `deploy` + `web` (Portainer “re-pull image” alone is not enough). Do **not** use `docker compose down -v` — that deletes your data.
-2. Force the one-shot deploy to run again:
-
-   ```bash
-   docker compose build --no-cache deploy web
-   docker compose up --build admin-key
-   docker compose up --build deploy   # expect "Deploy complete" and "JWT kid: …"
-   docker compose up -d --build web
-   ```
-
-3. In the browser, clear site data for the app origin (e.g. `http://YOUR_SERVER_IP:3000`), hard refresh, then open login again.
-4. Create the **first** account with **Sign up**, not Sign in. Sign in before any account exists returns “no account” / `InvalidAccountId`.
-5. If you wipe `users` / auth tables in the Convex dashboard, also clear browser site data — leftover tokens look “signed in” on the client while the server has no user (Sign In button + endless skeletons). After redeploy, confirm `Deploy complete`, then Sign up once.
-
-Optional health check (useful, not required for JWT validation after the static-JWKS fix):
-
-```bash
-curl http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
-curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
-# Expect each key in JWKS to include a "kid" field
-```
 
 ### Reset everything (destructive)
 

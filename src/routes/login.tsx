@@ -1,10 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
-import { convexQuery } from '@convex-dev/react-query'
 import { z } from 'zod'
-import { api } from '../../convex/_generated/api'
 import { LogoBig } from '@/components/brand/logo'
 import {
   Card,
@@ -15,10 +12,8 @@ import {
 } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { SignInWithGoogle } from '@/components/auth/SignInWithGoogle'
-import { SignInWithPassword } from '@/components/auth/SignInWithPassword'
 import { ModeToggle } from '#/components/theme/mode-toggle'
 import { LanguageToggle } from '#/i18n/LanguageToggle'
-import { ONE_HOUR } from '@/lib/queryCache'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -33,14 +28,6 @@ function RouteComponent() {
   const { redirect } = Route.useSearch()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const { t } = useTranslation(['auth', 'common'])
-
-  const { data: providers } = useQuery({
-    ...convexQuery(api.authProviders.getAuthProviders, {}),
-    gcTime: ONE_HOUR,
-  })
-
-  const showPassword = providers?.password === true
-  const showGoogle = providers?.google === true
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
@@ -113,39 +100,11 @@ function RouteComponent() {
               .
             </label>
           </div>
-
-          {providers === undefined ? (
-            <p className="text-center text-sm text-muted-foreground">
-              {t('loadingSignIn')}
-            </p>
-          ) : (
-            <>
-              {showPassword ? (
-                <SignInWithPassword
-                  termsAccepted={termsAccepted}
-                  defaultFlow={showGoogle ? 'signIn' : 'signUp'}
-                />
-              ) : null}
-
-              {showPassword && showGoogle ? (
-                <p className="text-center text-xs text-muted-foreground">
-                  {t('orContinueWith')}
-                </p>
-              ) : null}
-
-              {showGoogle ? (
-                <SignInWithGoogle
-                  termsAccepted={termsAccepted}
-                  redirectTo={redirect}
-                />
-              ) : null}
-
-              {!showPassword && showGoogle ? (
-                <p className="opacity-50 text-sm">{t('googleOnlyNote')}</p>
-              ) : null}
-            </>
-          )}
-
+          <SignInWithGoogle
+            termsAccepted={termsAccepted}
+            redirectTo={redirect}
+          />
+          <p className="opacity-50 text-sm">{t('googleOnlyNote')}</p>
           <div className="pt-4 mt-4 border-t">
             <p className="text-xs text-center text-muted-foreground">
               {t('appFooter')}{' '}

@@ -47,23 +47,6 @@ const ru: Catalog = {
     and: 'и',
     googleOnlyNote:
       'Сейчас поддерживается только Google. Мы работаем над другими вариантами.',
-    emailLabel: 'Эл. почта',
-    emailPlaceholder: 'you@example.com',
-    passwordLabel: 'Пароль',
-    passwordPlaceholder: 'Не менее 8 символов',
-    signIn: 'Войти',
-    signUp: 'Зарегистрироваться',
-    signInInstead: 'Уже есть аккаунт? Войти',
-    signUpInstead: 'Нужен аккаунт? Зарегистрироваться',
-    orContinueWith: 'или продолжить с',
-    loadingSignIn: 'Загрузка вариантов входа…',
-    passwordAuthFailed: 'Не удалось войти. Проверьте почту и пароль.',
-    passwordNoAccount:
-      'Нет аккаунта с этой почтой. Используйте «Зарегистрироваться», чтобы создать его.',
-    sessionRejected:
-      'Сервер отклонил токен сессии. Для self-host пересоберите deploy/web и очистите данные сайта (см. документацию self-hosting).',
-    signInNoTokens:
-      'Токен сессии не возвращён. Проверьте Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Это приложение ClassClarus.',
     signInWithGoogle: 'Войти через Google',
     continueWithGoogle: 'Продолжить через Google',

@@ -47,24 +47,7 @@ const ko: Catalog = {
     and: '및',
     googleOnlyNote:
       '현재는 Google만 지원합니다. 더 많은 옵션을 추가하기 위해 작업 중입니다.',
-    emailLabel: '이메일',
-    emailPlaceholder: 'you@example.com',
-    passwordLabel: '비밀번호',
-    passwordPlaceholder: '8자 이상',
-    signIn: '로그인',
-    signUp: '가입',
-    signInInstead: '이미 계정이 있나요? 로그인',
-    signUpInstead: '계정이 필요하신가요? 가입',
-    orContinueWith: '또는 다음으로 계속',
-    loadingSignIn: '로그인 옵션 불러오는 중…',
-    passwordAuthFailed: '로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.',
-    passwordNoAccount:
-      '해당 이메일의 계정이 없습니다. 가입으로 새 계정을 만드세요.',
-    sessionRejected:
-      '서버가 세션 토큰을 거부했습니다. 셀프호스트라면 deploy/web을 다시 빌드하고 사이트 데이터를 지우세요(셀프호스팅 문서 참고).',
-        signInNoTokens:
-      '세션 토큰이 반환되지 않았습니다. 대시보드 Logs에서 auth:signIn을 확인하세요 (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
-appFooter: '이것은 ClassClarus 앱입니다.',
+    appFooter: '이것은 ClassClarus 앱입니다.',
     signInWithGoogle: 'Google로 로그인',
     continueWithGoogle: 'Google로 계속',
   },

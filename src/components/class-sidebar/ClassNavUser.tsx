@@ -9,7 +9,6 @@ import {
   LogOut,
   Settings,
 } from 'lucide-react'
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ONE_HOUR } from '#/lib/queryCache'
@@ -78,23 +77,14 @@ function getDisplayName(user: CurrentUser) {
 
 function useAccountMenuState() {
   const { isLoading, isAuthenticated } = useConvexAuth()
-  const { data: user, isFetched: userFetched } = useQuery({
+  const { data: user } = useQuery({
     ...convexQuery(api.users.current, isAuthenticated ? {} : 'skip'),
     gcTime: ONE_HOUR,
   })
   const { signOut } = useAuthActions()
 
-  useEffect(() => {
-    if (isAuthenticated && userFetched && user === null) {
-      void signOut()
-    }
-  }, [isAuthenticated, userFetched, user, signOut])
-
   return {
-    isLoading:
-      isLoading ||
-      (isAuthenticated && user === undefined) ||
-      (isAuthenticated && user === null),
+    isLoading,
     isAuthenticated,
     user,
     signOut,

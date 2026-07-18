@@ -47,23 +47,6 @@ const es: Catalog = {
     and: 'y',
     googleOnlyNote:
       'Por ahora solo admitimos Google. Estamos trabajando en más opciones.',
-    emailLabel: 'Correo',
-    emailPlaceholder: 'tu@ejemplo.com',
-    passwordLabel: 'Contraseña',
-    passwordPlaceholder: 'Al menos 8 caracteres',
-    signIn: 'Iniciar sesión',
-    signUp: 'Registrarse',
-    signInInstead: '¿Ya tienes cuenta? Inicia sesión',
-    signUpInstead: '¿Necesitas una cuenta? Regístrate',
-    orContinueWith: 'o continuar con',
-    loadingSignIn: 'Cargando opciones de inicio de sesión…',
-    passwordAuthFailed: 'Error al iniciar sesión. Revisa tu correo y contraseña.',
-    passwordNoAccount:
-      'No hay cuenta con ese correo. Usa Registrarte para crear una.',
-    sessionRejected:
-      'El servidor rechazó el token de sesión. En self-host, reconstruye deploy/web y borra los datos del sitio (consulta la documentación de self-hosting).',
-    signInNoTokens:
-      'No se devolvió un token de sesión. Revisa Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Esta es la aplicación ClassClarus.',
     signInWithGoogle: 'Iniciar sesión con Google',
     continueWithGoogle: 'Continuar con Google',

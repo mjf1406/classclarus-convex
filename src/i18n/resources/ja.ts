@@ -47,24 +47,6 @@ const ja: Catalog = {
     and: 'および',
     googleOnlyNote:
       '現在はGoogleのみ対応しています。他のオプションも追加予定です。',
-    emailLabel: 'メール',
-    emailPlaceholder: 'you@example.com',
-    passwordLabel: 'パスワード',
-    passwordPlaceholder: '8文字以上',
-    signIn: 'ログイン',
-    signUp: '新規登録',
-    signInInstead: 'アカウントをお持ちですか？ログイン',
-    signUpInstead: 'アカウントが必要ですか？新規登録',
-    orContinueWith: 'または次で続行',
-    loadingSignIn: 'ログイン方法を読み込み中…',
-    passwordAuthFailed:
-      'ログインに失敗しました。メールとパスワードを確認してください。',
-    passwordNoAccount:
-      'そのメールのアカウントがありません。「新規登録」で作成してください。',
-    sessionRejected:
-      'サーバーがセッショントークンを拒否しました。セルフホストの場合は deploy/web を再ビルドし、サイトデータを消去してください（セルフホスティングのドキュメント参照）。',
-    signInNoTokens:
-      'セッショントークンが返されませんでした。ダッシュボードの Logs で auth:signIn を確認してください（JWT_PRIVATE_KEY / CONVEX_SITE_URL）。',
     appFooter: 'これはClassClarusアプリです。',
     signInWithGoogle: 'Googleでログイン',
     continueWithGoogle: 'Googleで続行',

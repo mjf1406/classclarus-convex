@@ -47,23 +47,6 @@ const pt: Catalog = {
     and: 'e',
     googleOnlyNote:
       'No momento só oferecemos Google. Estamos trabalhando em mais opções.',
-    emailLabel: 'E-mail',
-    emailPlaceholder: 'voce@exemplo.com',
-    passwordLabel: 'Senha',
-    passwordPlaceholder: 'Pelo menos 8 caracteres',
-    signIn: 'Entrar',
-    signUp: 'Criar conta',
-    signInInstead: 'Já tem uma conta? Entrar',
-    signUpInstead: 'Precisa de uma conta? Criar conta',
-    orContinueWith: 'ou continuar com',
-    loadingSignIn: 'Carregando opções de entrada…',
-    passwordAuthFailed: 'Falha ao entrar. Verifique o e-mail e a senha.',
-    passwordNoAccount:
-      'Nenhuma conta com esse e-mail. Use Criar conta para criar uma.',
-    sessionRejected:
-      'O servidor rejeitou o token de sessão. Em self-host, reconstrua deploy/web e limpe os dados do site (veja a documentação de self-hosting).',
-    signInNoTokens:
-      'Nenhum token de sessão retornado. Verifique Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Este é o app ClassClarus.',
     signInWithGoogle: 'Entrar com Google',
     continueWithGoogle: 'Continuar com Google',

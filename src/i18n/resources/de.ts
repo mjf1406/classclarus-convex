@@ -47,23 +47,6 @@ const de: Catalog = {
     and: 'und',
     googleOnlyNote:
       'Derzeit unterstützen wir nur Google. Weitere Optionen folgen.',
-    emailLabel: 'E-Mail',
-    emailPlaceholder: 'sie@beispiel.de',
-    passwordLabel: 'Passwort',
-    passwordPlaceholder: 'Mindestens 8 Zeichen',
-    signIn: 'Anmelden',
-    signUp: 'Registrieren',
-    signInInstead: 'Bereits ein Konto? Anmelden',
-    signUpInstead: 'Noch kein Konto? Registrieren',
-    orContinueWith: 'oder fortfahren mit',
-    loadingSignIn: 'Anmeldeoptionen werden geladen…',
-    passwordAuthFailed: 'Anmeldung fehlgeschlagen. E-Mail und Passwort prüfen.',
-    passwordNoAccount:
-      'Kein Konto für diese E-Mail. Nutzen Sie „Registrieren“, um eines zu erstellen.',
-    sessionRejected:
-      'Der Server hat das Sitzungstoken abgelehnt. Bei Self-Host deploy/web neu bauen und Websitedaten löschen (siehe Self-Hosting-Doku).',
-    signInNoTokens:
-      'Kein Sitzungstoken erhalten. Prüfe Dashboard Logs auf auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Dies ist die ClassClarus-App.',
     signInWithGoogle: 'Mit Google anmelden',
     continueWithGoogle: 'Mit Google fortfahren',

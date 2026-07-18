@@ -47,23 +47,6 @@ const uk: Catalog = {
     and: 'та',
     googleOnlyNote:
       'Зараз підтримується лише Google. Ми працюємо над іншими варіантами.',
-    emailLabel: 'Ел. пошта',
-    emailPlaceholder: 'you@example.com',
-    passwordLabel: 'Пароль',
-    passwordPlaceholder: 'Щонайменше 8 символів',
-    signIn: 'Увійти',
-    signUp: 'Зареєструватися',
-    signInInstead: 'Вже є акаунт? Увійти',
-    signUpInstead: 'Потрібен акаунт? Зареєструватися',
-    orContinueWith: 'або продовжити з',
-    loadingSignIn: 'Завантаження варіантів входу…',
-    passwordAuthFailed: 'Не вдалося увійти. Перевірте пошту та пароль.',
-    passwordNoAccount:
-      'Немає акаунта з цією поштою. Використайте «Зареєструватися», щоб створити його.',
-    sessionRejected:
-      'Сервер відхилив токен сесії. Для self-host перебудуйте deploy/web і очистіть дані сайту (див. документацію self-hosting).',
-    signInNoTokens:
-      'Токен сесії не повернуто. Перевірте Dashboard Logs → auth:signIn (JWT_PRIVATE_KEY / CONVEX_SITE_URL).',
     appFooter: 'Це додаток ClassClarus.',
     signInWithGoogle: 'Увійти через Google',
     continueWithGoogle: 'Продовжити через Google',

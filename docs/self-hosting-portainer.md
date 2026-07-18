@@ -155,21 +155,9 @@ curl http://127.0.0.1:3210/version
 
 ---
 
-## Sign in with email and password (default)
-
-Self-host stacks always enable Convex Auth **email/password**. It works from any device that can reach the app (including phones on your LAN) — no Google account required.
-
-1. Open the app → login page
-2. Accept the terms, then **Sign up** with email and password
-3. Create a school or redeem an invite in the app after sign-in
-
-Password reset by email is not configured yet. Cloud / production ClassClarus stays Google-only.
-
----
-
 ## Enable Google sign-in (optional)
 
-> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (e.g. `http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN. For Google login from other devices, use a real domain with HTTPS — see [self-hosting.md](self-hosting.md#public-server--domain). Prefer **email/password** on LAN.
+> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (e.g. `http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN. For Google login from other devices, use a real domain with HTTPS — see [self-hosting.md](self-hosting.md#public-server--domain).
 
 1. In [Google Cloud Console](https://console.cloud.google.com/) create a **Web application** OAuth client.
 2. Authorized JavaScript origin: your `SITE_URL` (local: `http://localhost:3000`). For a public domain, use that origin instead.
@@ -283,7 +271,7 @@ Use `sudo` if you see `permission denied` on `/var/run/docker.sock`. After pulls
 
 ### `deploy` exited with an error
 
-Portainer may **remove** failed containers, so `docker logs classclarus-deploy-1` can say the container does not exist. Capture logs by running deploy on the host instead (logs stay on screen):
+Portainer may **remove** failed containers, so `docker logs classclarus-deploy-1` can say the container does not exist. Capture logs by running deploy on the host instead:
 
 ```bash
 cd /path/to/classclarus-convex   # or clone fresh under /tmp
@@ -293,10 +281,7 @@ sudo docker compose up --build admin-key
 sudo docker compose up --build deploy
 ```
 
-Watch for `Deploy complete`. Common failures:
-
-- `Buffer is not defined` / auth.config errors — pull latest `main` (JWKS data URI must not use Node `Buffer`)
-- `Could not resolve "#/lib/..."` bundling errors — branch is too old; Convex code must not import frontend `#/` aliases
+Watch for `Deploy complete`. If you see `Could not resolve "#/lib/..."` bundling errors, the branch is too old — pull latest `main` (Convex code must not import frontend `#/` aliases).
 
 In Portainer, after a successful host deploy, update/redeploy the stack (or keep using Compose). `web` only starts after `deploy` exits 0.
 
@@ -324,40 +309,6 @@ Common causes (a valid key still fails for the last two):
 - Opened `http://YOUR_SERVER_IP:6791` from another machine while `NEXT_PUBLIC_DEPLOYMENT_URL` is still `http://127.0.0.1:3210` — set it to `http://YOUR_SERVER_IP:3210`, update the stack, **recreate `dashboard`**, then retry
 - Re-read `admin_key` from the `*_bootstrap` volume (Option B above) in case of a copy/paste error
 - Changed `INSTANCE_SECRET` after first boot — update the stack so `admin-key` and `deploy` run again, then use the new key
-
-### Auth stuck on login / session token rejected
-
-If password **Sign up** / **Sign in** finishes but you stay on the login page (or see “Server rejected the session token…” / “did not return a session token”):
-
-**DB clue:** `users` / `authAccounts` have rows but `authSessions` / `authRefreshTokens` are empty — account creation succeeded, JWT minting failed. Open **Dashboard → Logs** and filter `auth:signIn` for the real exception (often `Missing environment variable \`JWT_PRIVATE_KEY\`` or `CONVEX_SITE_URL`, or a PKCS8 parse error).
-
-1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Keep volumes.
-2. Confirm the `deploy` container exits **0** and logs include `verify-auth-keys ok`, `auth diagnostics: ok`, `JWT kid: …`, and `Deploy complete`.
-3. Check JWKS has a `kid`:
-
-   ```bash
-   curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
-   ```
-
-4. Optionally delete orphan `users` / `authAccounts` rows from failed attempts.
-5. Clear site data for the app origin, hard refresh, then **Sign up** again.
-
-### Auth stuck on skeletons / `Auth provider discovery failed`
-
-If password auth leaves the UI on endless skeletons and the browser console shows `Auth provider discovery of http://YOUR_SERVER_IP:3211 failed`:
-
-1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Do **not** delete the stack volumes.
-2. Confirm the `deploy` container exits **0** and logs include `JWT kid: …`, `AUTH_PASSWORD_ENABLED`, and `Deploy complete`.
-3. Clear site data for the app origin in the browser, hard refresh, then use **Sign up** for the first account (Sign in before any account exists fails with no-account / `InvalidAccountId`).
-4. If you delete rows from `users` / auth tables in the dashboard, clear browser site data too — stale tokens leave a “zombie” session (Sign In in the navbar + permanent skeletons).
-
-Optional checks:
-
-```bash
-curl http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
-curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
-# Expect each key in JWKS to include a "kid" field
-```
 
 ### Reset the stack (destructive)
 
