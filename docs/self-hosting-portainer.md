@@ -157,8 +157,10 @@ curl http://127.0.0.1:3210/version
 
 ## Enable Google sign-in (optional)
 
+> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (e.g. `http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN. For Google login from other devices, use a real domain with HTTPS — see [self-hosting.md](self-hosting.md#public-server--domain).
+
 1. In [Google Cloud Console](https://console.cloud.google.com/) create a **Web application** OAuth client.
-2. Authorized JavaScript origin: your `SITE_URL` (e.g. `http://localhost:3000` or `http://YOUR_IP:3000`).
+2. Authorized JavaScript origin: your `SITE_URL` (local: `http://localhost:3000`). For a public domain, use that origin instead.
 3. Authorized redirect URI:
 
    ```text

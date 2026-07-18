@@ -189,6 +189,8 @@ docker compose up -d --build web
 
 Local defaults work without Google, but login needs OAuth credentials.
 
+> **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (`http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN — even if you followed [Access from another device on your LAN](#access-from-another-device-on-your-lan). To use Google login from other devices, put the app on a real domain with HTTPS (see [Public server / domain](#public-server--domain)).
+
 ### 1. Create OAuth credentials
 
 1. Open [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
@@ -263,6 +265,7 @@ docker compose up -d --build
 That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebuilds `web` (needs the new `VITE_CONVEX_URL`).
 
 - **Dashboard login** talks to `NEXT_PUBLIC_DEPLOYMENT_URL` from the browser. With `127.0.0.1` still set, a valid full admin key (`INSTANCE_NAME|hex`) still fails from another device.
+- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. See [Enable Sign in with Google](#enable-sign-in-with-google-optional).
 - From that other device, check: `curl http://YOUR_SERVER_IP:3210/version`
 - Paste the **full** admin key from the bootstrap volume, not the hex alone.
 
@@ -400,11 +403,12 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
 
 ### Google sign-in fails
 
-1. Confirm `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` are in `.env`
-2. Confirm redirect URI is exactly  
+1. Confirm you are signing in from a browser on the **host machine** (`http://localhost:3000`). Google OAuth will not work from another device on the LAN — use the host, or set up a [public domain](#public-server--domain).
+2. Confirm `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` are in `.env`
+3. Confirm redirect URI is exactly  
    `http://127.0.0.1:3211/api/auth/callback/google` (local)  
    or your production `CONVEX_SITE_ORIGIN` + `/api/auth/callback/google`
-3. Redeploy: `docker compose up -d --build deploy`
+4. Redeploy: `docker compose up -d --build deploy`
 
 ### Reset everything (destructive)
 
