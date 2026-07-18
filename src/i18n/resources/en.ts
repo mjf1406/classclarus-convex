@@ -240,6 +240,10 @@ const en = {
     invalidShareLink:
       'Invalid share link. Ask your teacher for a new join code link.',
     shareDocTitle: 'Join Code | ClassClarus',
+    invalidCode: 'Invalid join code',
+    inviteExpired: 'This invite code has expired',
+    inviteExhausted: 'This invite code has no uses left',
+    inviteRevoked: 'This invite code has been revoked',
   },
   classes: {
     classFallback: 'Class',

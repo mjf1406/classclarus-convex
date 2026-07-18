@@ -71,7 +71,17 @@ function JoinPage() {
     try {
       const result = await redeemJoinOrGuardianCode({ code })
       if (!result.ok) {
-        setError(result.error)
+        const redeemErrorKey =
+          result.error === 'Invalid join code'
+            ? 'invalidCode'
+            : result.error === 'This invite code has expired'
+              ? 'inviteExpired'
+              : result.error === 'This invite code has no uses left'
+                ? 'inviteExhausted'
+                : result.error === 'This invite code has been revoked'
+                  ? 'inviteRevoked'
+                  : null
+        setError(redeemErrorKey ? t(redeemErrorKey) : result.error)
         return
       }
 

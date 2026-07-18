@@ -73,7 +73,7 @@ export function InviteCreateForm({
 }) {
   const { t } = useTranslation('classes')
   const [role, setRole] = useState(defaultRole)
-  const [ttlHours, setTtlHours] = useState<InviteTtlHours>(24)
+  const [ttlHours, setTtlHours] = useState<InviteTtlHours>(1)
   const [maxUsesMode, setMaxUsesMode] = useState<
     'unlimited' | 'preset' | 'custom'
   >('unlimited')
