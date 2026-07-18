@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { requireUser } from '#/lib/auth'
+import { getCurrentUser, requireUser } from '#/lib/auth'
 import {
   coerceAppLanguage,
   DEFAULT_APP_LANGUAGE,
@@ -42,7 +42,9 @@ export const getMyPreferences = query({
   args: {},
   returns: v.union(preferencesValidator, v.null()),
   handler: async (ctx) => {
-    const user = await requireUser(ctx)
+    const user = await getCurrentUser(ctx)
+    if (!user) return null
+
     const prefs = await ctx.db
       .query('userPreferences')
       .withIndex('by_userId', (q) => q.eq('userId', user._id))

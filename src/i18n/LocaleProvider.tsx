@@ -39,9 +39,13 @@ function applyDocumentLang(language: AppLanguage) {
 
 function PersonalLocaleInner({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useConvexAuth()
+  const currentUser = useQuery(
+    api.users.current,
+    isAuthenticated ? {} : 'skip',
+  )
   const prefs = useQuery(
     api.userPreferences.getMyPreferences,
-    isAuthenticated ? {} : 'skip',
+    isAuthenticated && currentUser ? {} : 'skip',
   )
   const setMyLanguage = useMutation(api.userPreferences.setMyLanguage)
 

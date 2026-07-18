@@ -1,4 +1,4 @@
-import { requireUser } from '#/lib/auth'
+import { getCurrentUser, requireUser } from '#/lib/auth'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
 import {
   internalMutation,
@@ -540,16 +540,20 @@ async function listMyChildrenForAccountHome(
 // - linked student children for the LinkedStudentsSection
 export const getAccountHome = query({
   args: {},
-  returns: v.object({
-    user: v.object({
-      _id: v.id('users'),
+  returns: v.union(
+    v.object({
+      user: v.object({
+        _id: v.id('users'),
+      }),
+      classes: v.array(classDocWithMyRole),
+      schools: v.array(schoolDocPublic),
+      children: v.array(accountChildValidator),
     }),
-    classes: v.array(classDocWithMyRole),
-    schools: v.array(schoolDocPublic),
-    children: v.array(accountChildValidator),
-  }),
+    v.null(),
+  ),
   handler: async (ctx) => {
-    const user = await requireUser(ctx)
+    const user = await getCurrentUser(ctx)
+    if (!user) return null
 
     const roles = await authz.getUserRoles(ctx, user._id)
 
