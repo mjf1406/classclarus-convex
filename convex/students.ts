@@ -1,13 +1,19 @@
 import { requireUser } from '#/lib/auth'
 import { v } from 'convex/values'
+import { paginationOptsValidator } from 'convex/server'
+import { orgScope } from '@djpanda/convex-tenants'
 
 import { internalMutation, mutation, query } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import type { Id } from './_generated/dataModel'
-import { requireClassPermission } from './lib/classAuth'
+import { authz } from './authz'
+import { classScope, requireClassPermission } from './lib/classAuth'
+import { generateUniqueJoinCode } from './lib/joinCodes'
+import { nextRosterNumber } from './lib/soloRoster'
 import { listGuardianLinksForStudent } from './lib/guardianLinks'
 import {
   formatClassStudentName,
+  formatOrgStudentName,
   genderValidator,
   legalFirstName,
   legalLastName,
@@ -15,6 +21,7 @@ import {
   splitDisplayName,
 } from './lib/studentNames'
 import type { StudentGender, StudentPronouns } from './lib/studentNames'
+import { tenantsClient } from './tenants'
 
 const MAX_CLASS_STUDENTS = 500
 
@@ -295,6 +302,239 @@ export const reorderRoster = mutation({
         rosterNumber: index + 1,
       })
     }
+    return null
+  },
+})
+
+async function requireOrgStudentPermission(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<'users'>,
+  organizationId: string,
+  permission:
+    | 'students:create'
+    | 'students:list'
+    | 'students:enroll'
+    | 'students:unenroll'
+    | 'students:update',
+) {
+  const member = await tenantsClient.getMember(ctx, organizationId, userId)
+  if (!member || member.status === 'suspended') {
+    throw new Error('Not a member of this school')
+  }
+  await authz
+    .withTenant(organizationId)
+    .require(ctx, userId, permission, orgScope(organizationId))
+}
+
+const orgStudentListItem = v.object({
+  _id: v.id('orgStudents'),
+  firstName: v.string(),
+  lastName: v.string(),
+  displayName: v.string(),
+  email: v.optional(v.string()),
+  userId: v.optional(v.id('users')),
+  organizationId: v.optional(v.string()),
+})
+
+export const createOrgStudent = mutation({
+  args: {
+    schoolId: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+    email: v.optional(v.string()),
+  },
+  returns: v.id('orgStudents'),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    await requireOrgStudentPermission(
+      ctx,
+      user._id,
+      args.schoolId,
+      'students:create',
+    )
+
+    const firstName = args.firstName.trim()
+    const lastName = args.lastName.trim()
+    if (!firstName || !lastName) {
+      throw new Error('First and last name are required')
+    }
+
+    const org = await tenantsClient.getOrganization(ctx, args.schoolId)
+    if (!org || org.status === 'archived' || org.status === 'suspended') {
+      throw new Error('School is not active')
+    }
+
+    const guardianCode = await generateUniqueJoinCode(ctx)
+    return await ctx.db.insert('orgStudents', {
+      organizationId: args.schoolId,
+      firstName,
+      lastName,
+      email: args.email?.trim() || undefined,
+      guardianCode,
+    })
+  },
+})
+
+export const listOrgStudents = query({
+  args: {
+    schoolId: v.string(),
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: v.object({
+    page: v.array(orgStudentListItem),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    await requireOrgStudentPermission(
+      ctx,
+      user._id,
+      args.schoolId,
+      'students:list',
+    )
+
+    const result = await ctx.db
+      .query('orgStudents')
+      .withIndex('by_organizationId', (q) =>
+        q.eq('organizationId', args.schoolId),
+      )
+      .paginate(args.paginationOpts)
+
+    return {
+      ...result,
+      page: result.page.map((student) => ({
+        _id: student._id,
+        firstName: legalFirstName(student),
+        lastName: legalLastName(student),
+        displayName: formatOrgStudentName(student),
+        email: student.email,
+        userId: student.userId,
+        organizationId: student.organizationId,
+      })),
+    }
+  },
+})
+
+export const enrollStudent = mutation({
+  args: {
+    classId: v.id('classes'),
+    orgStudentId: v.id('orgStudents'),
+  },
+  returns: v.id('classEnrollments'),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    const classDoc = await ctx.db.get(args.classId)
+    if (!classDoc) throw new Error('Class not found')
+    if (classDoc.archivedTime !== undefined) {
+      throw new Error('Class is archived')
+    }
+    if (!classDoc.organizationId) {
+      throw new Error('Class is not part of a school')
+    }
+
+    await requireOrgStudentPermission(
+      ctx,
+      user._id,
+      classDoc.organizationId,
+      'students:enroll',
+    )
+
+    const orgStudent = await ctx.db.get(args.orgStudentId)
+    if (!orgStudent) throw new Error('Student not found')
+    if (orgStudent.organizationId !== classDoc.organizationId) {
+      throw new Error('Student does not belong to this school')
+    }
+
+    const existing = await ctx.db
+      .query('classEnrollments')
+      .withIndex('by_classId_and_orgStudentId', (q) =>
+        q.eq('classId', args.classId).eq('orgStudentId', args.orgStudentId),
+      )
+      .unique()
+
+    if (existing) {
+      if (existing.status === 'active') return existing._id
+      const rosterNumber =
+        existing.rosterNumber ?? (await nextRosterNumber(ctx, args.classId))
+      await ctx.db.patch(existing._id, {
+        status: 'active',
+        rosterNumber,
+        organizationId: classDoc.organizationId,
+      })
+      if (orgStudent.userId) {
+        const scope = classScope(args.classId)
+        const has = await authz.hasRole(ctx, orgStudent.userId, 'student', scope)
+        if (!has) {
+          await authz.assignRole(ctx, orgStudent.userId, 'student', scope)
+        }
+      }
+      return existing._id
+    }
+
+    const enrollmentId = await ctx.db.insert('classEnrollments', {
+      organizationId: classDoc.organizationId,
+      classId: args.classId,
+      orgStudentId: args.orgStudentId,
+      status: 'active',
+      rosterNumber: await nextRosterNumber(ctx, args.classId),
+    })
+
+    if (orgStudent.userId) {
+      const scope = classScope(args.classId)
+      const has = await authz.hasRole(ctx, orgStudent.userId, 'student', scope)
+      if (!has) {
+        await authz.assignRole(ctx, orgStudent.userId, 'student', scope)
+      }
+    }
+
+    return enrollmentId
+  },
+})
+
+export const unenrollStudent = mutation({
+  args: {
+    classId: v.id('classes'),
+    orgStudentId: v.id('orgStudents'),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    const classDoc = await ctx.db.get(args.classId)
+    if (!classDoc?.organizationId) {
+      throw new Error('Class is not part of a school')
+    }
+
+    await requireOrgStudentPermission(
+      ctx,
+      user._id,
+      classDoc.organizationId,
+      'students:unenroll',
+    )
+
+    const enrollment = await ctx.db
+      .query('classEnrollments')
+      .withIndex('by_classId_and_orgStudentId', (q) =>
+        q.eq('classId', args.classId).eq('orgStudentId', args.orgStudentId),
+      )
+      .unique()
+    if (!enrollment || enrollment.status !== 'active') {
+      throw new Error('Student is not actively enrolled in this class')
+    }
+
+    await ctx.db.patch(enrollment._id, { status: 'withdrawn' })
+
+    const orgStudent = await ctx.db.get(args.orgStudentId)
+    if (orgStudent?.userId) {
+      await authz.revokeRole(
+        ctx,
+        orgStudent.userId,
+        'student',
+        classScope(args.classId),
+        user._id,
+      )
+    }
+
     return null
   },
 })

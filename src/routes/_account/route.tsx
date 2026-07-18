@@ -7,13 +7,16 @@ export const Route = createFileRoute('/_account')({
 })
 
 function AccountLayout() {
-  const isClassRoute = useRouterState({
-    select: (state) => state.location.pathname.startsWith('/c/'),
+  const isShellRoute = useRouterState({
+    select: (state) => {
+      const path = state.location.pathname
+      return path.startsWith('/c/') || path.startsWith('/s/')
+    },
   })
 
   return (
     <div className="min-h-svh bg-background">
-      {isClassRoute ? null : <AccountNavbar />}
+      {isShellRoute ? null : <AccountNavbar />}
       <Outlet />
     </div>
   )

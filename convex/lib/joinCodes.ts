@@ -17,38 +17,60 @@ function generateJoinCode(length = JOIN_CODE_LENGTH): string {
 }
 
 async function isCodeTaken(ctx: MutationCtx, code: string): Promise<boolean> {
-  const [studentClass, teacherClass, assistantClass, guardianStudent] =
-    await Promise.all([
-      ctx.db
-        .query('classes')
-        .withIndex('by_studentCode', (query) => query.eq('studentCode', code))
-        .first(),
-      ctx.db
-        .query('classes')
-        .withIndex('by_teacherCode', (query) => query.eq('teacherCode', code))
-        .first(),
-      ctx.db
-        .query('classes')
-        .withIndex('by_assistantTeacherCode', (query) =>
-          query.eq('assistantTeacherCode', code),
-        )
-        .first(),
-      ctx.db
-        .query('orgStudents')
-        .withIndex('by_guardianCode', (query) => query.eq('guardianCode', code))
-        .first(),
-    ])
+  const [
+    studentClass,
+    teacherClass,
+    assistantClass,
+    guardianStudent,
+    schoolPrincipal,
+    schoolTeacher,
+    schoolAdmin,
+  ] = await Promise.all([
+    ctx.db
+      .query('classes')
+      .withIndex('by_studentCode', (query) => query.eq('studentCode', code))
+      .first(),
+    ctx.db
+      .query('classes')
+      .withIndex('by_teacherCode', (query) => query.eq('teacherCode', code))
+      .first(),
+    ctx.db
+      .query('classes')
+      .withIndex('by_assistantTeacherCode', (query) =>
+        query.eq('assistantTeacherCode', code),
+      )
+      .first(),
+    ctx.db
+      .query('orgStudents')
+      .withIndex('by_guardianCode', (query) => query.eq('guardianCode', code))
+      .first(),
+    ctx.db
+      .query('schoolJoinCodes')
+      .withIndex('by_principalCode', (query) => query.eq('principalCode', code))
+      .first(),
+    ctx.db
+      .query('schoolJoinCodes')
+      .withIndex('by_teacherCode', (query) => query.eq('teacherCode', code))
+      .first(),
+    ctx.db
+      .query('schoolJoinCodes')
+      .withIndex('by_adminCode', (query) => query.eq('adminCode', code))
+      .first(),
+  ])
 
   return (
     studentClass !== null ||
     teacherClass !== null ||
     assistantClass !== null ||
-    guardianStudent !== null
+    guardianStudent !== null ||
+    schoolPrincipal !== null ||
+    schoolTeacher !== null ||
+    schoolAdmin !== null
   )
 }
 
 /**
- * Generates a code that is unique across every class role and guardian code.
+ * Generates a code that is unique across class, guardian, and school codes.
  * Keeping one global code namespace makes `/join` unambiguous.
  */
 export async function generateUniqueJoinCode(

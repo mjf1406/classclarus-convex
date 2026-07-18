@@ -29,6 +29,7 @@ import {
   classSort,
   toPublicClass,
 } from './classes'
+import { listSchoolsForUser, getSchoolNameMap, schoolDocPublic, tryRedeemSchoolJoinCode } from './schools'
 import { loadGuardianCodesForClass } from './guardians'
 import { tryRedeemGuardianCode } from './lib/guardianLinks'
 import { rateLimiter } from './rateLimiter'
@@ -39,6 +40,7 @@ import {
   guardianObject,
   guardianSubject,
 } from './lib/guardianAuth'
+import type { SchoolOrgRole } from './tenants'
 
 type RedeemableRole = 'student' | 'classTeacher' | 'assistantTeacher'
 
@@ -179,7 +181,8 @@ export const redeemJoinCode = mutation({
 })
 
 /**
- * Single rate-limit budget: try class join codes, then guardian codes.
+ * Single rate-limit budget: try class join codes, then school staff codes,
+ * then guardian codes.
  */
 export const redeemJoinOrGuardianCode = mutation({
   args: {
@@ -191,6 +194,18 @@ export const redeemJoinOrGuardianCode = mutation({
       kind: v.literal('class'),
       classId: v.id('classes'),
       role: redeemableRoleValidator,
+    }),
+    v.object({
+      ok: v.literal(true),
+      kind: v.literal('school'),
+      schoolId: v.string(),
+      role: v.union(
+        v.literal('owner'),
+        v.literal('admin'),
+        v.literal('principal'),
+        v.literal('teacher'),
+        v.literal('member'),
+      ),
     }),
     v.object({
       ok: v.literal(true),
@@ -219,9 +234,22 @@ export const redeemJoinOrGuardianCode = mutation({
       }
     }
 
-    // Only fall through on "invalid code" — preserve guardian-cap messages etc.
+    // Only fall through on "invalid code" — preserve other errors.
     if (classResult.error !== INVALID_CODE_ERROR) {
       return { ok: false as const, error: classResult.error }
+    }
+
+    const schoolResult = await tryRedeemSchoolJoinCode(ctx, user, args.code)
+    if (schoolResult.ok) {
+      return {
+        ok: true as const,
+        kind: 'school' as const,
+        schoolId: schoolResult.schoolId,
+        role: schoolResult.role as SchoolOrgRole,
+      }
+    }
+    if (schoolResult.error !== INVALID_CODE_ERROR) {
+      return { ok: false as const, error: schoolResult.error }
     }
 
     const guardianResult = await tryRedeemGuardianCode(ctx, user._id, args.code)
@@ -374,7 +402,19 @@ export const listMyClasses = query({
 
     const classes = [...rosterClasses, ...guardianOnly]
 
+    const schoolIds = classes
+      .map((doc) => doc.organizationId)
+      .filter((id): id is string => id !== undefined)
+    const schoolNames = await getSchoolNameMap(ctx, user._id, schoolIds)
+
     return sortClasses(classes, sort).map((doc) => {
+      const school =
+        doc.organizationId !== undefined
+          ? {
+              id: doc.organizationId,
+              name: schoolNames.get(doc.organizationId) ?? 'School',
+            }
+          : undefined
       const held = rolesByClassId.get(doc._id)
       if (held) {
         const myRole = highestClassRole(held) ?? undefined
@@ -385,12 +425,14 @@ export const listMyClasses = query({
           ...toPublicClass(doc),
           myRole,
           canManage,
+          school,
         }
       }
       return {
         ...toPublicClass(doc),
         myRole: 'guardian' as const,
         canManage: false,
+        school,
       }
     })
   },
@@ -494,6 +536,7 @@ async function listMyChildrenForAccountHome(
 
 // One subscription for the authenticated “home” surface:
 // - classes (active + archived) for the ClassList
+// - schools (active + archived) for the SchoolList
 // - linked student children for the LinkedStudentsSection
 export const getAccountHome = query({
   args: {},
@@ -502,6 +545,7 @@ export const getAccountHome = query({
       _id: v.id('users'),
     }),
     classes: v.array(classDocWithMyRole),
+    schools: v.array(schoolDocPublic),
     children: v.array(accountChildValidator),
   }),
   handler: async (ctx) => {
@@ -527,24 +571,36 @@ export const getAccountHome = query({
     }
 
     const docs = await Promise.all(classIds.map((id) => ctx.db.get(id)))
+    const classDocs = docs.filter((doc): doc is Doc<'classes'> => doc !== null)
 
-    const classes = sortClasses(
-      docs.filter((doc): doc is Doc<'classes'> => doc !== null),
-      DEFAULT_CLASS_SORT,
-    ).map((doc) => {
+    const schoolIds = classDocs
+      .map((doc) => doc.organizationId)
+      .filter((id): id is string => id !== undefined)
+    const schoolNames = await getSchoolNameMap(ctx, user._id, schoolIds)
+
+    const classes = sortClasses(classDocs, DEFAULT_CLASS_SORT).map((doc) => {
       const held = rolesByClassId.get(doc._id) ?? []
       const myRole = highestClassRole(held) ?? undefined
       const canManage = held.includes('creator') || held.includes('classTeacher')
+      const school =
+        doc.organizationId !== undefined
+          ? {
+              id: doc.organizationId,
+              name: schoolNames.get(doc.organizationId) ?? 'School',
+            }
+          : undefined
       return {
         ...toPublicClass(doc),
         myRole,
         canManage,
+        school,
       }
     })
 
     return {
       user: { _id: user._id },
       classes,
+      schools: await listSchoolsForUser(ctx, user._id),
       children: await listMyChildrenForAccountHome(ctx, user._id),
     }
   },

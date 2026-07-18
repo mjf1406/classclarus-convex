@@ -52,6 +52,10 @@ const roles = defineRoles(permissions, TENANTS_ROLES, {
     students: ['create', 'list', 'enroll', 'unenroll', 'update'],
     guardians: ['link', 'unlink', 'viewLinkedStudents'],
   },
+  admin: {
+    students: ['create', 'list', 'enroll', 'unenroll', 'update'],
+    guardians: ['link', 'unlink', 'viewLinkedStudents'],
+  },
   principal: {
     organizations: ['read', 'update'],
     members: ['add', 'remove', 'updateRole', 'list'],

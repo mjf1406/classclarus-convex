@@ -39,6 +39,7 @@ export type ClassPublic = Omit<
   myRole: ClassDisplayRole | undefined
   canManage?: boolean
   canManageMembers?: boolean
+  school: { id: string; name: string } | undefined
 }
 
 type ListMyClass = {
@@ -56,6 +57,7 @@ type ListMyClass = {
   organizationId?: string
   teamId?: string
   language: ClassLanguage
+  school: { id: string; name: string } | undefined
 }
 
 function toListMyClass(doc: ClassPublic): ListMyClass {
@@ -74,6 +76,7 @@ function toListMyClass(doc: ClassPublic): ListMyClass {
     language: doc.language,
     myRole: doc.myRole,
     canManage: doc.canManage === true,
+    school: doc.school,
   }
 }
 
@@ -146,8 +149,35 @@ export function useCreateClass() {
         icon: args.icon,
         year: args.year,
         language: args.language ?? DEFAULT_CLASS_LANGUAGE,
+        organizationId: args.organizationId,
+        teamId: args.teamId,
         myRole: 'creator',
         canManage: true,
+        school: undefined,
+      }
+
+      if (args.organizationId) {
+        for (const { args: queryArgs, value } of localStore.getAllQueries(
+          api.schools.listSchoolClasses,
+        )) {
+          if (!value || !queryArgs) continue
+          if (queryArgs.schoolId !== args.organizationId) continue
+          localStore.setQuery(api.schools.listSchoolClasses, queryArgs, [
+            ...value,
+            {
+              _id: optimisticClass._id,
+              _creationTime: now,
+              name: args.name,
+              description: args.description,
+              icon: args.icon,
+              year: args.year,
+              updatedTime: undefined,
+              archivedTime: undefined,
+              organizationId: args.organizationId,
+              teamId: args.teamId,
+            },
+          ])
+        }
       }
 
       const home = localStore.getQuery(api.memberships.getAccountHome, {})
@@ -160,7 +190,10 @@ export function useCreateClass() {
         DEFAULT_CLASS_SORT,
       )
 
-      localStore.setQuery(api.memberships.getAccountHome, {}, { ...home, classes: nextClasses })
+      localStore.setQuery(api.memberships.getAccountHome, {}, {
+        ...home,
+        classes: nextClasses as typeof home.classes,
+      })
     },
   )
 }
@@ -210,7 +243,10 @@ export function useUpdateClass() {
         DEFAULT_CLASS_SORT,
       )
 
-      localStore.setQuery(api.memberships.getAccountHome, {}, { ...home, classes: nextClasses })
+      localStore.setQuery(api.memberships.getAccountHome, {}, {
+        ...home,
+        classes: nextClasses as typeof home.classes,
+      })
     },
   )
 }

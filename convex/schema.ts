@@ -27,13 +27,31 @@ export default defineSchema({
     language: v.optional(classLanguageValidator),
   })
     .index('by_user', ['userId'])
+    .index('by_organizationId', ['organizationId'])
     .index('by_studentCode', ['studentCode'])
     .index('by_teacherCode', ['teacherCode'])
     .index('by_assistantTeacherCode', ['assistantTeacherCode']),
   userPreferences: defineTable({
     userId: v.id('users'),
     language: languageValidator,
+    // Home page section order (My Classes / My Schools). Default when missing:
+    // ['classes', 'schools'].
+    homeSectionOrder: v.optional(
+      v.array(
+        v.union(v.literal('classes'), v.literal('schools')),
+      ),
+    ),
   }).index('by_userId', ['userId']),
+  schoolJoinCodes: defineTable({
+    organizationId: v.string(),
+    principalCode: v.string(),
+    teacherCode: v.string(),
+    adminCode: v.string(),
+  })
+    .index('by_organizationId', ['organizationId'])
+    .index('by_principalCode', ['principalCode'])
+    .index('by_teacherCode', ['teacherCode'])
+    .index('by_adminCode', ['adminCode']),
   orgStudents: defineTable({
     organizationId: v.optional(v.string()),
     // Legacy single name; optional until backfillRosterNames runs, then unused.

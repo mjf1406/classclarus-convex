@@ -15,13 +15,18 @@ export const i18nNamespaces = [
   'auth',
   'pwa',
   'home',
+  'schools',
   'join',
   'classes',
   'settings',
   'account',
 ] as const
 
-type LocaleCatalog = typeof en
+type LocaleCatalog = {
+  [Namespace in keyof typeof en]: {
+    [Key in keyof (typeof en)[Namespace]]: string
+  }
+}
 
 const localeLoaders: Record<
   AppLanguage,
@@ -56,6 +61,7 @@ function catalogToResources(catalog: LocaleCatalog) {
     auth: catalog.auth,
     pwa: catalog.pwa,
     home: catalog.home,
+    schools: catalog.schools,
     join: catalog.join,
     classes: catalog.classes,
     settings: catalog.settings,

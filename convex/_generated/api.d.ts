@@ -27,6 +27,7 @@ import type * as lib_studentNames from "../lib/studentNames.js";
 import type * as memberships from "../memberships.js";
 import type * as permissions from "../permissions.js";
 import type * as rateLimiter from "../rateLimiter.js";
+import type * as schools from "../schools.js";
 import type * as students from "../students.js";
 import type * as tenants from "../tenants.js";
 import type * as userPreferences from "../userPreferences.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   memberships: typeof memberships;
   permissions: typeof permissions;
   rateLimiter: typeof rateLimiter;
+  schools: typeof schools;
   students: typeof students;
   tenants: typeof tenants;
   userPreferences: typeof userPreferences;

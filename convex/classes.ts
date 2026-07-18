@@ -20,6 +20,7 @@ import {
   classLanguageValidator,
 } from './lib/languages'
 import type { ClassLanguage } from './lib/languages'
+import { tenantsClient } from './tenants'
 
 // Public class shape: join codes and the display pin are redacted. Codes are
 // only available via getJoinCodes — student code gated on class:manageMembers;
@@ -59,11 +60,17 @@ export const classDisplayRoleValidator = v.union(
 // `guardian` when access is via a linked child enrollment.
 // Permission flags are set by getClass and listMyClasses so the UI can gate
 // manage actions without separate checkClassPermission subscriptions.
+export const classSchoolRefValidator = v.object({
+  id: v.string(),
+  name: v.string(),
+})
+
 export const classDocWithMyRole = v.object({
   ...classDocPublic.fields,
   myRole: v.optional(classDisplayRoleValidator),
   canManage: v.optional(v.boolean()),
   canManageMembers: v.optional(v.boolean()),
+  school: v.optional(classSchoolRefValidator),
 })
 
 export const classSort = v.union(
@@ -91,10 +98,16 @@ export type ClassPublic = {
 }
 
 export type ClassDisplayRole = ClassRole | 'guardian'
+export type ClassSchoolRef = {
+  id: string
+  name: string
+}
+
 export type ClassWithMyRole = ClassPublic & {
   myRole?: ClassDisplayRole
   canManage?: boolean
   canManageMembers?: boolean
+  school?: ClassSchoolRef
 }
 
 export function toPublicClass(doc: Doc<'classes'>): ClassPublic {
@@ -145,11 +158,19 @@ export const getClass = query({
       const canManage =
         heldRoles.includes('creator') || heldRoles.includes('classTeacher')
       const canManageMembers = canManage
+      let school: ClassSchoolRef | undefined
+      if (doc.organizationId !== undefined) {
+        const org = await tenantsClient.getOrganization(ctx, doc.organizationId)
+        if (org) {
+          school = { id: org._id, name: org.name }
+        }
+      }
       return {
         ...toPublicClass(doc),
         myRole,
         canManage,
         canManageMembers,
+        school,
       }
     }
 
@@ -159,11 +180,19 @@ export const getClass = query({
       args.classId,
     )
     if (!isGuardian) return null
+    let school: ClassSchoolRef | undefined
+    if (doc.organizationId !== undefined) {
+      const org = await tenantsClient.getOrganization(ctx, doc.organizationId)
+      if (org) {
+        school = { id: org._id, name: org.name }
+      }
+    }
     return {
       ...toPublicClass(doc),
       myRole: 'guardian' as const,
       canManage: false,
       canManageMembers: false,
+      school,
     }
   },
 })
@@ -176,6 +205,8 @@ export const createClass = mutation({
     year: v.number(),
     publicDisplayPin: v.optional(v.string()),
     language: v.optional(classLanguageValidator),
+    organizationId: v.optional(v.string()),
+    teamId: v.optional(v.string()),
   },
   returns: v.id('classes'),
   handler: async (ctx, args) => {
@@ -189,6 +220,35 @@ export const createClass = mutation({
 
     const language = args.language ?? DEFAULT_CLASS_LANGUAGE
 
+    let organizationId: string | undefined
+    let teamId: string | undefined
+
+    if (args.organizationId !== undefined) {
+      const member = await tenantsClient.getMember(
+        ctx,
+        args.organizationId,
+        user._id,
+      )
+      if (!member || member.status === 'suspended') {
+        throw new Error('Not a member of this school')
+      }
+      const org = await tenantsClient.getOrganization(ctx, args.organizationId)
+      if (!org || org.status === 'archived' || org.status === 'suspended') {
+        throw new Error('School is not active')
+      }
+      organizationId = args.organizationId
+
+      if (args.teamId !== undefined) {
+        const team = await tenantsClient.getTeam(ctx, args.teamId)
+        if (!team || team.organizationId !== args.organizationId) {
+          throw new Error('Team does not belong to this school')
+        }
+        teamId = args.teamId
+      }
+    } else if (args.teamId !== undefined) {
+      throw new Error('teamId requires organizationId')
+    }
+
     const classId = await ctx.db.insert('classes', {
       // userId is denormalized creator metadata; authorization uses authz.
       userId: user._id,
@@ -200,8 +260,8 @@ export const createClass = mutation({
       studentCode,
       teacherCode,
       assistantTeacherCode,
-      organizationId: undefined,
-      teamId: undefined,
+      organizationId,
+      teamId,
       language,
     })
 

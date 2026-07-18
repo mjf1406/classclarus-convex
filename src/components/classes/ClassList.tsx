@@ -8,6 +8,7 @@ import {
   MoreVertical,
   Pencil,
   Plus,
+  School,
   Trash2,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -149,6 +150,18 @@ function ClassTimestamps({ classDoc }: { classDoc: ClassPublic }) {
           ),
         })}
       </p>
+      {classDoc.school ? (
+        <Link
+          to="/s/$schoolId"
+          params={{ schoolId: classDoc.school.id }}
+          className="pointer-events-auto relative z-20 mt-1 inline-flex max-w-full items-center gap-1 text-2xs font-medium text-muted-foreground hover:text-foreground"
+          onClick={(event) => event.stopPropagation()}
+          preload={false}
+        >
+          <School className="size-3 shrink-0" />
+          <span className="truncate">{classDoc.school.name}</span>
+        </Link>
+      ) : null}
     </div>
   )
 }
@@ -369,6 +382,18 @@ function ClassRow({
                   ),
                 })}
               </span>
+              {classDoc.school ? (
+                <Link
+                  to="/s/$schoolId"
+                  params={{ schoolId: classDoc.school.id }}
+                  className="pointer-events-auto relative z-20 inline-flex max-w-full items-center gap-1 font-medium hover:text-foreground"
+                  onClick={(event) => event.stopPropagation()}
+                  preload={false}
+                >
+                  <School className="size-3 shrink-0" />
+                  <span className="truncate">{classDoc.school.name}</span>
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>

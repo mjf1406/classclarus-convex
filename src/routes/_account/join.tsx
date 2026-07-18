@@ -47,7 +47,7 @@ export const Route = createFileRoute('/_account/join')({
 })
 
 function JoinPage() {
-  const { t } = useTranslation(['join', 'common'])
+  const { t } = useTranslation(['join', 'common', 'schools'])
   const navigate = useNavigate()
   const { joinCode: prefilledCode } = Route.useSearch()
   const redeemJoinOrGuardianCode = useMutation(
@@ -88,6 +88,23 @@ function JoinPage() {
         await navigate({
           to: '/c/$classId',
           params: { classId: result.classId },
+        })
+        return
+      }
+
+      if (result.kind === 'school') {
+        const roleLabel =
+          result.role === 'principal'
+            ? t('schools:rolePrincipal')
+            : result.role === 'teacher'
+              ? t('schools:roleTeacher')
+              : result.role === 'admin'
+                ? t('schools:roleAdmin')
+                : result.role
+        toast.success(t('joinedAs', { role: roleLabel }))
+        await navigate({
+          to: '/s/$schoolId/members',
+          params: { schoolId: result.schoolId },
         })
         return
       }

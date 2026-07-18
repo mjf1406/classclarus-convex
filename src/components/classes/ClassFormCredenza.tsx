@@ -50,6 +50,9 @@ type ClassFormCredenzaProps = {
   mode?: ClassFormMode
   /** When set in edit mode, form fields are prefilled and update targets this class */
   classDoc?: ClassPublic | null
+  /** When creating from a school shell, attach the new class to this org. */
+  organizationId?: string
+  teamId?: string
 }
 
 export function ClassFormCredenza({
@@ -58,6 +61,8 @@ export function ClassFormCredenza({
   showTrigger,
   mode = 'create',
   classDoc,
+  organizationId,
+  teamId,
 }: ClassFormCredenzaProps) {
   const { t } = useTranslation(['classes', 'common'])
   const isEdit = mode === 'edit'
@@ -169,6 +174,8 @@ export function ClassFormCredenza({
           year: result.data.year,
           language,
           ...(trimmedDescription ? { description: trimmedDescription } : {}),
+          ...(organizationId ? { organizationId } : {}),
+          ...(teamId ? { teamId } : {}),
         })
 
     handleOpenChange(false)

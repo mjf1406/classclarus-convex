@@ -18,8 +18,18 @@ import { Route as AccountIndexRouteImport } from './routes/_account/index'
 import { Route as AccountSettingsRouteImport } from './routes/_account/settings'
 import { Route as AccountJoinRouteImport } from './routes/_account/join'
 import { Route as AccountAccountRouteImport } from './routes/_account/account'
+import { Route as AccountSSchoolIdRouteRouteImport } from './routes/_account/s.$schoolId/route'
 import { Route as AccountCClassIdRouteRouteImport } from './routes/_account/c.$classId/route'
+import { Route as AccountSSchoolIdIndexRouteImport } from './routes/_account/s.$schoolId/index'
 import { Route as AccountCClassIdIndexRouteImport } from './routes/_account/c.$classId/index'
+import { Route as AccountSSchoolIdTeamsRouteImport } from './routes/_account/s.$schoolId/teams'
+import { Route as AccountSSchoolIdTeachersRouteImport } from './routes/_account/s.$schoolId/teachers'
+import { Route as AccountSSchoolIdSettingsRouteImport } from './routes/_account/s.$schoolId/settings'
+import { Route as AccountSSchoolIdPrincipalsRouteImport } from './routes/_account/s.$schoolId/principals'
+import { Route as AccountSSchoolIdMembersRouteImport } from './routes/_account/s.$schoolId/members'
+import { Route as AccountSSchoolIdInviteRouteImport } from './routes/_account/s.$schoolId/invite'
+import { Route as AccountSSchoolIdClassesRouteImport } from './routes/_account/s.$schoolId/classes'
+import { Route as AccountSSchoolIdAdminsRouteImport } from './routes/_account/s.$schoolId/admins'
 import { Route as AccountCClassIdTeachersRouteImport } from './routes/_account/c.$classId/teachers'
 import { Route as AccountCClassIdStudentsRouteImport } from './routes/_account/c.$classId/students'
 import { Route as AccountCClassIdSettingsRouteImport } from './routes/_account/c.$classId/settings'
@@ -74,15 +84,68 @@ const AccountAccountRoute = AccountAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AccountRouteRoute,
 } as any)
+const AccountSSchoolIdRouteRoute = AccountSSchoolIdRouteRouteImport.update({
+  id: '/s/$schoolId',
+  path: '/s/$schoolId',
+  getParentRoute: () => AccountRouteRoute,
+} as any)
 const AccountCClassIdRouteRoute = AccountCClassIdRouteRouteImport.update({
   id: '/c/$classId',
   path: '/c/$classId',
   getParentRoute: () => AccountRouteRoute,
 } as any)
+const AccountSSchoolIdIndexRoute = AccountSSchoolIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountSSchoolIdRouteRoute,
+} as any)
 const AccountCClassIdIndexRoute = AccountCClassIdIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
+const AccountSSchoolIdTeamsRoute = AccountSSchoolIdTeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => AccountSSchoolIdRouteRoute,
+} as any)
+const AccountSSchoolIdTeachersRoute =
+  AccountSSchoolIdTeachersRouteImport.update({
+    id: '/teachers',
+    path: '/teachers',
+    getParentRoute: () => AccountSSchoolIdRouteRoute,
+  } as any)
+const AccountSSchoolIdSettingsRoute =
+  AccountSSchoolIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AccountSSchoolIdRouteRoute,
+  } as any)
+const AccountSSchoolIdPrincipalsRoute =
+  AccountSSchoolIdPrincipalsRouteImport.update({
+    id: '/principals',
+    path: '/principals',
+    getParentRoute: () => AccountSSchoolIdRouteRoute,
+  } as any)
+const AccountSSchoolIdMembersRoute = AccountSSchoolIdMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AccountSSchoolIdRouteRoute,
+} as any)
+const AccountSSchoolIdInviteRoute = AccountSSchoolIdInviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => AccountSSchoolIdRouteRoute,
+} as any)
+const AccountSSchoolIdClassesRoute = AccountSSchoolIdClassesRouteImport.update({
+  id: '/classes',
+  path: '/classes',
+  getParentRoute: () => AccountSSchoolIdRouteRoute,
+} as any)
+const AccountSSchoolIdAdminsRoute = AccountSSchoolIdAdminsRouteImport.update({
+  id: '/admins',
+  path: '/admins',
+  getParentRoute: () => AccountSSchoolIdRouteRoute,
 } as any)
 const AccountCClassIdTeachersRoute = AccountCClassIdTeachersRouteImport.update({
   id: '/teachers',
@@ -142,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/join': typeof AccountJoinRoute
   '/settings': typeof AccountSettingsRoute
   '/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/s/$schoolId': typeof AccountSSchoolIdRouteRouteWithChildren
   '/c/$classId/assistant-teachers': typeof AccountCClassIdAssistantTeachersRoute
   '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
@@ -151,7 +215,16 @@ export interface FileRoutesByFullPath {
   '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/c/$classId/students': typeof AccountCClassIdStudentsRoute
   '/c/$classId/teachers': typeof AccountCClassIdTeachersRoute
+  '/s/$schoolId/admins': typeof AccountSSchoolIdAdminsRoute
+  '/s/$schoolId/classes': typeof AccountSSchoolIdClassesRoute
+  '/s/$schoolId/invite': typeof AccountSSchoolIdInviteRoute
+  '/s/$schoolId/members': typeof AccountSSchoolIdMembersRoute
+  '/s/$schoolId/principals': typeof AccountSSchoolIdPrincipalsRoute
+  '/s/$schoolId/settings': typeof AccountSSchoolIdSettingsRoute
+  '/s/$schoolId/teachers': typeof AccountSSchoolIdTeachersRoute
+  '/s/$schoolId/teams': typeof AccountSSchoolIdTeamsRoute
   '/c/$classId/': typeof AccountCClassIdIndexRoute
+  '/s/$schoolId/': typeof AccountSSchoolIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
@@ -171,7 +244,16 @@ export interface FileRoutesByTo {
   '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/c/$classId/students': typeof AccountCClassIdStudentsRoute
   '/c/$classId/teachers': typeof AccountCClassIdTeachersRoute
+  '/s/$schoolId/admins': typeof AccountSSchoolIdAdminsRoute
+  '/s/$schoolId/classes': typeof AccountSSchoolIdClassesRoute
+  '/s/$schoolId/invite': typeof AccountSSchoolIdInviteRoute
+  '/s/$schoolId/members': typeof AccountSSchoolIdMembersRoute
+  '/s/$schoolId/principals': typeof AccountSSchoolIdPrincipalsRoute
+  '/s/$schoolId/settings': typeof AccountSSchoolIdSettingsRoute
+  '/s/$schoolId/teachers': typeof AccountSSchoolIdTeachersRoute
+  '/s/$schoolId/teams': typeof AccountSSchoolIdTeamsRoute
   '/c/$classId': typeof AccountCClassIdIndexRoute
+  '/s/$schoolId': typeof AccountSSchoolIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -185,6 +267,7 @@ export interface FileRoutesById {
   '/_account/settings': typeof AccountSettingsRoute
   '/_account/': typeof AccountIndexRoute
   '/_account/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/_account/s/$schoolId': typeof AccountSSchoolIdRouteRouteWithChildren
   '/_account/c/$classId/assistant-teachers': typeof AccountCClassIdAssistantTeachersRoute
   '/_account/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/_account/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
@@ -194,7 +277,16 @@ export interface FileRoutesById {
   '/_account/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/_account/c/$classId/students': typeof AccountCClassIdStudentsRoute
   '/_account/c/$classId/teachers': typeof AccountCClassIdTeachersRoute
+  '/_account/s/$schoolId/admins': typeof AccountSSchoolIdAdminsRoute
+  '/_account/s/$schoolId/classes': typeof AccountSSchoolIdClassesRoute
+  '/_account/s/$schoolId/invite': typeof AccountSSchoolIdInviteRoute
+  '/_account/s/$schoolId/members': typeof AccountSSchoolIdMembersRoute
+  '/_account/s/$schoolId/principals': typeof AccountSSchoolIdPrincipalsRoute
+  '/_account/s/$schoolId/settings': typeof AccountSSchoolIdSettingsRoute
+  '/_account/s/$schoolId/teachers': typeof AccountSSchoolIdTeachersRoute
+  '/_account/s/$schoolId/teams': typeof AccountSSchoolIdTeamsRoute
   '/_account/c/$classId/': typeof AccountCClassIdIndexRoute
+  '/_account/s/$schoolId/': typeof AccountSSchoolIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -208,6 +300,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/settings'
     | '/c/$classId'
+    | '/s/$schoolId'
     | '/c/$classId/assistant-teachers'
     | '/c/$classId/groups'
     | '/c/$classId/guardians'
@@ -217,7 +310,16 @@ export interface FileRouteTypes {
     | '/c/$classId/settings'
     | '/c/$classId/students'
     | '/c/$classId/teachers'
+    | '/s/$schoolId/admins'
+    | '/s/$schoolId/classes'
+    | '/s/$schoolId/invite'
+    | '/s/$schoolId/members'
+    | '/s/$schoolId/principals'
+    | '/s/$schoolId/settings'
+    | '/s/$schoolId/teachers'
+    | '/s/$schoolId/teams'
     | '/c/$classId/'
+    | '/s/$schoolId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/$'
@@ -237,7 +339,16 @@ export interface FileRouteTypes {
     | '/c/$classId/settings'
     | '/c/$classId/students'
     | '/c/$classId/teachers'
+    | '/s/$schoolId/admins'
+    | '/s/$schoolId/classes'
+    | '/s/$schoolId/invite'
+    | '/s/$schoolId/members'
+    | '/s/$schoolId/principals'
+    | '/s/$schoolId/settings'
+    | '/s/$schoolId/teachers'
+    | '/s/$schoolId/teams'
     | '/c/$classId'
+    | '/s/$schoolId'
   id:
     | '__root__'
     | '/_account'
@@ -250,6 +361,7 @@ export interface FileRouteTypes {
     | '/_account/settings'
     | '/_account/'
     | '/_account/c/$classId'
+    | '/_account/s/$schoolId'
     | '/_account/c/$classId/assistant-teachers'
     | '/_account/c/$classId/groups'
     | '/_account/c/$classId/guardians'
@@ -259,7 +371,16 @@ export interface FileRouteTypes {
     | '/_account/c/$classId/settings'
     | '/_account/c/$classId/students'
     | '/_account/c/$classId/teachers'
+    | '/_account/s/$schoolId/admins'
+    | '/_account/s/$schoolId/classes'
+    | '/_account/s/$schoolId/invite'
+    | '/_account/s/$schoolId/members'
+    | '/_account/s/$schoolId/principals'
+    | '/_account/s/$schoolId/settings'
+    | '/_account/s/$schoolId/teachers'
+    | '/_account/s/$schoolId/teams'
     | '/_account/c/$classId/'
+    | '/_account/s/$schoolId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -335,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountAccountRouteImport
       parentRoute: typeof AccountRouteRoute
     }
+    '/_account/s/$schoolId': {
+      id: '/_account/s/$schoolId'
+      path: '/s/$schoolId'
+      fullPath: '/s/$schoolId'
+      preLoaderRoute: typeof AccountSSchoolIdRouteRouteImport
+      parentRoute: typeof AccountRouteRoute
+    }
     '/_account/c/$classId': {
       id: '/_account/c/$classId'
       path: '/c/$classId'
@@ -342,12 +470,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountCClassIdRouteRouteImport
       parentRoute: typeof AccountRouteRoute
     }
+    '/_account/s/$schoolId/': {
+      id: '/_account/s/$schoolId/'
+      path: '/'
+      fullPath: '/s/$schoolId/'
+      preLoaderRoute: typeof AccountSSchoolIdIndexRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
     '/_account/c/$classId/': {
       id: '/_account/c/$classId/'
       path: '/'
       fullPath: '/c/$classId/'
       preLoaderRoute: typeof AccountCClassIdIndexRouteImport
       parentRoute: typeof AccountCClassIdRouteRoute
+    }
+    '/_account/s/$schoolId/teams': {
+      id: '/_account/s/$schoolId/teams'
+      path: '/teams'
+      fullPath: '/s/$schoolId/teams'
+      preLoaderRoute: typeof AccountSSchoolIdTeamsRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/teachers': {
+      id: '/_account/s/$schoolId/teachers'
+      path: '/teachers'
+      fullPath: '/s/$schoolId/teachers'
+      preLoaderRoute: typeof AccountSSchoolIdTeachersRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/settings': {
+      id: '/_account/s/$schoolId/settings'
+      path: '/settings'
+      fullPath: '/s/$schoolId/settings'
+      preLoaderRoute: typeof AccountSSchoolIdSettingsRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/principals': {
+      id: '/_account/s/$schoolId/principals'
+      path: '/principals'
+      fullPath: '/s/$schoolId/principals'
+      preLoaderRoute: typeof AccountSSchoolIdPrincipalsRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/members': {
+      id: '/_account/s/$schoolId/members'
+      path: '/members'
+      fullPath: '/s/$schoolId/members'
+      preLoaderRoute: typeof AccountSSchoolIdMembersRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/invite': {
+      id: '/_account/s/$schoolId/invite'
+      path: '/invite'
+      fullPath: '/s/$schoolId/invite'
+      preLoaderRoute: typeof AccountSSchoolIdInviteRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/classes': {
+      id: '/_account/s/$schoolId/classes'
+      path: '/classes'
+      fullPath: '/s/$schoolId/classes'
+      preLoaderRoute: typeof AccountSSchoolIdClassesRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
+    }
+    '/_account/s/$schoolId/admins': {
+      id: '/_account/s/$schoolId/admins'
+      path: '/admins'
+      fullPath: '/s/$schoolId/admins'
+      preLoaderRoute: typeof AccountSSchoolIdAdminsRouteImport
+      parentRoute: typeof AccountSSchoolIdRouteRoute
     }
     '/_account/c/$classId/teachers': {
       id: '/_account/c/$classId/teachers'
@@ -444,12 +635,42 @@ const AccountCClassIdRouteRouteChildren: AccountCClassIdRouteRouteChildren = {
 const AccountCClassIdRouteRouteWithChildren =
   AccountCClassIdRouteRoute._addFileChildren(AccountCClassIdRouteRouteChildren)
 
+interface AccountSSchoolIdRouteRouteChildren {
+  AccountSSchoolIdAdminsRoute: typeof AccountSSchoolIdAdminsRoute
+  AccountSSchoolIdClassesRoute: typeof AccountSSchoolIdClassesRoute
+  AccountSSchoolIdInviteRoute: typeof AccountSSchoolIdInviteRoute
+  AccountSSchoolIdMembersRoute: typeof AccountSSchoolIdMembersRoute
+  AccountSSchoolIdPrincipalsRoute: typeof AccountSSchoolIdPrincipalsRoute
+  AccountSSchoolIdSettingsRoute: typeof AccountSSchoolIdSettingsRoute
+  AccountSSchoolIdTeachersRoute: typeof AccountSSchoolIdTeachersRoute
+  AccountSSchoolIdTeamsRoute: typeof AccountSSchoolIdTeamsRoute
+  AccountSSchoolIdIndexRoute: typeof AccountSSchoolIdIndexRoute
+}
+
+const AccountSSchoolIdRouteRouteChildren: AccountSSchoolIdRouteRouteChildren = {
+  AccountSSchoolIdAdminsRoute: AccountSSchoolIdAdminsRoute,
+  AccountSSchoolIdClassesRoute: AccountSSchoolIdClassesRoute,
+  AccountSSchoolIdInviteRoute: AccountSSchoolIdInviteRoute,
+  AccountSSchoolIdMembersRoute: AccountSSchoolIdMembersRoute,
+  AccountSSchoolIdPrincipalsRoute: AccountSSchoolIdPrincipalsRoute,
+  AccountSSchoolIdSettingsRoute: AccountSSchoolIdSettingsRoute,
+  AccountSSchoolIdTeachersRoute: AccountSSchoolIdTeachersRoute,
+  AccountSSchoolIdTeamsRoute: AccountSSchoolIdTeamsRoute,
+  AccountSSchoolIdIndexRoute: AccountSSchoolIdIndexRoute,
+}
+
+const AccountSSchoolIdRouteRouteWithChildren =
+  AccountSSchoolIdRouteRoute._addFileChildren(
+    AccountSSchoolIdRouteRouteChildren,
+  )
+
 interface AccountRouteRouteChildren {
   AccountAccountRoute: typeof AccountAccountRoute
   AccountJoinRoute: typeof AccountJoinRoute
   AccountSettingsRoute: typeof AccountSettingsRoute
   AccountIndexRoute: typeof AccountIndexRoute
   AccountCClassIdRouteRoute: typeof AccountCClassIdRouteRouteWithChildren
+  AccountSSchoolIdRouteRoute: typeof AccountSSchoolIdRouteRouteWithChildren
 }
 
 const AccountRouteRouteChildren: AccountRouteRouteChildren = {
@@ -458,6 +679,7 @@ const AccountRouteRouteChildren: AccountRouteRouteChildren = {
   AccountSettingsRoute: AccountSettingsRoute,
   AccountIndexRoute: AccountIndexRoute,
   AccountCClassIdRouteRoute: AccountCClassIdRouteRouteWithChildren,
+  AccountSSchoolIdRouteRoute: AccountSSchoolIdRouteRouteWithChildren,
 }
 
 const AccountRouteRouteWithChildren = AccountRouteRoute._addFileChildren(
