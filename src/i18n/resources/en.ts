@@ -50,6 +50,8 @@ const en = {
     orContinueWith: 'or continue with',
     loadingSignIn: 'Loading sign-in options…',
     passwordAuthFailed: 'Sign-in failed. Check your email and password.',
+    passwordNoAccount:
+      'No account found for that email. Use Sign up to create one.',
     appFooter: 'This is the ClassClarus app.',
     signInWithGoogle: 'Sign in with Google',
     continueWithGoogle: 'Continue with Google',

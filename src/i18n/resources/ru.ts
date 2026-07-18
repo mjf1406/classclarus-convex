@@ -58,6 +58,8 @@ const ru: Catalog = {
     orContinueWith: 'или продолжить с',
     loadingSignIn: 'Загрузка вариантов входа…',
     passwordAuthFailed: 'Не удалось войти. Проверьте почту и пароль.',
+    passwordNoAccount:
+      'Нет аккаунта с этой почтой. Используйте «Зарегистрироваться», чтобы создать его.',
     appFooter: 'Это приложение ClassClarus.',
     signInWithGoogle: 'Войти через Google',
     continueWithGoogle: 'Продолжить через Google',

@@ -59,6 +59,8 @@ const ja: Catalog = {
     loadingSignIn: 'ログイン方法を読み込み中…',
     passwordAuthFailed:
       'ログインに失敗しました。メールとパスワードを確認してください。',
+    passwordNoAccount:
+      'そのメールのアカウントがありません。「新規登録」で作成してください。',
     appFooter: 'これはClassClarusアプリです。',
     signInWithGoogle: 'Googleでログイン',
     continueWithGoogle: 'Googleで続行',

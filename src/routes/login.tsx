@@ -121,7 +121,10 @@ function RouteComponent() {
           ) : (
             <>
               {showPassword ? (
-                <SignInWithPassword termsAccepted={termsAccepted} />
+                <SignInWithPassword
+                  termsAccepted={termsAccepted}
+                  defaultFlow={showGoogle ? 'signIn' : 'signUp'}
+                />
               ) : null}
 
               {showPassword && showGoogle ? (

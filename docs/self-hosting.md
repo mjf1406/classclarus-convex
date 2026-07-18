@@ -425,6 +425,36 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
    or your production `CONVEX_SITE_ORIGIN` + `/api/auth/callback/google`
 4. Redeploy: `docker compose up -d --build deploy`
 
+### Auth stuck on skeletons / `Auth provider discovery failed`
+
+After password sign-in/sign-up the UI may show endless skeletons, and the console may show:
+
+```text
+Auth provider discovery of http://YOUR_SERVER_IP:3211 failed
+```
+
+That means JWT validation could not reach the site proxy’s OIDC discovery URL (common with LAN IPs from inside Docker). Current builds avoid that by validating with a **static JWKS** from the bootstrap deploy. To recover:
+
+1. Pull latest code and **rebuild** `deploy` + `web` (Portainer “re-pull image” alone is not enough). Do **not** use `docker compose down -v` — that deletes your data.
+2. Force the one-shot deploy to run again:
+
+   ```bash
+   docker compose build --no-cache deploy web
+   docker compose up --build admin-key
+   docker compose up --build deploy   # expect "Deploy complete"
+   docker compose up -d --build web
+   ```
+
+3. In the browser, clear site data for the app origin (e.g. `http://YOUR_SERVER_IP:3000`), hard refresh, then open login again.
+4. Create the **first** account with **Sign up**, not Sign in. Sign in before any account exists returns “no account” / `InvalidAccountId`.
+
+Optional health check (useful, not required for JWT validation after the static-JWKS fix):
+
+```bash
+curl http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
+curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+```
+
 ### Reset everything (destructive)
 
 This deletes containers **and** the database / bootstrap volumes:

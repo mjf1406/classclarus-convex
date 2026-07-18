@@ -322,6 +322,21 @@ Common causes (a valid key still fails for the last two):
 - Re-read `admin_key` from the `*_bootstrap` volume (Option B above) in case of a copy/paste error
 - Changed `INSTANCE_SECRET` after first boot — update the stack so `admin-key` and `deploy` run again, then use the new key
 
+### Auth stuck on skeletons / `Auth provider discovery failed`
+
+If password auth leaves the UI on endless skeletons and the browser console shows `Auth provider discovery of http://YOUR_SERVER_IP:3211 failed`:
+
+1. **Pull and redeploy from Git with a rebuild** of `deploy` and `web` (not only “re-pull” GHCR images). Do **not** delete the stack volumes.
+2. Confirm the `deploy` container exits **0** and logs include `AUTH_PASSWORD_ENABLED` and `Deploy complete`.
+3. Clear site data for the app origin in the browser, hard refresh, then use **Sign up** for the first account (Sign in before any account exists fails with no-account / `InvalidAccountId`).
+
+Optional checks:
+
+```bash
+curl http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
+curl http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+```
+
 ### Reset the stack (destructive)
 
 In Portainer, remove the stack and **delete unused volumes** only if you intend to wipe data (`data` + `bootstrap`). Then create the stack again from Git.

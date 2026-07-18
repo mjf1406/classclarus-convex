@@ -58,6 +58,8 @@ const uk: Catalog = {
     orContinueWith: 'або продовжити з',
     loadingSignIn: 'Завантаження варіантів входу…',
     passwordAuthFailed: 'Не вдалося увійти. Перевірте пошту та пароль.',
+    passwordNoAccount:
+      'Немає акаунта з цією поштою. Використайте «Зареєструватися», щоб створити його.',
     appFooter: 'Це додаток ClassClarus.',
     signInWithGoogle: 'Увійти через Google',
     continueWithGoogle: 'Продовжити через Google',

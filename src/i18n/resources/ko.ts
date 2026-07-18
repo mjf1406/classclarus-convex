@@ -58,6 +58,8 @@ const ko: Catalog = {
     orContinueWith: '또는 다음으로 계속',
     loadingSignIn: '로그인 옵션 불러오는 중…',
     passwordAuthFailed: '로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.',
+    passwordNoAccount:
+      '해당 이메일의 계정이 없습니다. 가입으로 새 계정을 만드세요.',
     appFooter: '이것은 ClassClarus 앱입니다.',
     signInWithGoogle: 'Google로 로그인',
     continueWithGoogle: 'Google로 계속',

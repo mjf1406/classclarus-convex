@@ -57,6 +57,7 @@ const zht: Catalog = {
     orContinueWith: '或繼續使用',
     loadingSignIn: '正在載入登入選項…',
     passwordAuthFailed: '登入失敗。請檢查電子郵件和密碼。',
+    passwordNoAccount: '該電子郵件尚無帳號。請使用「註冊」建立。',
     appFooter: '這是 ClassClarus 應用程式。',
     signInWithGoogle: '使用 Google 登入',
     continueWithGoogle: '使用 Google 繼續',

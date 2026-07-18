@@ -58,6 +58,8 @@ const es: Catalog = {
     orContinueWith: 'o continuar con',
     loadingSignIn: 'Cargando opciones de inicio de sesión…',
     passwordAuthFailed: 'Error al iniciar sesión. Revisa tu correo y contraseña.',
+    passwordNoAccount:
+      'No hay cuenta con ese correo. Usa Registrarte para crear una.',
     appFooter: 'Esta es la aplicación ClassClarus.',
     signInWithGoogle: 'Iniciar sesión con Google',
     continueWithGoogle: 'Continuar con Google',

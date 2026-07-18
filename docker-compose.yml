@@ -78,6 +78,8 @@ services:
       dockerfile: docker/Dockerfile.deploy
     environment:
       - CONVEX_SELF_HOSTED_URL=http://backend:3210
+      # Same public origin as backend CONVEX_SITE_ORIGIN — used by auth.config.ts issuer
+      - CONVEX_SITE_URL=${CONVEX_SITE_ORIGIN:-http://127.0.0.1:3211}
       - SITE_URL=${SITE_URL:-http://localhost:3000}
       - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID:-}
       - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET:-}

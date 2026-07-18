@@ -8,14 +8,38 @@ import { Label } from '../ui/label'
 
 interface SignInWithPasswordProps {
   termsAccepted?: boolean
+  /** Prefer sign-up first (e.g. password-only self-host with no accounts yet). */
+  defaultFlow?: 'signIn' | 'signUp'
+}
+
+function passwordErrorMessage(
+  err: unknown,
+  flow: 'signIn' | 'signUp',
+  t: (key: string) => string,
+): string {
+  const raw = err instanceof Error ? err.message : String(err ?? '')
+  const lower = raw.toLowerCase()
+  if (
+    flow === 'signIn' &&
+    (lower.includes('invalidaccountid') ||
+      lower.includes('invalid account') ||
+      lower.includes('invalid credentials'))
+  ) {
+    return t('passwordNoAccount')
+  }
+  if (err instanceof Error && err.message) {
+    return err.message
+  }
+  return t('passwordAuthFailed')
 }
 
 export function SignInWithPassword({
   termsAccepted = false,
+  defaultFlow = 'signIn',
 }: SignInWithPasswordProps) {
   const { signIn } = useAuthActions()
   const { t } = useTranslation('auth')
-  const [flow, setFlow] = useState<'signIn' | 'signUp'>('signIn')
+  const [flow, setFlow] = useState<'signIn' | 'signUp'>(defaultFlow)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,9 +57,7 @@ export function SignInWithPassword({
       })
       .catch((err: unknown) => {
         setIsLoading(false)
-        setError(
-          err instanceof Error ? err.message : t('passwordAuthFailed'),
-        )
+        setError(passwordErrorMessage(err, flow, t))
       })
   }
 

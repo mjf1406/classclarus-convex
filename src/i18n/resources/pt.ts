@@ -58,6 +58,8 @@ const pt: Catalog = {
     orContinueWith: 'ou continuar com',
     loadingSignIn: 'Carregando opções de entrada…',
     passwordAuthFailed: 'Falha ao entrar. Verifique o e-mail e a senha.',
+    passwordNoAccount:
+      'Nenhuma conta com esse e-mail. Use Criar conta para criar uma.',
     appFooter: 'Este é o app ClassClarus.',
     signInWithGoogle: 'Entrar com Google',
     continueWithGoogle: 'Continuar com Google',

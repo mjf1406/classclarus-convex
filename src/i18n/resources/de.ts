@@ -58,6 +58,8 @@ const de: Catalog = {
     orContinueWith: 'oder fortfahren mit',
     loadingSignIn: 'Anmeldeoptionen werden geladen…',
     passwordAuthFailed: 'Anmeldung fehlgeschlagen. E-Mail und Passwort prüfen.',
+    passwordNoAccount:
+      'Kein Konto für diese E-Mail. Nutzen Sie „Registrieren“, um eines zu erstellen.',
     appFooter: 'Dies ist die ClassClarus-App.',
     signInWithGoogle: 'Mit Google anmelden',
     continueWithGoogle: 'Mit Google fortfahren',
