@@ -2,7 +2,7 @@
 // The provider passes { userId, permission, scope? }; we keep that shape but
 // never trust the client-supplied userId: checks are only performed for the
 // authenticated caller.
-import { getCurrentUser } from '#/lib/auth'
+import { getCurrentUser } from './lib/auth'
 import { query } from './_generated/server'
 import { v } from 'convex/values'
 import { authz } from './authz'

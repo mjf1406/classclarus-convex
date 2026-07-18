@@ -1,5 +1,5 @@
 import { generateSlug } from '@djpanda/convex-tenants'
-import { requireUser } from '#/lib/auth'
+import { requireUser } from './lib/auth'
 import { mutation, query } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'

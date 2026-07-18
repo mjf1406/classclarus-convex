@@ -1,4 +1,4 @@
-import { requireUser } from '#/lib/auth'
+import { requireUser } from './lib/auth'
 import { internalMutation, mutation, query } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { v } from 'convex/values'

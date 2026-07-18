@@ -1,4 +1,4 @@
-import { requireUser } from '#/lib/auth'
+import { requireUser } from './lib/auth'
 import { v } from 'convex/values'
 import type { Id } from './_generated/dataModel'
 import type { MutationCtx, QueryCtx } from './_generated/server'

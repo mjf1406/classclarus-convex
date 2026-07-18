@@ -1,4 +1,4 @@
-import { getCurrentUser } from '#/lib/auth'
+import { getCurrentUser } from './lib/auth'
 import { query } from './_generated/server'
 import { v } from 'convex/values'
 import { authz } from './authz'

@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { getCurrentUser, requireUser } from '#/lib/auth'
+import { getCurrentUser, requireUser } from './lib/auth'
 import {
   coerceAppLanguage,
   DEFAULT_APP_LANGUAGE,

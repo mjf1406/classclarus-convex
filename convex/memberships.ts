@@ -1,5 +1,5 @@
-import { getCurrentUser, requireUser } from '#/lib/auth'
-import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
+import { getCurrentUser, requireUser } from './lib/auth'
+import { DEFAULT_CLASS_SORT, sortClasses } from './lib/classSort'
 import {
   internalMutation,
   internalQuery,

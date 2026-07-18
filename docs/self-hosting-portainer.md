@@ -233,6 +233,33 @@ You should see a commit SHA for both lines. If that fails on the host, Portainer
 - Confirm `Dockerfile` and `docker/Dockerfile.deploy` exist on the branch you selected.
 - Check Portainer build logs for the `web` / `deploy` services.
 
+### Deploy stuck on `Pulling` / `Waiting` (truncated error)
+
+Portainer often truncates the real error during the first image pull. On the Docker host:
+
+```bash
+sudo docker pull ghcr.io/get-convex/convex-backend:abdd9b30f89c0e7c18c4213b99cd10e4bad33f8c
+sudo docker pull ghcr.io/get-convex/convex-dashboard:abdd9b30f89c0e7c18c4213b99cd10e4bad33f8c
+```
+
+Use `sudo` if you see `permission denied` on `/var/run/docker.sock`. After pulls succeed, redeploy the stack (images are cached). Check disk with `df -h` if pulls fail with no space left.
+
+### `deploy` exited with an error
+
+Portainer may **remove** failed containers, so `docker logs classclarus-deploy-1` can say the container does not exist. Capture logs by running deploy on the host instead:
+
+```bash
+cd /path/to/classclarus-convex   # or clone fresh under /tmp
+# .env must include INSTANCE_SECRET (same as Portainer)
+sudo docker compose up -d backend
+sudo docker compose up --build admin-key
+sudo docker compose up --build deploy
+```
+
+Watch for `Deploy complete`. If you see `Could not resolve "#/lib/..."` bundling errors, the branch is too old — pull latest `main` (Convex code must not import frontend `#/` aliases).
+
+In Portainer, after a successful host deploy, update/redeploy the stack (or keep using Compose). `web` only starts after `deploy` exits 0.
+
 ### `INSTANCE_SECRET` error
 
 Add `INSTANCE_SECRET` in the stack environment (64-character hex from `openssl rand -hex 32`), then update the stack.
@@ -253,10 +280,6 @@ Change `WEB_PORT`, `PORT`, `SITE_PROXY_PORT`, `DASHBOARD_PORT` in stack env, and
 
 - Re-read `admin_key` from the `*_bootstrap` volume (Option B above).
 - If you changed `INSTANCE_SECRET`, update the stack so `admin-key` and `deploy` run again, then use the new key.
-
-### `deploy` exited with an error
-
-Open the `deploy` container logs in Portainer. Common causes: backend not healthy yet, bad `INSTANCE_SECRET`, or network issues pulling base images. Fix env, then update/redeploy the stack.
 
 ### Reset the stack (destructive)
 

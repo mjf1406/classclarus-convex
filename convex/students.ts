@@ -1,4 +1,4 @@
-import { requireUser } from '#/lib/auth'
+import { requireUser } from './lib/auth'
 import { v } from 'convex/values'
 import { paginationOptsValidator } from 'convex/server'
 import { orgScope } from '@djpanda/convex-tenants'

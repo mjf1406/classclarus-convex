@@ -1,7 +1,8 @@
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { internalQuery } from '../../convex/_generated/server'
-import type { MutationCtx, QueryCtx } from '../../convex/_generated/server'
-import type { Doc, Id } from '../../convex/_generated/dataModel'
+import { v } from 'convex/values'
+import { internalQuery } from '../_generated/server'
+import type { MutationCtx, QueryCtx } from '../_generated/server'
+import type { Doc, Id } from '../_generated/dataModel'
 
 export async function getCurrentUser(
   ctx: QueryCtx | MutationCtx,
@@ -33,6 +34,7 @@ export async function requireUserId(
 
 export const requireUserQuery = internalQuery({
   args: {},
+  returns: v.boolean(),
   handler: async (ctx) => {
     await requireUser(ctx)
     return true
