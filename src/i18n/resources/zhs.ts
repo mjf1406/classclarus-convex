@@ -171,6 +171,17 @@ const zhs: Catalog = {
     membersDescription:
       '移除通过泄露代码加入的人员的访问权限。重新生成代码不会撤销现有成员的访问。',
     noMembersYet: '还没有成员。',
+    teachers: '教师',
+    teachersDescription:
+      '本班教师与创建者。移除不应再管理本班的人员的访问权限。',
+    noTeachersYet: '还没有教师。',
+    assistantTeachers: '助教',
+    assistantTeachersDescription:
+      '本班助教。移除不应再协助的人员的访问权限。',
+    noAssistantTeachersYet: '还没有助教。',
+    guardiansDescription:
+      '已关联到本班学生的监护人。若某监护人不应再有访问权限，可解除关联。',
+    noGuardiansYet: '还没有关联的监护人。',
     removeMemberTitle: '移除成员？',
     removeMemberDescription:
       '将 {{name}} 从此班级移除？在重新加入之前，其将失去访问权限。',
@@ -179,6 +190,9 @@ const zhs: Catalog = {
     students: '学生',
     studentsDescription:
       '每位已注册学生都有私密监护人加入码（最多 5 名监护人）。可复制代码或链接分享，泄露时重新生成，或下载全班可打印二维码。',
+    colName: '姓名',
+    colRole: '角色',
+    colLinkedStudents: '关联学生',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -250,7 +264,10 @@ const zhs: Catalog = {
     navClass: '班级',
     navPoints: '积分',
     navMembers: '成员',
+    navTeachers: '教师',
+    navAssistantTeachers: '助教',
     navStudents: '学生',
+    navGuardians: '监护人',
     navGroups: '小组',
     groupsTitle: '小组与小队',
     groupsDescription: '将学生分到小组及嵌套小队中。可在未分组、小组或小队之间拖放。',

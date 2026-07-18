@@ -180,6 +180,17 @@ const ja: Catalog = {
     membersDescription:
       '漏洩したコードで参加した人のアクセスを削除できます。コードを再生成しても既存メンバーのアクセスは取り消されません。',
     noMembersYet: 'まだメンバーがいません。',
+    teachers: '教員',
+    teachersDescription:
+      'クラスの教員と作成者。管理不要になった人のアクセスを削除できます。',
+    noTeachersYet: 'まだ教員がいません。',
+    assistantTeachers: 'アシスタント教員',
+    assistantTeachersDescription:
+      'このクラスのアシスタント教員。補助不要になった人のアクセスを削除できます。',
+    noAssistantTeachersYet: 'まだアシスタント教員がいません。',
+    guardiansDescription:
+      'このクラスの生徒に紐づいた保護者。アクセス不要になった保護者は生徒から解除できます。',
+    noGuardiansYet: 'まだ保護者が紐づいていません。',
     removeMemberTitle: 'メンバーを削除しますか？',
     removeMemberDescription:
       '{{name}}をこのクラスから削除しますか？再参加するまでアクセスできなくなります。',
@@ -188,6 +199,9 @@ const ja: Catalog = {
     students: '生徒',
     studentsDescription:
       '登録された各生徒には非公開の保護者参加コードがあります（最大5人）。コードやリンクをコピーして共有し、漏洩時は再生成するか、クラス全体の印刷用QRをダウンロードできます。',
+    colName: '名前',
+    colRole: '役割',
+    colLinkedStudents: '紐づいた生徒',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -261,7 +275,10 @@ const ja: Catalog = {
     navClass: 'クラス',
     navPoints: 'ポイント',
     navMembers: 'メンバー',
+    navTeachers: '教員',
+    navAssistantTeachers: 'アシスタント教員',
     navStudents: '生徒',
+    navGuardians: '保護者',
     navGroups: 'グループ',
     groupsTitle: 'グループとチーム',
     groupsDescription: '生徒をグループと入れ子のチームに整理します。未所属・グループ・チームの間でドラッグして移動できます。',

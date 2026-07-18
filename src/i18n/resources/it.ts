@@ -181,6 +181,17 @@ const it: Catalog = {
     membersDescription:
       'Rimuovi l’accesso a chi si è unito con un codice divulgato. Rigenerare un codice non revoca i membri esistenti.',
     noMembersYet: 'Nessun membro ancora.',
+    teachers: 'Insegnanti',
+    teachersDescription:
+      'Insegnanti della classe e il creatore. Rimuovi l\'accesso a chi non deve più gestire questa classe.',
+    noTeachersYet: 'Nessun insegnante ancora.',
+    assistantTeachers: 'Insegnanti assistenti',
+    assistantTeachersDescription:
+      'Insegnanti assistenti di questa classe. Rimuovi l\'accesso a chi non deve più assistere.',
+    noAssistantTeachersYet: 'Nessun insegnante assistente ancora.',
+    guardiansDescription:
+      'Tutori collegati agli studenti di questa classe. Scollega un tutore se non deve più avere accesso.',
+    noGuardiansYet: 'Nessun tutore collegato ancora.',
     removeMemberTitle: 'Rimuovere il membro?',
     removeMemberDescription:
       'Rimuovere {{name}} da questa classe? Perderà l’accesso finché non si unirà di nuovo.',
@@ -189,6 +200,9 @@ const it: Catalog = {
     students: 'Studenti',
     studentsDescription:
       'Ogni studente iscritto ha un codice privato per i tutori (max 5). Copia un codice o un link da condividere, rigenera se divulgato o scarica QR pronti da stampare per tutta la classe.',
+    colName: 'Nome',
+    colRole: 'Ruolo',
+    colLinkedStudents: 'Studenti collegati',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -262,7 +276,10 @@ const it: Catalog = {
     navClass: 'Classe',
     navPoints: 'Punti',
     navMembers: 'Membri',
+    navTeachers: 'Insegnanti',
+    navAssistantTeachers: 'Insegnanti assistenti',
     navStudents: 'Studenti',
+    navGuardians: 'Tutori',
     navGroups: 'Gruppi',
     groupsTitle: 'Gruppi e squadre',
     groupsDescription: 'Organizza gli studenti in gruppi e squadre annidate. Trascina tra non assegnati, un gruppo o una squadra.',

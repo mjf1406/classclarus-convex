@@ -44,6 +44,7 @@ import {
   useUpdateEnrollmentDisplay,
   useUpdateStudentProfile,
 } from '@/lib/students'
+import { useUnlinkGuardian } from '@/lib/guardians'
 import { ONE_HOUR } from '@/lib/queryCache'
 import {
   AlertDialog,
@@ -359,7 +360,7 @@ export function ClassStudentsSection({
   const updateStudentProfile = useUpdateStudentProfile()
   const updateEnrollmentDisplay = useUpdateEnrollmentDisplay()
   const reorderRoster = useMutation(api.students.reorderRoster)
-  const unlinkGuardian = useMutation(api.guardians.unlinkGuardian)
+  const unlinkGuardian = useUnlinkGuardian()
   const unlinkAllGuardiansForStudent = useMutation(
     api.guardians.unlinkAllGuardiansForStudent,
   )

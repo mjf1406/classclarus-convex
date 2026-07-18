@@ -1,22 +1,14 @@
 import { Navigate, createFileRoute } from '@tanstack/react-router'
 
 import { useClassLayout } from '#/components/classes/ClassLayoutContext'
-import { ClassMembersSection } from '#/components/classes/ClassMembersSection'
 
 export const Route = createFileRoute('/_account/c/$classId/members')({
-  component: ClassMembersPage,
+  component: ClassMembersRedirect,
 })
 
-function ClassMembersPage() {
-  const { classId, canManage, adminBundle } = useClassLayout()
-
-  if (!canManage) {
-    return (
-      <Navigate to="/c/$classId/points" params={{ classId }} replace />
-    )
-  }
-
+function ClassMembersRedirect() {
+  const { classId } = useClassLayout()
   return (
-    <ClassMembersSection classId={classId} members={adminBundle?.members} />
+    <Navigate to="/c/$classId/students" params={{ classId }} replace />
   )
 }

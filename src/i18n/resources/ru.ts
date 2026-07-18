@@ -181,6 +181,17 @@ const ru: Catalog = {
     membersDescription:
       'Уберите доступ у тех, кто присоединился по утечшему коду. Пересоздание кода не отзывает существующих участников.',
     noMembersYet: 'Пока нет участников.',
+    teachers: 'Учителя',
+    teachersDescription:
+      'Учителя класса и создатель. Удалите доступ тем, кто больше не должен управлять этим классом.',
+    noTeachersYet: 'Пока нет учителей.',
+    assistantTeachers: 'Ассистенты учителя',
+    assistantTeachersDescription:
+      'Ассистенты учителя этого класса. Удалите доступ тем, кто больше не должен помогать.',
+    noAssistantTeachersYet: 'Пока нет ассистентов учителя.',
+    guardiansDescription:
+      'Опекуны, связанные с учениками этого класса. Отвяжите опекуна, если у него больше не должно быть доступа.',
+    noGuardiansYet: 'Пока нет связанных опекунов.',
     removeMemberTitle: 'Удалить участника?',
     removeMemberDescription:
       'Удалить {{name}} из этого класса? Доступ будет закрыт до повторного присоединения.',
@@ -189,6 +200,9 @@ const ru: Catalog = {
     students: 'Ученики',
     studentsDescription:
       'У каждого зачисленного ученика есть личный код опекуна (макс. 5). Скопируйте код или ссылку, пересоздайте при утечке или скачайте QR для печати всего класса.',
+    colName: 'Имя',
+    colRole: 'Роль',
+    colLinkedStudents: 'Связанные ученики',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -262,7 +276,10 @@ const ru: Catalog = {
     navClass: 'Класс',
     navPoints: 'Баллы',
     navMembers: 'Участники',
+    navTeachers: 'Учителя',
+    navAssistantTeachers: 'Ассистенты',
     navStudents: 'Ученики',
+    navGuardians: 'Опекуны',
     navGroups: 'Группы',
     groupsTitle: 'Группы и команды',
     groupsDescription: 'Организуйте учеников в группы и вложенные команды. Перетаскивайте между без группы, группой или командой.',

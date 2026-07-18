@@ -181,6 +181,17 @@ const pt: Catalog = {
     membersDescription:
       'Remova o acesso de quem entrou com um código vazado. Regenerar um código não revoga membros existentes.',
     noMembersYet: 'Ainda não há membros.',
+    teachers: 'Professores',
+    teachersDescription:
+      'Professores da turma e o criador. Remova o acesso de quem não deve mais gerir esta turma.',
+    noTeachersYet: 'Ainda não há professores.',
+    assistantTeachers: 'Professores assistentes',
+    assistantTeachersDescription:
+      'Professores assistentes desta turma. Remova o acesso de quem não deve mais assistir.',
+    noAssistantTeachersYet: 'Ainda não há professores assistentes.',
+    guardiansDescription:
+      'Encarregados de educação ligados aos alunos desta turma. Desassocie um encarregado se já não deve ter acesso.',
+    noGuardiansYet: 'Ainda não há encarregados ligados.',
     removeMemberTitle: 'Remover membro?',
     removeMemberDescription:
       'Remover {{name}} desta turma? A pessoa perderá o acesso até entrar novamente.',
@@ -189,6 +200,9 @@ const pt: Catalog = {
     students: 'Alunos',
     studentsDescription:
       'Cada aluno inscrito tem um código privado de responsável (máx. 5). Copie um código ou link para compartilhar, regenere se vazar ou baixe QRs prontos para impressão da turma toda.',
+    colName: 'Nome',
+    colRole: 'Função',
+    colLinkedStudents: 'Alunos associados',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -262,7 +276,10 @@ const pt: Catalog = {
     navClass: 'Turma',
     navPoints: 'Pontos',
     navMembers: 'Membros',
+    navTeachers: 'Professores',
+    navAssistantTeachers: 'Professores assistentes',
     navStudents: 'Alunos',
+    navGuardians: 'Encarregados',
     navGroups: 'Grupos',
     groupsTitle: 'Grupos e equipas',
     groupsDescription: 'Organize os alunos em grupos e equipas aninhadas. Arraste entre sem grupo, um grupo ou uma equipa.',

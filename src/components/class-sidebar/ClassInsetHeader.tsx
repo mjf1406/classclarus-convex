@@ -18,8 +18,10 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 
 const PAGE_TITLE_KEYS = {
   points: 'navPoints',
-  members: 'navMembers',
+  teachers: 'navTeachers',
+  assistantTeachers: 'navAssistantTeachers',
   students: 'navStudents',
+  guardians: 'navGuardians',
   groups: 'navGroups',
   invite: 'navInvite',
   settings: 'navSettings',
@@ -28,8 +30,10 @@ const PAGE_TITLE_KEYS = {
 type ClassSubpage = keyof typeof PAGE_TITLE_KEYS
 
 function getSubpageFromPath(pathname: string): ClassSubpage {
-  if (pathname.endsWith('/members')) return 'members'
+  if (pathname.endsWith('/teachers')) return 'teachers'
+  if (pathname.endsWith('/assistant-teachers')) return 'assistantTeachers'
   if (pathname.endsWith('/students')) return 'students'
+  if (pathname.endsWith('/guardians')) return 'guardians'
   if (pathname.endsWith('/groups')) return 'groups'
   if (pathname.endsWith('/invite')) return 'invite'
   if (pathname.endsWith('/settings')) return 'settings'

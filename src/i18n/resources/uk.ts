@@ -181,6 +181,17 @@ const uk: Catalog = {
     membersDescription:
       'Приберіть доступ у тих, хто приєднався за виточеним кодом. Перестворення коду не скасовує наявних учасників.',
     noMembersYet: 'Поки немає учасників.',
+    teachers: 'Вчителі',
+    teachersDescription:
+      'Вчителі класу та творець. Видаліть доступ тим, хто більше не повинен керувати цим класом.',
+    noTeachersYet: 'Поки немає вчителів.',
+    assistantTeachers: 'Асистенти вчителя',
+    assistantTeachersDescription:
+      'Асистенти вчителя цього класу. Видаліть доступ тим, хто більше не повинен допомагати.',
+    noAssistantTeachersYet: 'Поки немає асистентів вчителя.',
+    guardiansDescription:
+      'Опікуни, пов\'язані з учнями цього класу. Відв\'яжіть опікуна, якщо він більше не повинен мати доступ.',
+    noGuardiansYet: 'Поки немає пов\'язаних опікунів.',
     removeMemberTitle: 'Видалити учасника?',
     removeMemberDescription:
       'Видалити {{name}} з цього класу? Доступ буде втрачено до повторного приєднання.',
@@ -189,6 +200,9 @@ const uk: Catalog = {
     students: 'Учні',
     studentsDescription:
       'Кожен зарахований учень має особистий код опікуна (макс. 5). Скопіюйте код або посилання, перестворіть у разі витоку або завантажте QR для друку всього класу.',
+    colName: 'Ім\'я',
+    colRole: 'Роль',
+    colLinkedStudents: 'Пов\'язані учні',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -262,7 +276,10 @@ const uk: Catalog = {
     navClass: 'Клас',
     navPoints: 'Бали',
     navMembers: 'Учасники',
+    navTeachers: 'Вчителі',
+    navAssistantTeachers: 'Асистенти',
     navStudents: 'Учні',
+    navGuardians: 'Опікуни',
     navGroups: 'Групи',
     groupsTitle: 'Групи та команди',
     groupsDescription: 'Організуйте учнів у групи та вкладені команди. Перетягуйте між без групи, групою або командою.',

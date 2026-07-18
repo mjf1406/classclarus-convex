@@ -181,6 +181,17 @@ const fr: Catalog = {
     membersDescription:
       'Retirez l’accès de quiconque a rejoint avec un code divulgué. Régénérer un code ne révoque pas les membres existants.',
     noMembersYet: 'Aucun membre pour l’instant.',
+    teachers: 'Enseignants',
+    teachersDescription:
+      'Enseignants de la classe et le créateur. Retirez l\'accès à quiconque ne doit plus gérer cette classe.',
+    noTeachersYet: 'Aucun enseignant pour l\'instant.',
+    assistantTeachers: 'Enseignants assistants',
+    assistantTeachersDescription:
+      'Enseignants assistants de cette classe. Retirez l\'accès à quiconque ne doit plus assister.',
+    noAssistantTeachersYet: 'Aucun enseignant assistant pour l\'instant.',
+    guardiansDescription:
+      'Tuteurs liés aux élèves de cette classe. Dissociez un tuteur s\'il ne doit plus avoir accès.',
+    noGuardiansYet: 'Aucun tuteur lié pour l\'instant.',
     removeMemberTitle: 'Retirer le membre ?',
     removeMemberDescription:
       'Retirer {{name}} de cette classe ? La personne perdra l’accès jusqu’à ce qu’elle rejoigne à nouveau.',
@@ -189,6 +200,9 @@ const fr: Catalog = {
     students: 'Élèves',
     studentsDescription:
       'Chaque élève inscrit a un code d’accès tuteur privé (max. 5 tuteurs). Copiez un code ou un lien à partager, régénérez en cas de fuite, ou téléchargez des QR prêts à imprimer pour toute la classe.',
+    colName: 'Nom',
+    colRole: 'Rôle',
+    colLinkedStudents: 'Élèves liés',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -262,7 +276,10 @@ const fr: Catalog = {
     navClass: 'Classe',
     navPoints: 'Points',
     navMembers: 'Membres',
+    navTeachers: 'Enseignants',
+    navAssistantTeachers: 'Enseignants assistants',
     navStudents: 'Élèves',
+    navGuardians: 'Tuteurs',
     navGroups: 'Groupes',
     groupsTitle: 'Groupes et équipes',
     groupsDescription: 'Organisez les élèves en groupes et équipes imbriquées. Glissez entre non groupés, un groupe ou une équipe.',

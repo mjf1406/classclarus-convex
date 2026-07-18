@@ -24,11 +24,21 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-type ClassSubpage = 'points' | 'members' | 'students' | 'groups' | 'invite' | 'settings'
+type ClassSubpage =
+  | 'points'
+  | 'teachers'
+  | 'assistantTeachers'
+  | 'students'
+  | 'guardians'
+  | 'groups'
+  | 'invite'
+  | 'settings'
 
 function getSubpageFromPath(pathname: string): ClassSubpage {
-  if (pathname.endsWith('/members')) return 'members'
+  if (pathname.endsWith('/teachers')) return 'teachers'
+  if (pathname.endsWith('/assistant-teachers')) return 'assistantTeachers'
   if (pathname.endsWith('/students')) return 'students'
+  if (pathname.endsWith('/guardians')) return 'guardians'
   if (pathname.endsWith('/groups')) return 'groups'
   if (pathname.endsWith('/invite')) return 'invite'
   if (pathname.endsWith('/settings')) return 'settings'
@@ -37,8 +47,10 @@ function getSubpageFromPath(pathname: string): ClassSubpage {
 
 const SUBPAGE_ROUTES = {
   points: '/c/$classId/points',
-  members: '/c/$classId/members',
+  teachers: '/c/$classId/teachers',
+  assistantTeachers: '/c/$classId/assistant-teachers',
   students: '/c/$classId/students',
+  guardians: '/c/$classId/guardians',
   groups: '/c/$classId/groups',
   invite: '/c/$classId/invite',
   settings: '/c/$classId/settings',

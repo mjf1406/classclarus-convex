@@ -180,6 +180,17 @@ const ko: Catalog = {
     membersDescription:
       '유출된 코드로 참가한 사람의 접근을 제거하세요. 코드를 재생성해도 기존 구성원의 접근은 취소되지 않습니다.',
     noMembersYet: '아직 구성원이 없습니다.',
+    teachers: '교사',
+    teachersDescription:
+      '학급 교사와 생성자입니다. 더 이상 이 학급을 관리하지 않아야 하는 사람의 접근을 제거하세요.',
+    noTeachersYet: '아직 교사가 없습니다.',
+    assistantTeachers: '보조 교사',
+    assistantTeachersDescription:
+      '이 학급의 보조 교사입니다. 더 이상 보조하지 않아야 하는 사람의 접근을 제거하세요.',
+    noAssistantTeachersYet: '아직 보조 교사가 없습니다.',
+    guardiansDescription:
+      '이 학급 학생에 연결된 보호자입니다. 더 이상 접근하면 안 되는 보호자는 연결을 해제하세요.',
+    noGuardiansYet: '아직 연결된 보호자가 없습니다.',
     removeMemberTitle: '구성원을 제거할까요?',
     removeMemberDescription:
       '{{name}}님을 이 클래스에서 제거할까요? 다시 참여할 때까지 접근할 수 없습니다.',
@@ -188,6 +199,9 @@ const ko: Catalog = {
     students: '학생',
     studentsDescription:
       '등록된 각 학생에게는 비공개 보호자 참가 코드가 있습니다(최대 5명). 코드나 링크를 복사해 공유하고, 유출 시 재생성하거나 전체 수업용 인쇄 QR을 다운로드하세요.',
+    colName: '이름',
+    colRole: '역할',
+    colLinkedStudents: '연결된 학생',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -261,7 +275,10 @@ const ko: Catalog = {
     navClass: '수업',
     navPoints: '포인트',
     navMembers: '구성원',
+    navTeachers: '교사',
+    navAssistantTeachers: '보조 교사',
     navStudents: '학생',
+    navGuardians: '보호자',
     navGroups: '모둠',
     groupsTitle: '모둠 및 팀',
     groupsDescription: '학생을 모둠과 하위 팀으로 구성합니다. 미배정, 모둠, 팀 사이로 끌어다 놓으세요.',

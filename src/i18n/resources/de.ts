@@ -181,6 +181,17 @@ const de: Catalog = {
     membersDescription:
       'Entfernen Sie den Zugang von Personen, die mit einem geleakten Code beigetreten sind. Das Regenerieren eines Codes widerruft bestehende Mitglieder nicht.',
     noMembersYet: 'Noch keine Mitglieder.',
+    teachers: 'Lehrkräfte',
+    teachersDescription:
+      'Klassenlehrkräfte und der Ersteller der Klasse. Entfernen Sie den Zugang von Personen, die diese Klasse nicht mehr verwalten sollen.',
+    noTeachersYet: 'Noch keine Lehrkräfte.',
+    assistantTeachers: 'Assistenzlehrkräfte',
+    assistantTeachersDescription:
+      'Assistenzlehrkräfte für diese Klasse. Entfernen Sie den Zugang von Personen, die nicht mehr assistieren sollen.',
+    noAssistantTeachersYet: 'Noch keine Assistenzlehrkräfte.',
+    guardiansDescription:
+      'Mit Schülern dieser Klasse verknüpfte Erziehungsberechtigte. Trennen Sie die Verknüpfung, wenn jemand keinen Zugriff mehr haben soll.',
+    noGuardiansYet: 'Noch keine Erziehungsberechtigten verknüpft.',
     removeMemberTitle: 'Mitglied entfernen?',
     removeMemberDescription:
       '{{name}} aus dieser Klasse entfernen? Die Person verliert den Zugriff, bis sie erneut beitritt.',
@@ -189,6 +200,9 @@ const de: Catalog = {
     students: 'Schüler',
     studentsDescription:
       'Jeder eingeschriebene Schüler hat einen privaten Erziehungsberechtigten-Code (max. 5). Kopieren Sie Code oder Link zum Teilen, regenerieren Sie bei Leak oder laden Sie druckfertige QR-Codes für die ganze Klasse herunter.',
+    colName: 'Name',
+    colRole: 'Rolle',
+    colLinkedStudents: 'Verknüpfte Schüler',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -270,7 +284,10 @@ const de: Catalog = {
     navClass: 'Klasse',
     navPoints: 'Punkte',
     navMembers: 'Mitglieder',
+    navTeachers: 'Lehrkräfte',
+    navAssistantTeachers: 'Assistenzlehrkräfte',
     navStudents: 'Schüler',
+    navGuardians: 'Erziehungsberechtigte',
     navGroups: 'Gruppen',
     groupsTitle: 'Gruppen & Teams',
     groupsDescription: 'Organisieren Sie Schüler in Gruppen und verschachtelte Teams. Ziehen Sie Schüler zwischen Ungruppiert, Gruppe oder Team.',

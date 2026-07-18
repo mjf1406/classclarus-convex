@@ -173,6 +173,17 @@ const en = {
     membersDescription:
       'Remove access for anyone who joined with a leaked code. Regenerating a code does not revoke existing members.',
     noMembersYet: 'No members yet.',
+    teachers: 'Teachers',
+    teachersDescription:
+      'Class teachers and the class creator. Remove access for anyone who should no longer manage this class.',
+    noTeachersYet: 'No teachers yet.',
+    assistantTeachers: 'Assistant teachers',
+    assistantTeachersDescription:
+      'Assistant teachers for this class. Remove access for anyone who should no longer assist.',
+    noAssistantTeachersYet: 'No assistant teachers yet.',
+    guardiansDescription:
+      'Guardians linked to students in this class. Unlink a guardian from a student if they should no longer have access.',
+    noGuardiansYet: 'No guardians linked yet.',
     removeMemberTitle: 'Remove member?',
     removeMemberDescription:
       'Remove {{name}} from this class? They will lose access until they rejoin.',
@@ -181,6 +192,9 @@ const en = {
     students: 'Students',
     studentsDescription:
       'Manage the class roster: edit names, gender, pronouns, and class display names. Drag to set roster numbers. Each student has a private guardian join code — download print-ready QR slips for the whole class.',
+    colName: 'Name',
+    colRole: 'Role',
+    colLinkedStudents: 'Linked students',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -254,7 +268,10 @@ const en = {
     navClass: 'Class',
     navPoints: 'Points',
     navMembers: 'Members',
+    navTeachers: 'Teachers',
+    navAssistantTeachers: 'Assistant teachers',
     navStudents: 'Students',
+    navGuardians: 'Guardians',
     navGroups: 'Groups',
     navInvite: 'Invite',
     navSettings: 'Settings',

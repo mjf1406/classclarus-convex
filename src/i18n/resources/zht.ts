@@ -171,6 +171,17 @@ const zht: Catalog = {
     membersDescription:
       '移除透過外洩代碼加入者的存取權限。重新產生代碼不會撤銷現有成員的存取。',
     noMembersYet: '尚無成員。',
+    teachers: '教師',
+    teachersDescription:
+      '本班教師與建立者。移除不應再管理本班的人員的存取權限。',
+    noTeachersYet: '尚無教師。',
+    assistantTeachers: '助教',
+    assistantTeachersDescription:
+      '本班助教。移除不應再協助的人員的存取權限。',
+    noAssistantTeachersYet: '尚無助教。',
+    guardiansDescription:
+      '已連結到本班學生的監護人。若某監護人不應再有存取權限，可解除連結。',
+    noGuardiansYet: '尚無連結的監護人。',
     removeMemberTitle: '移除成員？',
     removeMemberDescription:
       '將 {{name}} 從此班級移除？在重新加入之前，其將失去存取權限。',
@@ -179,6 +190,9 @@ const zht: Catalog = {
     students: '學生',
     studentsDescription:
       '每位已註冊學生都有私密監護人加入碼（最多 5 名監護人）。可複製代碼或連結分享，外洩時重新產生，或下載全班可列印 QR 碼。',
+    colName: '姓名',
+    colRole: '角色',
+    colLinkedStudents: '連結學生',
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -250,7 +264,10 @@ const zht: Catalog = {
     navClass: '班級',
     navPoints: '積分',
     navMembers: '成員',
+    navTeachers: '教師',
+    navAssistantTeachers: '助教',
     navStudents: '學生',
+    navGuardians: '監護人',
     navGroups: '小組',
     groupsTitle: '小組與小隊',
     groupsDescription: '將學生分到小組及巢狀小隊中。可在未分組、小組或小隊之間拖放。',

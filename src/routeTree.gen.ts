@@ -20,12 +20,15 @@ import { Route as AccountJoinRouteImport } from './routes/_account/join'
 import { Route as AccountAccountRouteImport } from './routes/_account/account'
 import { Route as AccountCClassIdRouteRouteImport } from './routes/_account/c.$classId/route'
 import { Route as AccountCClassIdIndexRouteImport } from './routes/_account/c.$classId/index'
+import { Route as AccountCClassIdTeachersRouteImport } from './routes/_account/c.$classId/teachers'
 import { Route as AccountCClassIdStudentsRouteImport } from './routes/_account/c.$classId/students'
 import { Route as AccountCClassIdSettingsRouteImport } from './routes/_account/c.$classId/settings'
 import { Route as AccountCClassIdPointsRouteImport } from './routes/_account/c.$classId/points'
 import { Route as AccountCClassIdMembersRouteImport } from './routes/_account/c.$classId/members'
 import { Route as AccountCClassIdInviteRouteImport } from './routes/_account/c.$classId/invite'
+import { Route as AccountCClassIdGuardiansRouteImport } from './routes/_account/c.$classId/guardians'
 import { Route as AccountCClassIdGroupsRouteImport } from './routes/_account/c.$classId/groups'
+import { Route as AccountCClassIdAssistantTeachersRouteImport } from './routes/_account/c.$classId/assistant-teachers'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -81,6 +84,11 @@ const AccountCClassIdIndexRoute = AccountCClassIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountCClassIdRouteRoute,
 } as any)
+const AccountCClassIdTeachersRoute = AccountCClassIdTeachersRouteImport.update({
+  id: '/teachers',
+  path: '/teachers',
+  getParentRoute: () => AccountCClassIdRouteRoute,
+} as any)
 const AccountCClassIdStudentsRoute = AccountCClassIdStudentsRouteImport.update({
   id: '/students',
   path: '/students',
@@ -106,11 +114,23 @@ const AccountCClassIdInviteRoute = AccountCClassIdInviteRouteImport.update({
   path: '/invite',
   getParentRoute: () => AccountCClassIdRouteRoute,
 } as any)
+const AccountCClassIdGuardiansRoute =
+  AccountCClassIdGuardiansRouteImport.update({
+    id: '/guardians',
+    path: '/guardians',
+    getParentRoute: () => AccountCClassIdRouteRoute,
+  } as any)
 const AccountCClassIdGroupsRoute = AccountCClassIdGroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
   getParentRoute: () => AccountCClassIdRouteRoute,
 } as any)
+const AccountCClassIdAssistantTeachersRoute =
+  AccountCClassIdAssistantTeachersRouteImport.update({
+    id: '/assistant-teachers',
+    path: '/assistant-teachers',
+    getParentRoute: () => AccountCClassIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AccountIndexRoute
@@ -122,12 +142,15 @@ export interface FileRoutesByFullPath {
   '/join': typeof AccountJoinRoute
   '/settings': typeof AccountSettingsRoute
   '/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/c/$classId/assistant-teachers': typeof AccountCClassIdAssistantTeachersRoute
   '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
+  '/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
   '/c/$classId/invite': typeof AccountCClassIdInviteRoute
   '/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/c/$classId/points': typeof AccountCClassIdPointsRoute
   '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/c/$classId/students': typeof AccountCClassIdStudentsRoute
+  '/c/$classId/teachers': typeof AccountCClassIdTeachersRoute
   '/c/$classId/': typeof AccountCClassIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -139,12 +162,15 @@ export interface FileRoutesByTo {
   '/join': typeof AccountJoinRoute
   '/settings': typeof AccountSettingsRoute
   '/': typeof AccountIndexRoute
+  '/c/$classId/assistant-teachers': typeof AccountCClassIdAssistantTeachersRoute
   '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
+  '/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
   '/c/$classId/invite': typeof AccountCClassIdInviteRoute
   '/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/c/$classId/points': typeof AccountCClassIdPointsRoute
   '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/c/$classId/students': typeof AccountCClassIdStudentsRoute
+  '/c/$classId/teachers': typeof AccountCClassIdTeachersRoute
   '/c/$classId': typeof AccountCClassIdIndexRoute
 }
 export interface FileRoutesById {
@@ -159,12 +185,15 @@ export interface FileRoutesById {
   '/_account/settings': typeof AccountSettingsRoute
   '/_account/': typeof AccountIndexRoute
   '/_account/c/$classId': typeof AccountCClassIdRouteRouteWithChildren
+  '/_account/c/$classId/assistant-teachers': typeof AccountCClassIdAssistantTeachersRoute
   '/_account/c/$classId/groups': typeof AccountCClassIdGroupsRoute
+  '/_account/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
   '/_account/c/$classId/invite': typeof AccountCClassIdInviteRoute
   '/_account/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/_account/c/$classId/points': typeof AccountCClassIdPointsRoute
   '/_account/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/_account/c/$classId/students': typeof AccountCClassIdStudentsRoute
+  '/_account/c/$classId/teachers': typeof AccountCClassIdTeachersRoute
   '/_account/c/$classId/': typeof AccountCClassIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -179,12 +208,15 @@ export interface FileRouteTypes {
     | '/join'
     | '/settings'
     | '/c/$classId'
+    | '/c/$classId/assistant-teachers'
     | '/c/$classId/groups'
+    | '/c/$classId/guardians'
     | '/c/$classId/invite'
     | '/c/$classId/members'
     | '/c/$classId/points'
     | '/c/$classId/settings'
     | '/c/$classId/students'
+    | '/c/$classId/teachers'
     | '/c/$classId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -196,12 +228,15 @@ export interface FileRouteTypes {
     | '/join'
     | '/settings'
     | '/'
+    | '/c/$classId/assistant-teachers'
     | '/c/$classId/groups'
+    | '/c/$classId/guardians'
     | '/c/$classId/invite'
     | '/c/$classId/members'
     | '/c/$classId/points'
     | '/c/$classId/settings'
     | '/c/$classId/students'
+    | '/c/$classId/teachers'
     | '/c/$classId'
   id:
     | '__root__'
@@ -215,12 +250,15 @@ export interface FileRouteTypes {
     | '/_account/settings'
     | '/_account/'
     | '/_account/c/$classId'
+    | '/_account/c/$classId/assistant-teachers'
     | '/_account/c/$classId/groups'
+    | '/_account/c/$classId/guardians'
     | '/_account/c/$classId/invite'
     | '/_account/c/$classId/members'
     | '/_account/c/$classId/points'
     | '/_account/c/$classId/settings'
     | '/_account/c/$classId/students'
+    | '/_account/c/$classId/teachers'
     | '/_account/c/$classId/'
   fileRoutesById: FileRoutesById
 }
@@ -311,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountCClassIdIndexRouteImport
       parentRoute: typeof AccountCClassIdRouteRoute
     }
+    '/_account/c/$classId/teachers': {
+      id: '/_account/c/$classId/teachers'
+      path: '/teachers'
+      fullPath: '/c/$classId/teachers'
+      preLoaderRoute: typeof AccountCClassIdTeachersRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
     '/_account/c/$classId/students': {
       id: '/_account/c/$classId/students'
       path: '/students'
@@ -346,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountCClassIdInviteRouteImport
       parentRoute: typeof AccountCClassIdRouteRoute
     }
+    '/_account/c/$classId/guardians': {
+      id: '/_account/c/$classId/guardians'
+      path: '/guardians'
+      fullPath: '/c/$classId/guardians'
+      preLoaderRoute: typeof AccountCClassIdGuardiansRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
     '/_account/c/$classId/groups': {
       id: '/_account/c/$classId/groups'
       path: '/groups'
@@ -353,26 +405,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountCClassIdGroupsRouteImport
       parentRoute: typeof AccountCClassIdRouteRoute
     }
+    '/_account/c/$classId/assistant-teachers': {
+      id: '/_account/c/$classId/assistant-teachers'
+      path: '/assistant-teachers'
+      fullPath: '/c/$classId/assistant-teachers'
+      preLoaderRoute: typeof AccountCClassIdAssistantTeachersRouteImport
+      parentRoute: typeof AccountCClassIdRouteRoute
+    }
   }
 }
 
 interface AccountCClassIdRouteRouteChildren {
+  AccountCClassIdAssistantTeachersRoute: typeof AccountCClassIdAssistantTeachersRoute
   AccountCClassIdGroupsRoute: typeof AccountCClassIdGroupsRoute
+  AccountCClassIdGuardiansRoute: typeof AccountCClassIdGuardiansRoute
   AccountCClassIdInviteRoute: typeof AccountCClassIdInviteRoute
   AccountCClassIdMembersRoute: typeof AccountCClassIdMembersRoute
   AccountCClassIdPointsRoute: typeof AccountCClassIdPointsRoute
   AccountCClassIdSettingsRoute: typeof AccountCClassIdSettingsRoute
   AccountCClassIdStudentsRoute: typeof AccountCClassIdStudentsRoute
+  AccountCClassIdTeachersRoute: typeof AccountCClassIdTeachersRoute
   AccountCClassIdIndexRoute: typeof AccountCClassIdIndexRoute
 }
 
 const AccountCClassIdRouteRouteChildren: AccountCClassIdRouteRouteChildren = {
+  AccountCClassIdAssistantTeachersRoute: AccountCClassIdAssistantTeachersRoute,
   AccountCClassIdGroupsRoute: AccountCClassIdGroupsRoute,
+  AccountCClassIdGuardiansRoute: AccountCClassIdGuardiansRoute,
   AccountCClassIdInviteRoute: AccountCClassIdInviteRoute,
   AccountCClassIdMembersRoute: AccountCClassIdMembersRoute,
   AccountCClassIdPointsRoute: AccountCClassIdPointsRoute,
   AccountCClassIdSettingsRoute: AccountCClassIdSettingsRoute,
   AccountCClassIdStudentsRoute: AccountCClassIdStudentsRoute,
+  AccountCClassIdTeachersRoute: AccountCClassIdTeachersRoute,
   AccountCClassIdIndexRoute: AccountCClassIdIndexRoute,
 }
 

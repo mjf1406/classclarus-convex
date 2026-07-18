@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react'
 
 import type { ClassPublic } from '#/lib/classes'
+import type { ClassMember } from '#/lib/memberships'
 import type { Id } from '../../../convex/_generated/dataModel'
-import type { ClassMember } from '#/components/classes/ClassMembersSection'
 
 export type GuardianRosterData = {
   className: string
