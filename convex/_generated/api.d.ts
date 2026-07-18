@@ -16,6 +16,7 @@ import type * as classes from "../classes.js";
 import type * as groups from "../groups.js";
 import type * as guardians from "../guardians.js";
 import type * as http from "../http.js";
+import type * as inviteCodes from "../inviteCodes.js";
 import type * as lib_classAuth from "../lib/classAuth.js";
 import type * as lib_guardianAuth from "../lib/guardianAuth.js";
 import type * as lib_guardianLinks from "../lib/guardianLinks.js";
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   groups: typeof groups;
   guardians: typeof guardians;
   http: typeof http;
+  inviteCodes: typeof inviteCodes;
   "lib/classAuth": typeof lib_classAuth;
   "lib/guardianAuth": typeof lib_guardianAuth;
   "lib/guardianLinks": typeof lib_guardianLinks;

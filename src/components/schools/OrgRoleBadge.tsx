@@ -4,6 +4,8 @@ import {
   GraduationCap,
   Shield,
   User,
+  UserCheck,
+  Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -33,6 +35,18 @@ const ROLE_ICON_CONFIG: Record<
     className:
       'border-indigo-500/20 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
     labelKey: 'rolePrincipal',
+  },
+  vicePrincipal: {
+    icon: UserCheck,
+    className:
+      'border-indigo-500/20 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+    labelKey: 'roleVicePrincipal',
+  },
+  assistantVicePrincipal: {
+    icon: Users,
+    className:
+      'border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-300',
+    labelKey: 'roleAssistantVicePrincipal',
   },
   teacher: {
     icon: GraduationCap,

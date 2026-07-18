@@ -34,16 +34,21 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-const PRINCIPAL_ROLES = new Set<SchoolOrgRole>(['owner', 'principal'])
+const ADMIN_ROLES = new Set<SchoolOrgRole>([
+  'owner',
+  'principal',
+  'vicePrincipal',
+  'assistantVicePrincipal',
+  'admin',
+])
 const TEACHER_ROLES = new Set<SchoolOrgRole>(['teacher'])
-const ADMIN_ROLES = new Set<SchoolOrgRole>(['admin'])
 
 export function SchoolStaffMembersSection({
   schoolId,
   roleFilter,
 }: {
   schoolId: string
-  roleFilter: 'principals' | 'teachers' | 'admins'
+  roleFilter: 'admins' | 'teachers'
 }) {
   const { t } = useTranslation(['schools', 'common'])
   const removeMember = useRemoveSchoolMember(schoolId)
@@ -57,33 +62,14 @@ export function SchoolStaffMembersSection({
 
   const filtered = useMemo(() => {
     if (!members) return undefined
-    const roles =
-      roleFilter === 'principals'
-        ? PRINCIPAL_ROLES
-        : roleFilter === 'teachers'
-          ? TEACHER_ROLES
-          : ADMIN_ROLES
+    const roles = roleFilter === 'admins' ? ADMIN_ROLES : TEACHER_ROLES
     return members.filter((member) => roles.has(member.role))
   }, [members, roleFilter])
 
-  const titleKey =
-    roleFilter === 'principals'
-      ? 'principals'
-      : roleFilter === 'teachers'
-        ? 'teachers'
-        : 'admins'
+  const titleKey = roleFilter === 'admins' ? 'admins' : 'teachers'
   const descriptionKey =
-    roleFilter === 'principals'
-      ? 'principalsDescription'
-      : roleFilter === 'teachers'
-        ? 'teachersDescription'
-        : 'adminsDescription'
-  const emptyKey =
-    roleFilter === 'principals'
-      ? 'noPrincipalsYet'
-      : roleFilter === 'teachers'
-        ? 'noTeachersYet'
-        : 'noAdminsYet'
+    roleFilter === 'admins' ? 'adminsDescription' : 'teachersDescription'
+  const emptyKey = roleFilter === 'admins' ? 'noAdminsYet' : 'noTeachersYet'
 
   const memberLabel = (member: SchoolMember) =>
     member.name ??

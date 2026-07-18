@@ -20,14 +20,14 @@ function pageTitleKey(pathname: string, schoolId: string): string {
     ? pathname.slice(prefix.length)
     : ''
   switch (rest) {
-    case 'principals':
-      return 'principals'
-    case 'teachers':
-      return 'teachers'
     case 'admins':
       return 'admins'
+    case 'teachers':
+      return 'teachers'
     case 'teams':
       return 'teamsTitle'
+    case 'members/invite':
+      return 'inviteTitle'
     case 'invite':
       return 'inviteTitle'
     case 'settings':

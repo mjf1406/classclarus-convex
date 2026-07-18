@@ -86,15 +86,13 @@ export function SchoolSwitcher() {
               const target =
                 subpath === '/teams'
                   ? '/s/$schoolId/teams'
-                  : subpath === '/invite'
-                    ? '/s/$schoolId/invite'
+                  : subpath === '/members/invite' || subpath === '/invite'
+                    ? '/s/$schoolId/members/invite'
                     : subpath === '/settings'
                       ? '/s/$schoolId/settings'
                       : subpath === '/teachers'
                         ? '/s/$schoolId/teachers'
-                        : subpath === '/admins'
-                          ? '/s/$schoolId/admins'
-                          : '/s/$schoolId/principals'
+                        : '/s/$schoolId/admins'
               return (
                 <DropdownMenuItem key={item._id} asChild>
                   <Link to={target} params={{ schoolId: item._id }}>

@@ -35,13 +35,14 @@ function getSubpageFromPath(pathname: string): ClassSubpage {
   if (pathname.endsWith('/students')) return 'students'
   if (pathname.endsWith('/guardians')) return 'guardians'
   if (pathname.endsWith('/groups')) return 'groups'
-  if (pathname.endsWith('/invite')) return 'invite'
+  if (pathname.endsWith('/members/invite') || pathname.endsWith('/invite'))
+    return 'invite'
   if (pathname.endsWith('/settings')) return 'settings'
   return 'points'
 }
 
 export function ClassInsetHeader() {
-  const { t } = useTranslation(['classes', 'home'])
+  const { t } = useTranslation(['classes', 'common'])
   const { classId, classDoc, canManage } = useClassLayout()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const subpage = getSubpageFromPath(pathname)
@@ -60,7 +61,7 @@ export function ClassInsetHeader() {
           <BreadcrumbList className="flex-nowrap">
             <BreadcrumbItem className="hidden shrink-0 md:block">
               <BreadcrumbLink asChild>
-                <Link to="/">{t('home:title')}</Link>
+                <Link to="/">{t('common:home')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden shrink-0 md:block" />

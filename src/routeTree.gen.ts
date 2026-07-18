@@ -25,7 +25,6 @@ import { Route as AccountCClassIdIndexRouteImport } from './routes/_account/c.$c
 import { Route as AccountSSchoolIdTeamsRouteImport } from './routes/_account/s.$schoolId/teams'
 import { Route as AccountSSchoolIdTeachersRouteImport } from './routes/_account/s.$schoolId/teachers'
 import { Route as AccountSSchoolIdSettingsRouteImport } from './routes/_account/s.$schoolId/settings'
-import { Route as AccountSSchoolIdPrincipalsRouteImport } from './routes/_account/s.$schoolId/principals'
 import { Route as AccountSSchoolIdMembersRouteImport } from './routes/_account/s.$schoolId/members'
 import { Route as AccountSSchoolIdInviteRouteImport } from './routes/_account/s.$schoolId/invite'
 import { Route as AccountSSchoolIdClassesRouteImport } from './routes/_account/s.$schoolId/classes'
@@ -39,6 +38,10 @@ import { Route as AccountCClassIdInviteRouteImport } from './routes/_account/c.$
 import { Route as AccountCClassIdGuardiansRouteImport } from './routes/_account/c.$classId/guardians'
 import { Route as AccountCClassIdGroupsRouteImport } from './routes/_account/c.$classId/groups'
 import { Route as AccountCClassIdAssistantTeachersRouteImport } from './routes/_account/c.$classId/assistant-teachers'
+import { Route as AccountSSchoolIdMembersIndexRouteImport } from './routes/_account/s.$schoolId/members.index'
+import { Route as AccountCClassIdMembersIndexRouteImport } from './routes/_account/c.$classId/members.index'
+import { Route as AccountSSchoolIdMembersInviteRouteImport } from './routes/_account/s.$schoolId/members.invite'
+import { Route as AccountCClassIdMembersInviteRouteImport } from './routes/_account/c.$classId/members.invite'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -121,12 +124,6 @@ const AccountSSchoolIdSettingsRoute =
     path: '/settings',
     getParentRoute: () => AccountSSchoolIdRouteRoute,
   } as any)
-const AccountSSchoolIdPrincipalsRoute =
-  AccountSSchoolIdPrincipalsRouteImport.update({
-    id: '/principals',
-    path: '/principals',
-    getParentRoute: () => AccountSSchoolIdRouteRoute,
-  } as any)
 const AccountSSchoolIdMembersRoute = AccountSSchoolIdMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -194,6 +191,30 @@ const AccountCClassIdAssistantTeachersRoute =
     path: '/assistant-teachers',
     getParentRoute: () => AccountCClassIdRouteRoute,
   } as any)
+const AccountSSchoolIdMembersIndexRoute =
+  AccountSSchoolIdMembersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AccountSSchoolIdMembersRoute,
+  } as any)
+const AccountCClassIdMembersIndexRoute =
+  AccountCClassIdMembersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AccountCClassIdMembersRoute,
+  } as any)
+const AccountSSchoolIdMembersInviteRoute =
+  AccountSSchoolIdMembersInviteRouteImport.update({
+    id: '/invite',
+    path: '/invite',
+    getParentRoute: () => AccountSSchoolIdMembersRoute,
+  } as any)
+const AccountCClassIdMembersInviteRoute =
+  AccountCClassIdMembersInviteRouteImport.update({
+    id: '/invite',
+    path: '/invite',
+    getParentRoute: () => AccountCClassIdMembersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AccountIndexRoute
@@ -210,7 +231,7 @@ export interface FileRoutesByFullPath {
   '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
   '/c/$classId/invite': typeof AccountCClassIdInviteRoute
-  '/c/$classId/members': typeof AccountCClassIdMembersRoute
+  '/c/$classId/members': typeof AccountCClassIdMembersRouteWithChildren
   '/c/$classId/points': typeof AccountCClassIdPointsRoute
   '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/c/$classId/students': typeof AccountCClassIdStudentsRoute
@@ -218,13 +239,16 @@ export interface FileRoutesByFullPath {
   '/s/$schoolId/admins': typeof AccountSSchoolIdAdminsRoute
   '/s/$schoolId/classes': typeof AccountSSchoolIdClassesRoute
   '/s/$schoolId/invite': typeof AccountSSchoolIdInviteRoute
-  '/s/$schoolId/members': typeof AccountSSchoolIdMembersRoute
-  '/s/$schoolId/principals': typeof AccountSSchoolIdPrincipalsRoute
+  '/s/$schoolId/members': typeof AccountSSchoolIdMembersRouteWithChildren
   '/s/$schoolId/settings': typeof AccountSSchoolIdSettingsRoute
   '/s/$schoolId/teachers': typeof AccountSSchoolIdTeachersRoute
   '/s/$schoolId/teams': typeof AccountSSchoolIdTeamsRoute
   '/c/$classId/': typeof AccountCClassIdIndexRoute
   '/s/$schoolId/': typeof AccountSSchoolIdIndexRoute
+  '/c/$classId/members/invite': typeof AccountCClassIdMembersInviteRoute
+  '/s/$schoolId/members/invite': typeof AccountSSchoolIdMembersInviteRoute
+  '/c/$classId/members/': typeof AccountCClassIdMembersIndexRoute
+  '/s/$schoolId/members/': typeof AccountSSchoolIdMembersIndexRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
@@ -239,7 +263,6 @@ export interface FileRoutesByTo {
   '/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
   '/c/$classId/invite': typeof AccountCClassIdInviteRoute
-  '/c/$classId/members': typeof AccountCClassIdMembersRoute
   '/c/$classId/points': typeof AccountCClassIdPointsRoute
   '/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/c/$classId/students': typeof AccountCClassIdStudentsRoute
@@ -247,13 +270,15 @@ export interface FileRoutesByTo {
   '/s/$schoolId/admins': typeof AccountSSchoolIdAdminsRoute
   '/s/$schoolId/classes': typeof AccountSSchoolIdClassesRoute
   '/s/$schoolId/invite': typeof AccountSSchoolIdInviteRoute
-  '/s/$schoolId/members': typeof AccountSSchoolIdMembersRoute
-  '/s/$schoolId/principals': typeof AccountSSchoolIdPrincipalsRoute
   '/s/$schoolId/settings': typeof AccountSSchoolIdSettingsRoute
   '/s/$schoolId/teachers': typeof AccountSSchoolIdTeachersRoute
   '/s/$schoolId/teams': typeof AccountSSchoolIdTeamsRoute
   '/c/$classId': typeof AccountCClassIdIndexRoute
   '/s/$schoolId': typeof AccountSSchoolIdIndexRoute
+  '/c/$classId/members/invite': typeof AccountCClassIdMembersInviteRoute
+  '/s/$schoolId/members/invite': typeof AccountSSchoolIdMembersInviteRoute
+  '/c/$classId/members': typeof AccountCClassIdMembersIndexRoute
+  '/s/$schoolId/members': typeof AccountSSchoolIdMembersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -272,7 +297,7 @@ export interface FileRoutesById {
   '/_account/c/$classId/groups': typeof AccountCClassIdGroupsRoute
   '/_account/c/$classId/guardians': typeof AccountCClassIdGuardiansRoute
   '/_account/c/$classId/invite': typeof AccountCClassIdInviteRoute
-  '/_account/c/$classId/members': typeof AccountCClassIdMembersRoute
+  '/_account/c/$classId/members': typeof AccountCClassIdMembersRouteWithChildren
   '/_account/c/$classId/points': typeof AccountCClassIdPointsRoute
   '/_account/c/$classId/settings': typeof AccountCClassIdSettingsRoute
   '/_account/c/$classId/students': typeof AccountCClassIdStudentsRoute
@@ -280,13 +305,16 @@ export interface FileRoutesById {
   '/_account/s/$schoolId/admins': typeof AccountSSchoolIdAdminsRoute
   '/_account/s/$schoolId/classes': typeof AccountSSchoolIdClassesRoute
   '/_account/s/$schoolId/invite': typeof AccountSSchoolIdInviteRoute
-  '/_account/s/$schoolId/members': typeof AccountSSchoolIdMembersRoute
-  '/_account/s/$schoolId/principals': typeof AccountSSchoolIdPrincipalsRoute
+  '/_account/s/$schoolId/members': typeof AccountSSchoolIdMembersRouteWithChildren
   '/_account/s/$schoolId/settings': typeof AccountSSchoolIdSettingsRoute
   '/_account/s/$schoolId/teachers': typeof AccountSSchoolIdTeachersRoute
   '/_account/s/$schoolId/teams': typeof AccountSSchoolIdTeamsRoute
   '/_account/c/$classId/': typeof AccountCClassIdIndexRoute
   '/_account/s/$schoolId/': typeof AccountSSchoolIdIndexRoute
+  '/_account/c/$classId/members/invite': typeof AccountCClassIdMembersInviteRoute
+  '/_account/s/$schoolId/members/invite': typeof AccountSSchoolIdMembersInviteRoute
+  '/_account/c/$classId/members/': typeof AccountCClassIdMembersIndexRoute
+  '/_account/s/$schoolId/members/': typeof AccountSSchoolIdMembersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -314,12 +342,15 @@ export interface FileRouteTypes {
     | '/s/$schoolId/classes'
     | '/s/$schoolId/invite'
     | '/s/$schoolId/members'
-    | '/s/$schoolId/principals'
     | '/s/$schoolId/settings'
     | '/s/$schoolId/teachers'
     | '/s/$schoolId/teams'
     | '/c/$classId/'
     | '/s/$schoolId/'
+    | '/c/$classId/members/invite'
+    | '/s/$schoolId/members/invite'
+    | '/c/$classId/members/'
+    | '/s/$schoolId/members/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/$'
@@ -334,7 +365,6 @@ export interface FileRouteTypes {
     | '/c/$classId/groups'
     | '/c/$classId/guardians'
     | '/c/$classId/invite'
-    | '/c/$classId/members'
     | '/c/$classId/points'
     | '/c/$classId/settings'
     | '/c/$classId/students'
@@ -342,13 +372,15 @@ export interface FileRouteTypes {
     | '/s/$schoolId/admins'
     | '/s/$schoolId/classes'
     | '/s/$schoolId/invite'
-    | '/s/$schoolId/members'
-    | '/s/$schoolId/principals'
     | '/s/$schoolId/settings'
     | '/s/$schoolId/teachers'
     | '/s/$schoolId/teams'
     | '/c/$classId'
     | '/s/$schoolId'
+    | '/c/$classId/members/invite'
+    | '/s/$schoolId/members/invite'
+    | '/c/$classId/members'
+    | '/s/$schoolId/members'
   id:
     | '__root__'
     | '/_account'
@@ -375,12 +407,15 @@ export interface FileRouteTypes {
     | '/_account/s/$schoolId/classes'
     | '/_account/s/$schoolId/invite'
     | '/_account/s/$schoolId/members'
-    | '/_account/s/$schoolId/principals'
     | '/_account/s/$schoolId/settings'
     | '/_account/s/$schoolId/teachers'
     | '/_account/s/$schoolId/teams'
     | '/_account/c/$classId/'
     | '/_account/s/$schoolId/'
+    | '/_account/c/$classId/members/invite'
+    | '/_account/s/$schoolId/members/invite'
+    | '/_account/c/$classId/members/'
+    | '/_account/s/$schoolId/members/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -505,13 +540,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountSSchoolIdSettingsRouteImport
       parentRoute: typeof AccountSSchoolIdRouteRoute
     }
-    '/_account/s/$schoolId/principals': {
-      id: '/_account/s/$schoolId/principals'
-      path: '/principals'
-      fullPath: '/s/$schoolId/principals'
-      preLoaderRoute: typeof AccountSSchoolIdPrincipalsRouteImport
-      parentRoute: typeof AccountSSchoolIdRouteRoute
-    }
     '/_account/s/$schoolId/members': {
       id: '/_account/s/$schoolId/members'
       path: '/members'
@@ -603,15 +631,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountCClassIdAssistantTeachersRouteImport
       parentRoute: typeof AccountCClassIdRouteRoute
     }
+    '/_account/s/$schoolId/members/': {
+      id: '/_account/s/$schoolId/members/'
+      path: '/'
+      fullPath: '/s/$schoolId/members/'
+      preLoaderRoute: typeof AccountSSchoolIdMembersIndexRouteImport
+      parentRoute: typeof AccountSSchoolIdMembersRoute
+    }
+    '/_account/c/$classId/members/': {
+      id: '/_account/c/$classId/members/'
+      path: '/'
+      fullPath: '/c/$classId/members/'
+      preLoaderRoute: typeof AccountCClassIdMembersIndexRouteImport
+      parentRoute: typeof AccountCClassIdMembersRoute
+    }
+    '/_account/s/$schoolId/members/invite': {
+      id: '/_account/s/$schoolId/members/invite'
+      path: '/invite'
+      fullPath: '/s/$schoolId/members/invite'
+      preLoaderRoute: typeof AccountSSchoolIdMembersInviteRouteImport
+      parentRoute: typeof AccountSSchoolIdMembersRoute
+    }
+    '/_account/c/$classId/members/invite': {
+      id: '/_account/c/$classId/members/invite'
+      path: '/invite'
+      fullPath: '/c/$classId/members/invite'
+      preLoaderRoute: typeof AccountCClassIdMembersInviteRouteImport
+      parentRoute: typeof AccountCClassIdMembersRoute
+    }
   }
 }
+
+interface AccountCClassIdMembersRouteChildren {
+  AccountCClassIdMembersInviteRoute: typeof AccountCClassIdMembersInviteRoute
+  AccountCClassIdMembersIndexRoute: typeof AccountCClassIdMembersIndexRoute
+}
+
+const AccountCClassIdMembersRouteChildren: AccountCClassIdMembersRouteChildren =
+  {
+    AccountCClassIdMembersInviteRoute: AccountCClassIdMembersInviteRoute,
+    AccountCClassIdMembersIndexRoute: AccountCClassIdMembersIndexRoute,
+  }
+
+const AccountCClassIdMembersRouteWithChildren =
+  AccountCClassIdMembersRoute._addFileChildren(
+    AccountCClassIdMembersRouteChildren,
+  )
 
 interface AccountCClassIdRouteRouteChildren {
   AccountCClassIdAssistantTeachersRoute: typeof AccountCClassIdAssistantTeachersRoute
   AccountCClassIdGroupsRoute: typeof AccountCClassIdGroupsRoute
   AccountCClassIdGuardiansRoute: typeof AccountCClassIdGuardiansRoute
   AccountCClassIdInviteRoute: typeof AccountCClassIdInviteRoute
-  AccountCClassIdMembersRoute: typeof AccountCClassIdMembersRoute
+  AccountCClassIdMembersRoute: typeof AccountCClassIdMembersRouteWithChildren
   AccountCClassIdPointsRoute: typeof AccountCClassIdPointsRoute
   AccountCClassIdSettingsRoute: typeof AccountCClassIdSettingsRoute
   AccountCClassIdStudentsRoute: typeof AccountCClassIdStudentsRoute
@@ -624,7 +696,7 @@ const AccountCClassIdRouteRouteChildren: AccountCClassIdRouteRouteChildren = {
   AccountCClassIdGroupsRoute: AccountCClassIdGroupsRoute,
   AccountCClassIdGuardiansRoute: AccountCClassIdGuardiansRoute,
   AccountCClassIdInviteRoute: AccountCClassIdInviteRoute,
-  AccountCClassIdMembersRoute: AccountCClassIdMembersRoute,
+  AccountCClassIdMembersRoute: AccountCClassIdMembersRouteWithChildren,
   AccountCClassIdPointsRoute: AccountCClassIdPointsRoute,
   AccountCClassIdSettingsRoute: AccountCClassIdSettingsRoute,
   AccountCClassIdStudentsRoute: AccountCClassIdStudentsRoute,
@@ -635,12 +707,27 @@ const AccountCClassIdRouteRouteChildren: AccountCClassIdRouteRouteChildren = {
 const AccountCClassIdRouteRouteWithChildren =
   AccountCClassIdRouteRoute._addFileChildren(AccountCClassIdRouteRouteChildren)
 
+interface AccountSSchoolIdMembersRouteChildren {
+  AccountSSchoolIdMembersInviteRoute: typeof AccountSSchoolIdMembersInviteRoute
+  AccountSSchoolIdMembersIndexRoute: typeof AccountSSchoolIdMembersIndexRoute
+}
+
+const AccountSSchoolIdMembersRouteChildren: AccountSSchoolIdMembersRouteChildren =
+  {
+    AccountSSchoolIdMembersInviteRoute: AccountSSchoolIdMembersInviteRoute,
+    AccountSSchoolIdMembersIndexRoute: AccountSSchoolIdMembersIndexRoute,
+  }
+
+const AccountSSchoolIdMembersRouteWithChildren =
+  AccountSSchoolIdMembersRoute._addFileChildren(
+    AccountSSchoolIdMembersRouteChildren,
+  )
+
 interface AccountSSchoolIdRouteRouteChildren {
   AccountSSchoolIdAdminsRoute: typeof AccountSSchoolIdAdminsRoute
   AccountSSchoolIdClassesRoute: typeof AccountSSchoolIdClassesRoute
   AccountSSchoolIdInviteRoute: typeof AccountSSchoolIdInviteRoute
-  AccountSSchoolIdMembersRoute: typeof AccountSSchoolIdMembersRoute
-  AccountSSchoolIdPrincipalsRoute: typeof AccountSSchoolIdPrincipalsRoute
+  AccountSSchoolIdMembersRoute: typeof AccountSSchoolIdMembersRouteWithChildren
   AccountSSchoolIdSettingsRoute: typeof AccountSSchoolIdSettingsRoute
   AccountSSchoolIdTeachersRoute: typeof AccountSSchoolIdTeachersRoute
   AccountSSchoolIdTeamsRoute: typeof AccountSSchoolIdTeamsRoute
@@ -651,8 +738,7 @@ const AccountSSchoolIdRouteRouteChildren: AccountSSchoolIdRouteRouteChildren = {
   AccountSSchoolIdAdminsRoute: AccountSSchoolIdAdminsRoute,
   AccountSSchoolIdClassesRoute: AccountSSchoolIdClassesRoute,
   AccountSSchoolIdInviteRoute: AccountSSchoolIdInviteRoute,
-  AccountSSchoolIdMembersRoute: AccountSSchoolIdMembersRoute,
-  AccountSSchoolIdPrincipalsRoute: AccountSSchoolIdPrincipalsRoute,
+  AccountSSchoolIdMembersRoute: AccountSSchoolIdMembersRouteWithChildren,
   AccountSSchoolIdSettingsRoute: AccountSSchoolIdSettingsRoute,
   AccountSSchoolIdTeachersRoute: AccountSSchoolIdTeachersRoute,
   AccountSSchoolIdTeamsRoute: AccountSSchoolIdTeamsRoute,

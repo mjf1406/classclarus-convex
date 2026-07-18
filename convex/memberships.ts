@@ -29,51 +29,23 @@ import {
   classSort,
   toPublicClass,
 } from './classes'
-import { listSchoolsForUser, getSchoolNameMap, schoolDocPublic, tryRedeemSchoolJoinCode } from './schools'
+import { listSchoolsForUser, getSchoolNameMap, schoolDocPublic } from './schools'
 import { loadGuardianCodesForClass } from './guardians'
 import { tryRedeemGuardianCode } from './lib/guardianLinks'
+import {
+  tryRedeemInviteCode,
+  INVALID_CODE_ERROR,
+} from './inviteCodes'
 import { rateLimiter } from './rateLimiter'
-import { JOIN_CODE_LENGTH } from './lib/joinCodes'
 import {
   GUARDIAN_RELATION,
   guardianAuthz,
   guardianObject,
   guardianSubject,
 } from './lib/guardianAuth'
-import type { SchoolOrgRole } from './tenants'
 
 type RedeemableRole = 'student' | 'classTeacher' | 'assistantTeacher'
 
-async function findClassByCode(
-  ctx: MutationCtx,
-  code: string,
-): Promise<{ doc: Doc<'classes'>; role: RedeemableRole } | null> {
-  // Codes are unique across all three fields at generation time, so at most
-  // one of these lookups matches; .unique() throws if that invariant breaks.
-  const byStudent = await ctx.db
-    .query('classes')
-    .withIndex('by_studentCode', (q) => q.eq('studentCode', code))
-    .unique()
-  if (byStudent) return { doc: byStudent, role: 'student' }
-
-  const byTeacher = await ctx.db
-    .query('classes')
-    .withIndex('by_teacherCode', (q) => q.eq('teacherCode', code))
-    .unique()
-  if (byTeacher) return { doc: byTeacher, role: 'classTeacher' }
-
-  const byAssistant = await ctx.db
-    .query('classes')
-    .withIndex('by_assistantTeacherCode', (q) =>
-      q.eq('assistantTeacherCode', code),
-    )
-    .unique()
-  if (byAssistant) return { doc: byAssistant, role: 'assistantTeacher' }
-
-  return null
-}
-
-const INVALID_CODE_ERROR = 'Invalid join code'
 const RATE_LIMITED_ERROR = 'Too many attempts. Please try again later.'
 const SOLO_BACKFILL_USERS_PER_BATCH = 20
 
@@ -83,8 +55,19 @@ const redeemableRoleValidator = v.union(
   v.literal('assistantTeacher'),
 )
 
+const schoolRedeemRoleValidator = v.union(
+  v.literal('owner'),
+  v.literal('admin'),
+  v.literal('principal'),
+  v.literal('vicePrincipal'),
+  v.literal('assistantVicePrincipal'),
+  v.literal('teacher'),
+  v.literal('member'),
+)
+
 /**
- * Redeem a class join code without rate limiting (caller applies limits once).
+ * Redeem a class invite code without rate limiting (caller applies limits once).
+ * Legacy forever class codes are intentionally not accepted.
  */
 async function tryRedeemJoinCode(
   ctx: MutationCtx,
@@ -94,45 +77,12 @@ async function tryRedeemJoinCode(
   | { ok: true; classId: Id<'classes'>; role: RedeemableRole }
   | { ok: false; error: string }
 > {
-  const code = rawCode.replace(/[\s\u2013-]/g, '').toUpperCase()
-  if (code.length !== JOIN_CODE_LENGTH) {
+  const result = await tryRedeemInviteCode(ctx, user, rawCode)
+  if (!result.ok) return result
+  if (result.kind !== 'class') {
     return { ok: false, error: INVALID_CODE_ERROR }
   }
-
-  const match = await findClassByCode(ctx, code)
-  // Generic error for both "no match" and "archived": never confirm that a
-  // code was (once) valid.
-  if (!match) {
-    return { ok: false, error: INVALID_CODE_ERROR }
-  }
-  if (match.doc.archivedTime !== undefined) {
-    return { ok: false, error: INVALID_CODE_ERROR }
-  }
-
-  // Org-class guard: org students go through the roster-linking path
-  // (Phase 2, linkStudentUser). Same generic error — never confirm a valid
-  // org student code to unauthenticated-to-roster callers.
-  if (match.doc.organizationId !== undefined && match.role === 'student') {
-    console.error('Org student join blocked (roster path required)', {
-      classId: match.doc._id,
-    })
-    return { ok: false, error: INVALID_CODE_ERROR }
-  }
-
-  const scope = classScope(match.doc._id)
-
-  // Idempotent: redeeming a code for a role you already hold succeeds
-  // without double-assigning. Roles are additive — a creator redeeming a
-  // teacher code keeps creator.
-  const alreadyHasRole = await authz.hasRole(ctx, user._id, match.role, scope)
-  if (!alreadyHasRole) {
-    await authz.assignRole(ctx, user._id, match.role, scope)
-  }
-  if (match.role === 'student' && match.doc.organizationId === undefined) {
-    await ensureSoloStudentEnrollment(ctx, user, match.doc._id)
-  }
-
-  return { ok: true, classId: match.doc._id, role: match.role }
+  return { ok: true, classId: result.classId, role: result.role }
 }
 
 async function applyJoinCodeRateLimits(
@@ -181,8 +131,7 @@ export const redeemJoinCode = mutation({
 })
 
 /**
- * Single rate-limit budget: try class join codes, then school staff codes,
- * then guardian codes.
+ * Single rate-limit budget: try invite codes (class/school), then guardian codes.
  */
 export const redeemJoinOrGuardianCode = mutation({
   args: {
@@ -199,13 +148,7 @@ export const redeemJoinOrGuardianCode = mutation({
       ok: v.literal(true),
       kind: v.literal('school'),
       schoolId: v.string(),
-      role: v.union(
-        v.literal('owner'),
-        v.literal('admin'),
-        v.literal('principal'),
-        v.literal('teacher'),
-        v.literal('member'),
-      ),
+      role: schoolRedeemRoleValidator,
     }),
     v.object({
       ok: v.literal(true),
@@ -224,32 +167,27 @@ export const redeemJoinOrGuardianCode = mutation({
       return { ok: false as const, error: limited.error }
     }
 
-    const classResult = await tryRedeemJoinCode(ctx, user, args.code)
-    if (classResult.ok) {
-      return {
-        ok: true as const,
-        kind: 'class' as const,
-        classId: classResult.classId,
-        role: classResult.role,
+    const inviteResult = await tryRedeemInviteCode(ctx, user, args.code)
+    if (inviteResult.ok) {
+      if (inviteResult.kind === 'class') {
+        return {
+          ok: true as const,
+          kind: 'class' as const,
+          classId: inviteResult.classId,
+          role: inviteResult.role,
+        }
       }
-    }
-
-    // Only fall through on "invalid code" — preserve other errors.
-    if (classResult.error !== INVALID_CODE_ERROR) {
-      return { ok: false as const, error: classResult.error }
-    }
-
-    const schoolResult = await tryRedeemSchoolJoinCode(ctx, user, args.code)
-    if (schoolResult.ok) {
       return {
         ok: true as const,
         kind: 'school' as const,
-        schoolId: schoolResult.schoolId,
-        role: schoolResult.role as SchoolOrgRole,
+        schoolId: inviteResult.schoolId,
+        role: inviteResult.role,
       }
     }
-    if (schoolResult.error !== INVALID_CODE_ERROR) {
-      return { ok: false as const, error: schoolResult.error }
+
+    // Only fall through on "invalid code" — preserve expired/exhausted/revoked.
+    if (inviteResult.error !== INVALID_CODE_ERROR) {
+      return { ok: false as const, error: inviteResult.error }
     }
 
     const guardianResult = await tryRedeemGuardianCode(ctx, user._id, args.code)
@@ -690,12 +628,6 @@ export const listClassMembers = internalQuery({
   },
 })
 
-const joinCodesValidator = v.object({
-  studentCode: v.string(),
-  teacherCode: v.union(v.string(), v.null()),
-  assistantTeacherCode: v.union(v.string(), v.null()),
-})
-
 const guardianRosterValidator = v.object({
   className: v.string(),
   year: v.number(),
@@ -718,15 +650,14 @@ const guardianRosterValidator = v.object({
 })
 
 /**
- * Single subscription for class manage UI: join codes, members (if creator),
- * and guardian roster. Gated on class:manageMembers.
+ * Single subscription for class manage UI: members and guardian roster.
+ * Gated on class:manageMembers. Invites are listed via inviteCodes.listClassInvites.
  */
 export const getClassAdminBundle = query({
   args: {
     classId: v.id('classes'),
   },
   returns: v.object({
-    joinCodes: joinCodesValidator,
     members: v.array(memberValidator),
     guardianRoster: guardianRosterValidator,
   }),
@@ -752,11 +683,6 @@ export const getClassAdminBundle = query({
     ])
 
     return {
-      joinCodes: {
-        studentCode: doc.studentCode,
-        teacherCode: doc.teacherCode,
-        assistantTeacherCode: doc.assistantTeacherCode,
-      },
       members,
       guardianRoster,
     }

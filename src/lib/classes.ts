@@ -20,9 +20,8 @@ export type ClassRole =
 export type ClassDisplayRole = ClassRole | 'guardian'
 
 /**
- * The class shape returned by public queries: join codes and the display pin
- * are redacted server-side (codes are only available via getJoinCodes /
- * getClassAdminBundle).
+ * The class shape returned by public queries: legacy join-code fields and the
+ * display pin are redacted server-side (invites are listed via inviteCodes APIs).
  * `myRole` is the caller's highest roster role, or `guardian` on getClass when
  * access is via a linked child enrollment.
  * Permission flags are present on getClass and listMyClasses.

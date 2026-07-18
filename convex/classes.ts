@@ -1,5 +1,5 @@
 import { requireUser } from '#/lib/auth'
-import { internalMutation, internalQuery, mutation, query } from './_generated/server'
+import { internalMutation, mutation, query } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { v } from 'convex/values'
 import {
@@ -11,7 +11,6 @@ import {
 } from './lib/classAuth'
 import type { ClassRole } from './lib/classAuth'
 import { authz } from './authz'
-import { generateUniqueJoinCode } from './lib/joinCodes'
 import { hasGuardianAccessToClass } from './lib/guardianAuth'
 import {
   DEFAULT_APP_LANGUAGE,
@@ -22,10 +21,8 @@ import {
 import type { ClassLanguage } from './lib/languages'
 import { tenantsClient } from './tenants'
 
-// Public class shape: join codes and the display pin are redacted. Codes are
-// only available via getJoinCodes — student code gated on class:manageMembers;
-// teacher/assistant codes only when the caller also has class:manage.
-// Otherwise a student who can read the class could read teacherCode and escalate.
+// Public class shape: invite codes and the display pin are redacted.
+// Invites are listed via inviteCodes.listClassInvites (manageMembers).
 export const classDocPublic = v.object({
   _id: v.id('classes'),
   _creationTime: v.number(),
@@ -211,12 +208,6 @@ export const createClass = mutation({
   returns: v.id('classes'),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
-    const studentCode = await generateUniqueJoinCode(ctx)
-    const teacherCode = await generateUniqueJoinCode(ctx, [studentCode])
-    const assistantTeacherCode = await generateUniqueJoinCode(ctx, [
-      studentCode,
-      teacherCode,
-    ])
 
     const language = args.language ?? DEFAULT_CLASS_LANGUAGE
 
@@ -257,9 +248,6 @@ export const createClass = mutation({
       icon: args.icon,
       year: args.year,
       publicDisplayPin: args.publicDisplayPin,
-      studentCode,
-      teacherCode,
-      assistantTeacherCode,
       organizationId,
       teamId,
       language,
@@ -351,82 +339,6 @@ export const removeClass = mutation({
     // drops ids whose db.get returns null.
     await ctx.db.delete(args.classId)
     return null
-  },
-})
-
-export const getJoinCodes = internalQuery({
-  args: {
-    classId: v.id('classes'),
-  },
-  returns: v.object({
-    studentCode: v.string(),
-    /** Only present when caller has class:manage. */
-    teacherCode: v.union(v.string(), v.null()),
-    assistantTeacherCode: v.union(v.string(), v.null()),
-  }),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx)
-    await requireClassPermission(
-      ctx,
-      user._id,
-      args.classId,
-      'class:manageMembers',
-    )
-
-    const doc = await ctx.db.get(args.classId)
-    if (!doc) {
-      throw new Error('Class not found')
-    }
-
-    const canManage = await hasClassPermission(
-      ctx,
-      user._id,
-      args.classId,
-      'class:manage',
-    )
-
-    return {
-      studentCode: doc.studentCode,
-      teacherCode: canManage ? doc.teacherCode : null,
-      assistantTeacherCode: canManage ? doc.assistantTeacherCode : null,
-    }
-  },
-})
-
-export const regenerateJoinCode = mutation({
-  args: {
-    classId: v.id('classes'),
-    codeType: v.union(
-      v.literal('student'),
-      v.literal('teacher'),
-      v.literal('assistantTeacher'),
-    ),
-  },
-  returns: v.string(),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx)
-    await requireClassPermission(ctx, user._id, args.classId, 'class:manage')
-
-    const existing = await ctx.db.get(args.classId)
-    if (!existing) {
-      throw new Error('Class not found')
-    }
-
-    const newCode = await generateUniqueJoinCode(ctx)
-    const field =
-      args.codeType === 'student'
-        ? 'studentCode'
-        : args.codeType === 'teacher'
-          ? 'teacherCode'
-          : 'assistantTeacherCode'
-
-    // Regenerating does not revoke roles already redeemed with the old code.
-    await ctx.db.patch(args.classId, {
-      [field]: newCode,
-      updatedTime: Date.now(),
-    })
-
-    return newCode
   },
 })
 

@@ -483,9 +483,13 @@ function Home() {
                         ? 'roleAdmin'
                         : role === 'principal'
                           ? 'rolePrincipal'
-                          : role === 'teacher'
-                            ? 'roleTeacher'
-                            : 'roleMember',
+                          : role === 'vicePrincipal'
+                            ? 'roleVicePrincipal'
+                            : role === 'assistantVicePrincipal'
+                              ? 'roleAssistantVicePrincipal'
+                              : role === 'teacher'
+                                ? 'roleTeacher'
+                                : 'roleMember',
                   )}
                 </SelectItem>
               ))}

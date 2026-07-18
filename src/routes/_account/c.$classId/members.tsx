@@ -1,14 +1,9 @@
-import { Navigate, createFileRoute } from '@tanstack/react-router'
-
-import { useClassLayout } from '#/components/classes/ClassLayoutContext'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_account/c/$classId/members')({
-  component: ClassMembersRedirect,
+  component: ClassMembersLayout,
 })
 
-function ClassMembersRedirect() {
-  const { classId } = useClassLayout()
-  return (
-    <Navigate to="/c/$classId/students" params={{ classId }} replace />
-  )
+function ClassMembersLayout() {
+  return <Outlet />
 }

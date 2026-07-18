@@ -12,6 +12,8 @@ export type SchoolOrgRole =
   | 'owner'
   | 'admin'
   | 'principal'
+  | 'vicePrincipal'
+  | 'assistantVicePrincipal'
   | 'teacher'
   | 'member'
 
@@ -46,6 +48,8 @@ export const SCHOOL_ORG_ROLES = [
   'owner',
   'admin',
   'principal',
+  'vicePrincipal',
+  'assistantVicePrincipal',
   'teacher',
   'member',
 ] as const satisfies readonly SchoolOrgRole[]

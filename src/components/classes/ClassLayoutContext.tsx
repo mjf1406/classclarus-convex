@@ -22,11 +22,6 @@ export type GuardianRosterData = {
 }
 
 export type ClassAdminBundle = {
-  joinCodes: {
-    studentCode: string
-    teacherCode: string | null
-    assistantTeacherCode: string | null
-  }
   members: Array<ClassMember>
   guardianRoster: GuardianRosterData
 }

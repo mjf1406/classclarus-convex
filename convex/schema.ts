@@ -16,9 +16,11 @@ export default defineSchema({
     // createdAt: v.number(), // Convex automatically creates _creationTime, which is UNIX timestamp in milliseconds.
     updatedTime: v.optional(v.number()),
     archivedTime: v.optional(v.number()), // undefined = active, number = archived
-    studentCode: v.string(),
-    teacherCode: v.string(),
-    assistantTeacherCode: v.string(),
+    // Deprecated forever join codes — optional for legacy rows; new classes omit
+    // them. Redeem uses inviteCodes instead.
+    studentCode: v.optional(v.string()),
+    teacherCode: v.optional(v.string()),
+    assistantTeacherCode: v.optional(v.string()),
     publicDisplayPin: v.optional(v.string()),
     organizationId: v.optional(v.string()), // undefined = solo class. Set in Phase 2 (tenants org/team ids).
     teamId: v.optional(v.string()),
@@ -42,6 +44,8 @@ export default defineSchema({
       ),
     ),
   }).index('by_userId', ['userId']),
+  // Deprecated permanent school join codes. No longer written or redeemed;
+  // kept so existing documents validate until a narrow migration removes them.
   schoolJoinCodes: defineTable({
     organizationId: v.string(),
     principalCode: v.string(),
@@ -52,6 +56,23 @@ export default defineSchema({
     .index('by_principalCode', ['principalCode'])
     .index('by_teacherCode', ['teacherCode'])
     .index('by_adminCode', ['adminCode']),
+  // Time-limited class/school invite codes (max 72h TTL).
+  inviteCodes: defineTable({
+    code: v.string(),
+    scope: v.union(v.literal('class'), v.literal('school')),
+    classId: v.optional(v.id('classes')),
+    organizationId: v.optional(v.string()),
+    role: v.string(),
+    createdBy: v.id('users'),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    maxUses: v.optional(v.number()),
+    useCount: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index('by_code', ['code'])
+    .index('by_classId_and_createdAt', ['classId', 'createdAt'])
+    .index('by_organizationId_and_createdAt', ['organizationId', 'createdAt']),
   orgStudents: defineTable({
     organizationId: v.optional(v.string()),
     // Legacy single name; optional until backfillRosterNames runs, then unused.

@@ -3,7 +3,6 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import {
   ChevronRight,
   LayoutGrid,
-  Link2,
   School,
   Settings,
   Users,
@@ -36,31 +35,31 @@ import {
 } from '@/components/ui/sidebar'
 
 type TopNavItem = {
-  titleKey: 'navClasses' | 'navTeams' | 'navInvite' | 'navSettings'
-  to:
-    | '/s/$schoolId/classes'
-    | '/s/$schoolId/teams'
-    | '/s/$schoolId/invite'
-    | '/s/$schoolId/settings'
+  titleKey: 'navClasses' | 'navTeams' | 'navSettings'
+  to: '/s/$schoolId/classes' | '/s/$schoolId/teams' | '/s/$schoolId/settings'
   icon: typeof LayoutGrid
   visible: boolean
 }
 
 type MembersSubItem = {
-  titleKey: 'navPrincipals' | 'navTeachers' | 'navAdmins'
+  titleKey: 'navInvite' | 'navAdmins' | 'navTeachers'
   to:
-    | '/s/$schoolId/principals'
-    | '/s/$schoolId/teachers'
+    | '/s/$schoolId/members/invite'
     | '/s/$schoolId/admins'
+    | '/s/$schoolId/teachers'
 }
 
 const MEMBERS_SUB_ITEMS: Array<MembersSubItem> = [
-  { titleKey: 'navPrincipals', to: '/s/$schoolId/principals' },
-  { titleKey: 'navTeachers', to: '/s/$schoolId/teachers' },
+  { titleKey: 'navInvite', to: '/s/$schoolId/members/invite' },
   { titleKey: 'navAdmins', to: '/s/$schoolId/admins' },
+  { titleKey: 'navTeachers', to: '/s/$schoolId/teachers' },
 ]
 
 function isMembersPath(pathname: string, schoolId: string): boolean {
+  const membersPrefix = `/s/${schoolId}/members`
+  if (pathname === membersPrefix || pathname.startsWith(`${membersPrefix}/`)) {
+    return true
+  }
   return MEMBERS_SUB_ITEMS.some((item) => {
     const href = item.to.replace('$schoolId', schoolId)
     return pathname === href || pathname.startsWith(`${href}/`)
@@ -121,12 +120,6 @@ export function SchoolNavMain() {
       titleKey: 'navTeams',
       to: '/s/$schoolId/teams',
       icon: LayoutGrid,
-      visible: canManageMembers,
-    },
-    {
-      titleKey: 'navInvite',
-      to: '/s/$schoolId/invite',
-      icon: Link2,
       visible: canManageMembers,
     },
     {

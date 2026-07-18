@@ -3,7 +3,6 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import {
   ChevronRight,
   LayoutGrid,
-  Link2,
   Settings,
   Star,
   Users,
@@ -36,23 +35,21 @@ import {
 } from '@/components/ui/sidebar'
 
 type TopNavItem = {
-  titleKey: 'navPoints' | 'navGroups' | 'navInvite' | 'navSettings'
-  to:
-    | '/c/$classId/points'
-    | '/c/$classId/groups'
-    | '/c/$classId/invite'
-    | '/c/$classId/settings'
+  titleKey: 'navPoints' | 'navGroups' | 'navSettings'
+  to: '/c/$classId/points' | '/c/$classId/groups' | '/c/$classId/settings'
   icon: typeof Star
   visible: boolean
 }
 
 type MembersSubItem = {
   titleKey:
+    | 'navInvite'
     | 'navTeachers'
     | 'navAssistantTeachers'
     | 'navStudents'
     | 'navGuardians'
   to:
+    | '/c/$classId/members/invite'
     | '/c/$classId/teachers'
     | '/c/$classId/assistant-teachers'
     | '/c/$classId/students'
@@ -60,6 +57,7 @@ type MembersSubItem = {
 }
 
 const MEMBERS_SUB_ITEMS: Array<MembersSubItem> = [
+  { titleKey: 'navInvite', to: '/c/$classId/members/invite' },
   { titleKey: 'navTeachers', to: '/c/$classId/teachers' },
   { titleKey: 'navAssistantTeachers', to: '/c/$classId/assistant-teachers' },
   { titleKey: 'navStudents', to: '/c/$classId/students' },
@@ -67,6 +65,10 @@ const MEMBERS_SUB_ITEMS: Array<MembersSubItem> = [
 ]
 
 function isMembersPath(pathname: string, classId: string): boolean {
+  const membersPrefix = `/c/${classId}/members`
+  if (pathname === membersPrefix || pathname.startsWith(`${membersPrefix}/`)) {
+    return true
+  }
   return MEMBERS_SUB_ITEMS.some((item) => {
     const href = item.to.replace('$classId', classId)
     return pathname === href || pathname.startsWith(`${href}/`)
@@ -127,12 +129,6 @@ export function ClassNavMain() {
       titleKey: 'navGroups',
       to: '/c/$classId/groups',
       icon: LayoutGrid,
-      visible: canManageMembers,
-    },
-    {
-      titleKey: 'navInvite',
-      to: '/c/$classId/invite',
-      icon: Link2,
       visible: canManageMembers,
     },
     {

@@ -1,27 +1,10 @@
-import { Navigate, createFileRoute } from '@tanstack/react-router'
-
-import { useClassLayout } from '#/components/classes/ClassLayoutContext'
-import { JoinCodesSection } from '#/components/classes/JoinCodesSection'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_account/c/$classId/invite')({
-  component: ClassInvitePage,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: '/c/$classId/members/invite',
+      params: { classId: params.classId },
+    })
+  },
 })
-
-function ClassInvitePage() {
-  const { classId, canManage, canManageMembers, adminBundle } =
-    useClassLayout()
-
-  if (!canManageMembers) {
-    return (
-      <Navigate to="/c/$classId/points" params={{ classId }} replace />
-    )
-  }
-
-  return (
-    <JoinCodesSection
-      classId={classId}
-      codes={adminBundle?.joinCodes}
-      canRegenerate={canManage}
-    />
-  )
-}

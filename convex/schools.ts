@@ -1,4 +1,4 @@
-import { generateSlug, orgScope } from '@djpanda/convex-tenants'
+import { generateSlug } from '@djpanda/convex-tenants'
 import { requireUser } from '#/lib/auth'
 import { mutation, query } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
@@ -10,7 +10,7 @@ import {
   hasClassPermission,
   requireClassPermission,
 } from './lib/classAuth'
-import { generateUniqueJoinCode, JOIN_CODE_LENGTH } from './lib/joinCodes'
+import { tryRedeemInviteCode } from './inviteCodes'
 import { tenantsClient, SCHOOL_ORG_ROLES } from './tenants'
 import type { SchoolOrgRole } from './tenants'
 import { rateLimiter } from './rateLimiter'
@@ -20,6 +20,8 @@ export const schoolOrgRoleValidator = v.union(
   v.literal('owner'),
   v.literal('admin'),
   v.literal('principal'),
+  v.literal('vicePrincipal'),
+  v.literal('assistantVicePrincipal'),
   v.literal('teacher'),
   v.literal('member'),
 )
@@ -56,7 +58,13 @@ export type SchoolPublic = {
 }
 
 const MANAGE_ROLES = new Set<string>(['owner', 'principal', 'admin'])
-const MANAGE_MEMBERS_ROLES = new Set<string>(['owner', 'principal', 'admin'])
+const MANAGE_MEMBERS_ROLES = new Set<string>([
+  'owner',
+  'principal',
+  'vicePrincipal',
+  'assistantVicePrincipal',
+  'admin',
+])
 
 function isSchoolOrgRole(role: string): role is SchoolOrgRole {
   return (SCHOOL_ORG_ROLES as readonly string[]).includes(role)
@@ -138,7 +146,7 @@ async function requireSchoolMember(
   return member
 }
 
-async function requireSchoolManageMembers(
+export async function requireSchoolManageMembers(
   ctx: QueryCtx | MutationCtx,
   userId: Id<'users'>,
   schoolId: string,
@@ -150,94 +158,9 @@ async function requireSchoolManageMembers(
   return member
 }
 
-type SchoolJoinCodeType = 'principal' | 'teacher' | 'admin'
-
-const schoolJoinCodeTypeValidator = v.union(
-  v.literal('principal'),
-  v.literal('teacher'),
-  v.literal('admin'),
-)
-
-const SCHOOL_CODE_ROLE: Record<SchoolJoinCodeType, SchoolOrgRole> = {
-  principal: 'principal',
-  teacher: 'teacher',
-  admin: 'admin',
-}
-
-async function insertSchoolJoinCodes(
-  ctx: MutationCtx,
-  organizationId: string,
-): Promise<Doc<'schoolJoinCodes'>> {
-  const principalCode = await generateUniqueJoinCode(ctx)
-  const teacherCode = await generateUniqueJoinCode(ctx, [principalCode])
-  const adminCode = await generateUniqueJoinCode(ctx, [
-    principalCode,
-    teacherCode,
-  ])
-  const id = await ctx.db.insert('schoolJoinCodes', {
-    organizationId,
-    principalCode,
-    teacherCode,
-    adminCode,
-  })
-  const doc = await ctx.db.get(id)
-  if (!doc) throw new Error('Failed to create school join codes')
-  return doc
-}
-
-async function getOrCreateSchoolJoinCodes(
-  ctx: MutationCtx,
-  organizationId: string,
-): Promise<Doc<'schoolJoinCodes'>> {
-  const existing = await ctx.db
-    .query('schoolJoinCodes')
-    .withIndex('by_organizationId', (q) =>
-      q.eq('organizationId', organizationId),
-    )
-    .unique()
-  if (existing) return existing
-  return await insertSchoolJoinCodes(ctx, organizationId)
-}
-
-async function findSchoolByJoinCode(
-  ctx: MutationCtx,
-  code: string,
-): Promise<{ organizationId: string; role: SchoolOrgRole } | null> {
-  const byPrincipal = await ctx.db
-    .query('schoolJoinCodes')
-    .withIndex('by_principalCode', (q) => q.eq('principalCode', code))
-    .unique()
-  if (byPrincipal) {
-    return {
-      organizationId: byPrincipal.organizationId,
-      role: SCHOOL_CODE_ROLE.principal,
-    }
-  }
-  const byTeacher = await ctx.db
-    .query('schoolJoinCodes')
-    .withIndex('by_teacherCode', (q) => q.eq('teacherCode', code))
-    .unique()
-  if (byTeacher) {
-    return {
-      organizationId: byTeacher.organizationId,
-      role: SCHOOL_CODE_ROLE.teacher,
-    }
-  }
-  const byAdmin = await ctx.db
-    .query('schoolJoinCodes')
-    .withIndex('by_adminCode', (q) => q.eq('adminCode', code))
-    .unique()
-  if (byAdmin) {
-    return {
-      organizationId: byAdmin.organizationId,
-      role: SCHOOL_CODE_ROLE.admin,
-    }
-  }
-  return null
-}
-
 /**
- * Redeem a school staff join code (caller applies rate limits once).
+ * Redeem a school staff invite code (caller applies rate limits once).
+ * Legacy forever schoolJoinCodes are intentionally not accepted.
  */
 export async function tryRedeemSchoolJoinCode(
   ctx: MutationCtx,
@@ -247,51 +170,12 @@ export async function tryRedeemSchoolJoinCode(
   | { ok: true; schoolId: string; role: SchoolOrgRole }
   | { ok: false; error: string }
 > {
-  const code = rawCode.replace(/[\s\u2013-]/g, '').toUpperCase()
-  if (code.length !== JOIN_CODE_LENGTH) {
+  const result = await tryRedeemInviteCode(ctx, user, rawCode)
+  if (!result.ok) return result
+  if (result.kind !== 'school') {
     return { ok: false, error: 'Invalid join code' }
   }
-
-  const match = await findSchoolByJoinCode(ctx, code)
-  if (!match) {
-    return { ok: false, error: 'Invalid join code' }
-  }
-
-  const org = await tenantsClient.getOrganization(ctx, match.organizationId)
-  if (!org || org.status === 'archived' || org.status === 'suspended') {
-    return { ok: false, error: 'Invalid join code' }
-  }
-
-  const existing = await tenantsClient.getMember(
-    ctx,
-    match.organizationId,
-    user._id,
-  )
-  if (existing && existing.status !== 'suspended') {
-    const role = isSchoolOrgRole(existing.role) ? existing.role : match.role
-    return { ok: true, schoolId: match.organizationId, role }
-  }
-
-  // Self-join via code: write membership + authz without members:add (joiners
-  // are not yet org members). Mirrors invitation accept semantics.
-  await ctx.runMutation(components.tenants.members.addMember, {
-    userId: user._id,
-    organizationId: match.organizationId,
-    memberUserId: user._id,
-    role: match.role,
-  })
-  await authz
-    .withTenant(match.organizationId)
-    .assignRole(
-      ctx,
-      user._id,
-      match.role,
-      orgScope(match.organizationId),
-      undefined,
-      user._id,
-    )
-
-  return { ok: true, schoolId: match.organizationId, role: match.role }
+  return { ok: true, schoolId: result.schoolId, role: result.role }
 }
 
 export const listMySchools = query({
@@ -336,7 +220,6 @@ export const createSchool = mutation({
         metadata: { type: 'school' },
       },
     )
-    await insertSchoolJoinCodes(ctx, organizationId)
     return organizationId
   },
 })
@@ -498,75 +381,6 @@ export const assignClassesToSchool = mutation({
       })
     }
     return null
-  },
-})
-
-const schoolJoinCodesPublic = v.object({
-  principalCode: v.string(),
-  teacherCode: v.string(),
-  adminCode: v.string(),
-})
-
-export const getSchoolJoinCodes = query({
-  args: { schoolId: v.string() },
-  returns: v.union(schoolJoinCodesPublic, v.null()),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx)
-    await requireSchoolManageMembers(ctx, user._id, args.schoolId)
-    const row = await ctx.db
-      .query('schoolJoinCodes')
-      .withIndex('by_organizationId', (q) =>
-        q.eq('organizationId', args.schoolId),
-      )
-      .unique()
-    if (!row) return null
-    return {
-      principalCode: row.principalCode,
-      teacherCode: row.teacherCode,
-      adminCode: row.adminCode,
-    }
-  },
-})
-
-/** Create join codes for schools created before codes existed. */
-export const ensureSchoolJoinCodes = mutation({
-  args: { schoolId: v.string() },
-  returns: schoolJoinCodesPublic,
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx)
-    await requireSchoolManageMembers(ctx, user._id, args.schoolId)
-    const row = await getOrCreateSchoolJoinCodes(ctx, args.schoolId)
-    return {
-      principalCode: row.principalCode,
-      teacherCode: row.teacherCode,
-      adminCode: row.adminCode,
-    }
-  },
-})
-
-export const regenerateSchoolJoinCode = mutation({
-  args: {
-    schoolId: v.string(),
-    codeType: schoolJoinCodeTypeValidator,
-  },
-  returns: v.string(),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx)
-    await requireSchoolManageMembers(ctx, user._id, args.schoolId)
-    const row = await getOrCreateSchoolJoinCodes(ctx, args.schoolId)
-    const newCode = await generateUniqueJoinCode(ctx, [
-      row.principalCode,
-      row.teacherCode,
-      row.adminCode,
-    ])
-    const field =
-      args.codeType === 'principal'
-        ? 'principalCode'
-        : args.codeType === 'teacher'
-          ? 'teacherCode'
-          : 'adminCode'
-    await ctx.db.patch(row._id, { [field]: newCode })
-    return newCode
   },
 })
 

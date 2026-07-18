@@ -41,7 +41,8 @@ function getSubpageFromPath(pathname: string): ClassSubpage {
   if (pathname.endsWith('/students')) return 'students'
   if (pathname.endsWith('/guardians')) return 'guardians'
   if (pathname.endsWith('/groups')) return 'groups'
-  if (pathname.endsWith('/invite')) return 'invite'
+  if (pathname.endsWith('/members/invite') || pathname.endsWith('/invite'))
+    return 'invite'
   if (pathname.endsWith('/settings')) return 'settings'
   return 'points'
 }
@@ -53,7 +54,7 @@ const SUBPAGE_ROUTES = {
   students: '/c/$classId/students',
   guardians: '/c/$classId/guardians',
   groups: '/c/$classId/groups',
-  invite: '/c/$classId/invite',
+  invite: '/c/$classId/members/invite',
   settings: '/c/$classId/settings',
 } as const
 

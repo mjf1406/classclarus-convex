@@ -96,11 +96,15 @@ function JoinPage() {
         const roleLabel =
           result.role === 'principal'
             ? t('schools:rolePrincipal')
-            : result.role === 'teacher'
-              ? t('schools:roleTeacher')
-              : result.role === 'admin'
-                ? t('schools:roleAdmin')
-                : result.role
+            : result.role === 'vicePrincipal'
+              ? t('schools:roleVicePrincipal')
+              : result.role === 'assistantVicePrincipal'
+                ? t('schools:roleAssistantVicePrincipal')
+                : result.role === 'teacher'
+                  ? t('schools:roleTeacher')
+                  : result.role === 'admin'
+                    ? t('schools:roleAdmin')
+                    : result.role
         toast.success(t('joinedAs', { role: roleLabel }))
         await navigate({
           to: '/s/$schoolId/members',
