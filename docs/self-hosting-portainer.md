@@ -36,11 +36,13 @@ Replace `<host>` with `localhost` or your server’s IP/hostname.
 5. Fill in:
    - **Repository URL** — `https://github.com/mjf1406/classclarus-convex.git` (or your fork’s HTTPS clone URL)
    - **Compose path** — `docker-compose.yml`
-   - **Repository Reference** / **Branch / ref** — `main` (this project’s only default branch; do not use `master`, `origin/main`, or `refs/heads/main`)
+   - **Repository reference** — `refs/heads/main` (Portainer expects `refs/heads/<branch>` or `refs/tags/<tag>`, not a bare branch name like `main`)
 6. If the repo is private, add Git credentials (Portainer → account/token as required by your Portainer version). For the public upstream URL above, leave credentials empty.
 7. Enable options to **build images** if Portainer shows them for this stack (required for `web` and `deploy`).
 
 Prefer **HTTPS** clone URLs. Use SSH (`git@github.com:...`) only if Portainer already has a deploy key for that host. Do not paste a GitHub web URL that includes `/tree/...`.
+
+You can leave **Repository reference** empty to use the repo’s default `HEAD` (usually `main`). If you set it, use the full ref form above — bare `main` often fails with `reference not found`.
 
 Do not deploy yet — add environment variables first.
 
@@ -194,7 +196,13 @@ More backup examples: [self-hosting.md](self-hosting.md#back-up-your-data).
 
 ### `unable to clone git repository: reference not found`
 
-This almost always means Portainer could not resolve the branch on the **Repository URL** you entered — not that `main` is wrong for this project.
+Portainer expects a full Git ref, not a bare branch name. For this project set **Repository reference** to:
+
+```text
+refs/heads/main
+```
+
+Using just `main` (or `master` / `origin/main`) commonly produces this error even when the branch exists. You can also clear the field and let Portainer use the default `HEAD`.
 
 For this repo, use:
 
@@ -202,9 +210,9 @@ For this repo, use:
 |-------|--------|
 | Repository URL | `https://github.com/mjf1406/classclarus-convex.git` |
 | Compose path | `docker-compose.yml` |
-| Repository Reference | `main` |
+| Repository reference | `refs/heads/main` |
 
-Common causes:
+If it still fails after fixing the ref:
 
 - Wrong or mistyped Repository URL (empty fork, different repo, or a GitHub **web** path like `.../tree/main`)
 - SSH URL without a deploy key / credentials in Portainer
