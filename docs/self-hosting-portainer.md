@@ -34,11 +34,13 @@ Replace `<host>` with `localhost` or your server’s IP/hostname.
 3. Name it, for example: `classclarus`.
 4. Choose **Repository** (Git).
 5. Fill in:
-   - **Repository URL** — your clone URL for this project
+   - **Repository URL** — `https://github.com/mjf1406/classclarus-convex.git` (or your fork’s HTTPS clone URL)
    - **Compose path** — `docker-compose.yml`
-   - **Branch / ref** — e.g. `main` (or your release branch)
-6. If the repo is private, add Git credentials (Portainer → account/token as required by your Portainer version).
+   - **Repository Reference** / **Branch / ref** — `main` (this project’s only default branch; do not use `master`, `origin/main`, or `refs/heads/main`)
+6. If the repo is private, add Git credentials (Portainer → account/token as required by your Portainer version). For the public upstream URL above, leave credentials empty.
 7. Enable options to **build images** if Portainer shows them for this stack (required for `web` and `deploy`).
+
+Prefer **HTTPS** clone URLs. Use SSH (`git@github.com:...`) only if Portainer already has a deploy key for that host. Do not paste a GitHub web URL that includes `/tree/...`.
 
 Do not deploy yet — add environment variables first.
 
@@ -189,6 +191,33 @@ More backup examples: [self-hosting.md](self-hosting.md#back-up-your-data).
 ---
 
 ## Troubleshooting
+
+### `unable to clone git repository: reference not found`
+
+This almost always means Portainer could not resolve the branch on the **Repository URL** you entered — not that `main` is wrong for this project.
+
+For this repo, use:
+
+| Field | Value |
+|-------|--------|
+| Repository URL | `https://github.com/mjf1406/classclarus-convex.git` |
+| Compose path | `docker-compose.yml` |
+| Repository Reference | `main` |
+
+Common causes:
+
+- Wrong or mistyped Repository URL (empty fork, different repo, or a GitHub **web** path like `.../tree/main`)
+- SSH URL without a deploy key / credentials in Portainer
+- Private fork with no PAT or credentials configured
+- Docker host cannot reach GitHub (DNS, firewall, or proxy)
+
+From the Docker host (or any machine that can reach GitHub), verify the ref exists:
+
+```bash
+git ls-remote https://github.com/mjf1406/classclarus-convex.git HEAD refs/heads/main
+```
+
+You should see a commit SHA for both lines. If that fails on the host, Portainer will fail too. Fix the URL/auth/network, then redeploy the stack.
 
 ### Stack fails because images cannot build
 
