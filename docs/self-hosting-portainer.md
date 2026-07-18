@@ -109,24 +109,30 @@ docker volume ls | grep bootstrap
 
 # Print the admin key (replace the volume name if needed)
 docker run --rm -v classclarus_bootstrap:/output alpine cat /output/admin_key
+# Example output (paste all of this, including the name and |):
+# convex-self-hosted|a1b2c3d4e5f6...
 ```
 
 If your stack name differs, use the matching `*_bootstrap` volume from `docker volume ls`.
 
 ### Log in to the dashboard
 
-The key looks like:
+The key is always:
 
 ```text
-convex-self-hosted|a1b2c3d4e5f6...
+INSTANCE_NAME|hex
 ```
 
-That is `INSTANCE_NAME`, a `|`, then a long hex string. Paste the **entire** value (including the name and `|`), with no extra spaces or line breaks. The hex alone will not work.
+Example: `convex-self-hosted|a1b2c3d4e5f6...`. Paste the **entire** value (name, `|`, and hex) with no extra spaces or line breaks. **The hex alone will not work.**
 
-1. Open `http://<host>:6791` (use the same host/IP you put in the stack env).
+1. Open `http://<host>:6791` (use the same host/IP you put in the stack env for browser URLs).
 2. Paste the full admin key.
 
-**LAN / another device:** The dashboard page runs in *your* browser and talks to `NEXT_PUBLIC_DEPLOYMENT_URL`. If that is still `http://127.0.0.1:3210` while you open `http://YOUR_SERVER_IP:6791` from a laptop or phone, login fails even with a valid key. Set `NEXT_PUBLIC_DEPLOYMENT_URL` (and the other browser URLs) to `http://YOUR_SERVER_IP:3210`, update the stack so `dashboard` recreates, then try again.
+**LAN / another device:** The dashboard page runs in *your* browser and calls `NEXT_PUBLIC_DEPLOYMENT_URL`. If that is still `http://127.0.0.1:3210` while you open `http://YOUR_SERVER_IP:6791` from a laptop or phone, login fails even with a valid key.
+
+1. Set `NEXT_PUBLIC_DEPLOYMENT_URL` (and the other browser URLs) to `http://YOUR_SERVER_IP:3210` / matching ports.
+2. Update the stack so **`dashboard` is recreated** (not only `web`).
+3. Retry login with the full key.
 
 From the client machine, confirm the API is reachable:
 
@@ -183,7 +189,8 @@ Details and production URLs: [self-hosting.md](self-hosting.md#enable-sign-in-wi
 
 ### After changing public URLs
 
-If you change `VITE_CONVEX_URL` / `CONVEX_CLOUD_ORIGIN` / related vars, you must **rebuild `web`** (Vite bakes the URL at image build time). Pull/redeploy with build, or force recreate the `web` service so it rebuilds.
+- If you change `VITE_CONVEX_URL` / `CONVEX_CLOUD_ORIGIN` / related vars, you must **rebuild `web`** (Vite bakes the URL at image build time). Pull/redeploy with build, or force recreate the `web` service so it rebuilds.
+- If you change `NEXT_PUBLIC_DEPLOYMENT_URL` (required for LAN dashboard login), **recreate `dashboard`** as well — that value is read by the dashboard UI in the browser. Updating only `web` is not enough for dashboard login.
 
 ### After changing only `convex/` backend code
 
@@ -294,10 +301,12 @@ Change `WEB_PORT`, `PORT`, `SITE_PROXY_PORT`, `DASHBOARD_PORT` in stack env, and
 
 ### Dashboard rejects the key
 
-- Paste the **full** key: `INSTANCE_NAME|hex` (example `convex-self-hosted|a1b2...`). The hex portion alone is not enough.
-- If you open the dashboard from another machine, `NEXT_PUBLIC_DEPLOYMENT_URL` must be `http://YOUR_SERVER_IP:3210` (not `127.0.0.1`). Update the stack and recreate `dashboard`, then retry.
-- Re-read `admin_key` from the `*_bootstrap` volume (Option B above).
-- If you changed `INSTANCE_SECRET`, update the stack so `admin-key` and `deploy` run again, then use the new key.
+Common causes (a valid key still fails for the last two):
+
+- Pasted only the hex — must paste the **full** key: `INSTANCE_NAME|hex` (example `convex-self-hosted|a1b2...`), including the `|`
+- Opened `http://YOUR_SERVER_IP:6791` from another machine while `NEXT_PUBLIC_DEPLOYMENT_URL` is still `http://127.0.0.1:3210` — set it to `http://YOUR_SERVER_IP:3210`, update the stack, **recreate `dashboard`**, then retry
+- Re-read `admin_key` from the `*_bootstrap` volume (Option B above) in case of a copy/paste error
+- Changed `INSTANCE_SECRET` after first boot — update the stack so `admin-key` and `deploy` run again, then use the new key
 
 ### Reset the stack (destructive)
 

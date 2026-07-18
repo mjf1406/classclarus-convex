@@ -120,11 +120,13 @@ docker volume ls | grep bootstrap
 
 # Print the key (adjust the volume name if needed)
 docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
+# Example output (paste all of this, including the name and |):
+# convex-self-hosted|a1b2c3d4e5f6...
 ```
 
-The value looks like `convex-self-hosted|a1b2c3d4e5f6...` — that is `INSTANCE_NAME`, a `|`, then hex. Paste the **entire** string into the dashboard login screen (including the name and `|`). The hex alone will not work.
+The key is always `INSTANCE_NAME|hex`. Paste the **entire** string into the dashboard login screen (including the name and `|`). **The hex alone will not work.**
 
-If you open the dashboard from another device on your LAN, see [Access from another device on your LAN](#access-from-another-device-on-your-lan) — `NEXT_PUBLIC_DEPLOYMENT_URL` must use the server IP, not `127.0.0.1`.
+If you open the dashboard from another device on your LAN, see [Access from another device on your LAN](#access-from-another-device-on-your-lan). Dashboard login uses `NEXT_PUBLIC_DEPLOYMENT_URL` in the browser — it must be the server IP (not `127.0.0.1`), and you must recreate `dashboard` after changing it.
 
 ---
 
@@ -258,8 +260,11 @@ Replace `YOUR_SERVER_IP` with the host address (e.g. `192.168.0.148`). Then rebu
 docker compose up -d --build
 ```
 
-- Dashboard login uses `NEXT_PUBLIC_DEPLOYMENT_URL` in the browser — with `127.0.0.1` still set, paste of a valid admin key will fail from another device.
+That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebuilds `web` (needs the new `VITE_CONVEX_URL`).
+
+- **Dashboard login** talks to `NEXT_PUBLIC_DEPLOYMENT_URL` from the browser. With `127.0.0.1` still set, a valid full admin key (`INSTANCE_NAME|hex`) still fails from another device.
 - From that other device, check: `curl http://YOUR_SERVER_IP:3210/version`
+- Paste the **full** admin key from the bootstrap volume, not the hex alone.
 
 ---
 
@@ -379,13 +384,14 @@ Common causes: backend not healthy yet, missing `INSTANCE_SECRET`, or network/DN
 
 ```bash
 docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
+# Example: convex-self-hosted|a1b2c3d4e5f6...
 ```
 
-Paste the **full** key: `INSTANCE_NAME|hex` (example `convex-self-hosted|a1b2...`). The hex portion alone is not enough.
+Common causes (a valid key still fails for the URL mismatch):
 
-If you open the dashboard from another machine, set `NEXT_PUBLIC_DEPLOYMENT_URL` to `http://YOUR_SERVER_IP:3210` (not `127.0.0.1`), recreate `dashboard`, and retry — see [Access from another device on your LAN](#access-from-another-device-on-your-lan).
-
-If you changed `INSTANCE_SECRET` after the first boot, regenerate:
+- Pasted only the hex — must paste the **full** key: `INSTANCE_NAME|hex` (including the `|`)
+- Opened the dashboard from another machine while `NEXT_PUBLIC_DEPLOYMENT_URL` is still `http://127.0.0.1:3210` — set it to `http://YOUR_SERVER_IP:3210`, recreate `dashboard` (`docker compose up -d --build`), then retry — see [Access from another device on your LAN](#access-from-another-device-on-your-lan)
+- Changed `INSTANCE_SECRET` after the first boot — regenerate:
 
 ```bash
 docker compose up -d --build admin-key deploy
