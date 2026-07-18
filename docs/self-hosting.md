@@ -2,6 +2,8 @@
 
 This guide gets ClassClarus running on your machine (or a VPS) with **one Docker Compose command**. You do not need a Convex Cloud account.
 
+Deploying through **Portainer** instead? Use [self-hosting-portainer.md](self-hosting-portainer.md).
+
 When it finishes you will have:
 
 | What | URL (local defaults) |
@@ -32,6 +34,14 @@ Check Docker works:
 docker --version
 docker compose version
 ```
+
+---
+
+## Deploy with Portainer
+
+If you manage Docker with Portainer, follow the dedicated guide instead of the CLI steps below:
+
+**[Self-host with Portainer](self-hosting-portainer.md)** — Git stack, env vars in the UI, admin key from the `bootstrap` volume.
 
 ---
 
@@ -102,16 +112,14 @@ When deploy finishes successfully you should see a line like `Deploy complete`. 
 
 **Dashboard login**
 
-Copy the admin key from the file Docker created:
+The admin key is stored in the Docker volume **`bootstrap`** (often named `<project>_bootstrap`, e.g. `classclarus-convex_bootstrap`).
 
 ```bash
-# macOS / Linux / Git Bash / WSL
-cat .convex-self-hosted/admin_key
-```
+# Confirm the volume name
+docker volume ls | grep bootstrap
 
-```powershell
-# Windows PowerShell
-Get-Content .convex-self-hosted\admin_key
+# Print the key (adjust the volume name if needed)
+docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
 
 Paste that key into the dashboard login screen.
@@ -216,7 +224,7 @@ If you later put the app on a real domain, update Google origins/redirects to ma
 
 ## What Docker created for you
 
-After a successful first boot, the folder **`.convex-self-hosted/`** (gitignored) contains:
+After a successful first boot, the **`bootstrap`** volume contains:
 
 | File | Purpose |
 |------|---------|
@@ -224,9 +232,9 @@ After a successful first boot, the folder **`.convex-self-hosted/`** (gitignored
 | `jwt_private_key` | Convex Auth signing key (auto-created if you left JWT vars blank) |
 | `jwks` | Matching public JWKS |
 
-Keep this folder. Deleting it can break auth until you redeploy with new keys.
+Keep this volume. Removing it can break auth until you redeploy with new keys.
 
-Your **app data** (classes, users, etc.) lives in a Docker volume named something like `classclarus-convex_data`, not in that folder.
+Your **app data** (classes, users, etc.) lives in the Docker volume **`data`** (e.g. `classclarus-convex_data`).
 
 ---
 
@@ -276,13 +284,15 @@ docker run --rm \
   -v "$(pwd):/backup" \
   alpine tar czf /backup/convex-data-backup.tgz -C /data .
 
+docker run --rm \
+  -v classclarus-convex_bootstrap:/output \
+  -v "$(pwd):/backup" \
+  alpine tar czf /backup/convex-bootstrap-backup.tgz -C /output .
+
 docker compose start backend
 ```
 
-Also copy:
-
-- `.env`
-- `.convex-self-hosted/`
+Also copy `.env` (especially `INSTANCE_SECRET`).
 
 Store backups somewhere safe. Losing `INSTANCE_SECRET` or the data volume means you cannot recover that instance cleanly.
 
@@ -343,14 +353,14 @@ Common causes: backend not healthy yet, missing `INSTANCE_SECRET`, or network/DN
 ### Dashboard will not accept a key
 
 ```bash
-cat .convex-self-hosted/admin_key
+docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
 
 Use the **entire** string (no extra spaces). If you changed `INSTANCE_SECRET` after the first boot, regenerate:
 
 ```bash
 docker compose up -d --build admin-key deploy
-cat .convex-self-hosted/admin_key
+docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
 
 ### Google sign-in fails
@@ -363,11 +373,10 @@ cat .convex-self-hosted/admin_key
 
 ### Reset everything (destructive)
 
-This deletes containers **and** the database volume:
+This deletes containers **and** the database / bootstrap volumes:
 
 ```bash
 docker compose down -v
-rm -rf .convex-self-hosted
 # Keep or recreate .env as needed
 docker compose up -d --build
 ```
@@ -384,7 +393,7 @@ Browser
   └─ :6791  → Convex dashboard
 
 SQLite data  → Docker volume "data"
-Secrets/keys → .env + .convex-self-hosted/
+Secrets/keys → .env + Docker volume "bootstrap"
 ```
 
 On `docker compose up`, Compose starts the backend, generates an admin key, sets auth environment variables, deploys your `convex/` functions, then serves the site.
@@ -400,3 +409,4 @@ On `docker compose up`, Compose starts the backend, generates an admin key, sets
 | [`Dockerfile`](../Dockerfile) | Builds and serves the website |
 | [`docker/deploy.sh`](../docker/deploy.sh) | One-shot Convex deploy + auth bootstrap |
 | [`scripts/generate-auth-keys.mjs`](../scripts/generate-auth-keys.mjs) | Optional local JWT key generator |
+| [self-hosting-portainer.md](self-hosting-portainer.md) | Portainer Git stack guide |

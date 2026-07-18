@@ -3,7 +3,7 @@
  *
  * Usage:
  *   bun run scripts/generate-auth-keys.mjs
- *   bun run scripts/generate-auth-keys.mjs --write-dir .convex-self-hosted
+ *   bun run scripts/generate-auth-keys.mjs --write-dir ./tmp-auth-keys
  *
  * Paste the printed values into .env, or let docker/deploy.sh generate them.
  */

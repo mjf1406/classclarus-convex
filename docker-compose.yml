@@ -2,9 +2,12 @@
 # Usage: cp .env.example .env && docker compose up -d --build
 #
 # App:       http://localhost:3000
-# Dashboard: http://localhost:6791  (admin key in .convex-self-hosted/admin_key)
+# Dashboard: http://localhost:6791  (admin key in Docker volume "bootstrap")
 # API:       http://127.0.0.1:3210
 # HTTP:      http://127.0.0.1:3211
+#
+# Read admin key after deploy:
+#   docker run --rm -v <project>_bootstrap:/output alpine cat /output/admin_key
 
 services:
   backend:
@@ -83,7 +86,7 @@ services:
       - OUTPUT_DIR=/output
     volumes:
       - credentials:/credentials:ro
-      - ./.convex-self-hosted:/output
+      - bootstrap:/output
     depends_on:
       backend:
         condition: service_healthy
@@ -107,3 +110,4 @@ services:
 volumes:
   data:
   credentials:
+  bootstrap:
