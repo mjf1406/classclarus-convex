@@ -15,6 +15,7 @@ export type GuardianRosterData = {
     guardians: Array<{
       guardianUserId: Id<'users'>
       name?: string
+      email?: string
       linkedAt: number
     }>
   }>

@@ -19,6 +19,10 @@ import {
   tryRedeemGuardianCode,
 } from './lib/guardianLinks'
 import { rateLimiter } from './rateLimiter'
+import {
+  formatClassStudentName,
+  formatOrgStudentName,
+} from './lib/studentNames'
 
 const RATE_LIMITED_ERROR = 'Too many attempts. Please try again later.'
 const MAX_GUARDIAN_LINKS = 100
@@ -39,10 +43,11 @@ const childValidator = v.object({
   classes: v.array(guardianClassValidator),
 })
 
-/** No email — name + user id only for unlink UI. */
+/** Name + optional email for unlink / roster UI. */
 const listedGuardianValidator = v.object({
   guardianUserId: v.id('users'),
   name: v.optional(v.string()),
+  email: v.optional(v.string()),
   linkedAt: v.number(),
 })
 
@@ -351,7 +356,7 @@ export const listMyChildren = query({
       children.push({
         orgStudentId: orgStudent._id,
         organizationId: orgStudent.organizationId,
-        displayName: orgStudent.displayName,
+        displayName: formatOrgStudentName(orgStudent),
         classes,
       })
     }
@@ -411,6 +416,7 @@ export const listGuardiansForStudent = query({
         return {
           guardianUserId: link.guardianUserId,
           name: guardian?.name,
+          email: guardian?.email,
           linkedAt: link.linkedAt,
         }
       }),
@@ -459,6 +465,7 @@ export type GuardianCodesForClass = {
     guardians: Array<{
       guardianUserId: Id<'users'>
       name?: string
+      email?: string
       linkedAt: number
     }>
   }>
@@ -492,9 +499,6 @@ export async function loadGuardianCodesForClass(
     }
     const orgStudent = await ctx.db.get('orgStudents', enrollment.orgStudentId)
     if (orgStudent && orgStudent.organizationId === classDoc.organizationId) {
-      const studentUser = orgStudent.userId
-        ? await ctx.db.get('users', orgStudent.userId)
-        : null
       const links = await listGuardianLinksForStudent(
         ctx,
         orgStudent._id,
@@ -506,14 +510,14 @@ export async function loadGuardianCodesForClass(
           return {
             guardianUserId: link.guardianUserId,
             name: guardian?.name,
+            email: guardian?.email,
             linkedAt: link.linkedAt,
           }
         }),
       )
       students.push({
         orgStudentId: orgStudent._id,
-        displayName:
-          studentUser?.name ?? studentUser?.email ?? orgStudent.displayName,
+        displayName: formatClassStudentName(enrollment, orgStudent),
         guardianCode: orgStudent.guardianCode,
         guardians,
       })

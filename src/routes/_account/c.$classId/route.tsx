@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useTranslation } from 'react-i18next'
 
-import { TEN_MINUTES } from '#/lib/queryCache'
+import { ONE_HOUR, TEN_MINUTES } from '#/lib/queryCache'
 import { classLabel } from '#/components/classes/classLabel'
 import { ClassLayoutProvider } from '#/components/classes/ClassLayoutContext'
-import type { ClassAdminBundle } from '#/components/classes/ClassLayoutContext';
+import type { ClassAdminBundle } from '#/components/classes/ClassLayoutContext'
 import { ClassSidebar } from '#/components/class-sidebar/ClassSidebar'
 import { ClassInsetHeader } from '#/components/class-sidebar/ClassInsetHeader'
 import i18n from '#/i18n'
@@ -78,6 +78,15 @@ function ClassLayout() {
     gcTime: TEN_MINUTES,
   })
 
+  // Warm the roster cache while in the class shell so Students paints instantly.
+  useQuery({
+    ...convexQuery(
+      api.students.listClassRoster,
+      canManageMembers ? { classId: typedClassId } : 'skip',
+    ),
+    gcTime: ONE_HOUR,
+  })
+
   const contextValue = {
     classId: typedClassId,
     classDoc,
@@ -91,9 +100,9 @@ function ClassLayout() {
     <ClassLayoutProvider value={contextValue}>
       <SidebarProvider>
         <ClassSidebar />
-        <SidebarInset>
+        <SidebarInset className="min-w-0">
           <ClassInsetHeader />
-          <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:p-6">
             {isPending || classDoc === undefined ? (
               <>
                 <Skeleton className="h-10 w-2/3 max-w-md" />

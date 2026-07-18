@@ -56,6 +56,7 @@ import { cn } from '@/lib/utils'
 type BoardStudent = {
   orgStudentId: Id<'orgStudents'>
   displayName: string
+  rosterNumber: number
 }
 
 type DropTarget =
@@ -118,7 +119,9 @@ function StudentChip({
       {...listeners}
       {...attributes}
     >
-      {student.displayName}
+      {student.rosterNumber < Number.MAX_SAFE_INTEGER
+        ? `#${student.rosterNumber} ${student.displayName}`
+        : student.displayName}
     </button>
   )
 }
@@ -563,7 +566,9 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
         <DragOverlay dropAnimation={null}>
           {activeStudent ? (
             <div className="rounded-md border bg-background px-2.5 py-1.5 text-sm shadow-md">
-              {activeStudent.displayName}
+              {activeStudent.rosterNumber < Number.MAX_SAFE_INTEGER
+                ? `#${activeStudent.rosterNumber} ${activeStudent.displayName}`
+                : activeStudent.displayName}
             </div>
           ) : null}
         </DragOverlay>

@@ -2,11 +2,31 @@ import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx } from '../_generated/server'
 import { generateUniqueJoinCode } from './joinCodes'
 import { revokeGuardiansAndRotateCode } from './guardianLinks'
+import { namesFromUser } from './studentNames'
 
 const MAX_SOLO_STUDENT_RECORDS = 200
+const MAX_CLASS_STUDENTS = 500
 
-function studentDisplayName(user: Doc<'users'>): string {
-  return user.name ?? user.email ?? 'Student'
+export async function nextRosterNumber(
+  ctx: MutationCtx,
+  classId: Id<'classes'>,
+): Promise<number> {
+  const enrollments = await ctx.db
+    .query('classEnrollments')
+    .withIndex('by_classId', (index) => index.eq('classId', classId))
+    .take(MAX_CLASS_STUDENTS)
+
+  let max = 0
+  for (const enrollment of enrollments) {
+    if (
+      enrollment.status === 'active' &&
+      enrollment.rosterNumber !== undefined &&
+      enrollment.rosterNumber > max
+    ) {
+      max = enrollment.rosterNumber
+    }
+  }
+  return max + 1
 }
 
 export async function ensureSoloStudentEnrollment(
@@ -18,6 +38,8 @@ export async function ensureSoloStudentEnrollment(
     .query('orgStudents')
     .withIndex('by_userId', (index) => index.eq('userId', user._id))
     .take(MAX_SOLO_STUDENT_RECORDS)
+
+  const names = namesFromUser(user)
 
   for (const student of studentRecords) {
     if (student.organizationId !== undefined) continue
@@ -34,21 +56,35 @@ export async function ensureSoloStudentEnrollment(
       throw new Error('Solo student enrollment scope mismatch')
     }
     if (enrollment.status === 'withdrawn') {
+      const rosterNumber =
+        enrollment.rosterNumber ?? (await nextRosterNumber(ctx, classId))
       await ctx.db.patch('classEnrollments', enrollment._id, {
         status: 'active',
+        rosterNumber,
       })
     }
 
-    const displayName = studentDisplayName(user)
-    if (student.displayName !== displayName) {
-      await ctx.db.patch('orgStudents', student._id, { displayName })
+    const patch: {
+      firstName?: string
+      lastName?: string
+      email?: string
+    } = {}
+    if (student.firstName !== names.firstName) patch.firstName = names.firstName
+    if (student.lastName !== names.lastName) patch.lastName = names.lastName
+    if (names.email !== undefined && student.email !== names.email) {
+      patch.email = names.email
+    }
+    if (Object.keys(patch).length > 0) {
+      await ctx.db.patch('orgStudents', student._id, patch)
     }
     return student._id
   }
 
   const guardianCode = await generateUniqueJoinCode(ctx)
   const orgStudentId = await ctx.db.insert('orgStudents', {
-    displayName: studentDisplayName(user),
+    firstName: names.firstName,
+    lastName: names.lastName,
+    email: names.email,
     userId: user._id,
     guardianCode,
   })
@@ -56,6 +92,7 @@ export async function ensureSoloStudentEnrollment(
     classId,
     orgStudentId,
     status: 'active',
+    rosterNumber: await nextRosterNumber(ctx, classId),
   })
   return orgStudentId
 }

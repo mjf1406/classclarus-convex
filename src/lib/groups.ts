@@ -68,7 +68,12 @@ function insertStudentSorted(
   student: BoardStudent,
 ): Array<BoardStudent> {
   const next = [...students, student]
-  next.sort((left, right) => left.displayName.localeCompare(right.displayName))
+  next.sort((left, right) => {
+    if (left.rosterNumber !== right.rosterNumber) {
+      return left.rosterNumber - right.rosterNumber
+    }
+    return left.displayName.localeCompare(right.displayName)
+  })
   return next
 }
 

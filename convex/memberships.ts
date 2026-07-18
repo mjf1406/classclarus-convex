@@ -14,7 +14,6 @@ import { authz } from './authz'
 import {
   CLASS_ROLES_BY_PRECEDENCE,
   classScope,
-  hasClassPermission,
   highestClassRole,
   requireClassPermission,
 } from './lib/classAuth'
@@ -23,6 +22,7 @@ import {
   ensureSoloStudentEnrollment,
   withdrawSoloStudentEnrollment,
 } from './lib/soloRoster'
+import { formatOrgStudentName } from './lib/studentNames'
 import {
   classDocWithMyRole,
   classRoleValidator,
@@ -400,7 +400,7 @@ async function listMyChildrenForAccountHome(
     children.push({
       orgStudentId: orgStudent._id,
       organizationId: orgStudent.organizationId,
-      displayName: orgStudent.displayName,
+      displayName: formatOrgStudentName(orgStudent),
       classes,
     })
   }
@@ -569,6 +569,7 @@ const guardianRosterValidator = v.object({
         v.object({
           guardianUserId: v.id('users'),
           name: v.optional(v.string()),
+          email: v.optional(v.string()),
           linkedAt: v.number(),
         }),
       ),

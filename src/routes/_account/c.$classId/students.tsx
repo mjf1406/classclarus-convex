@@ -19,7 +19,7 @@ function ClassStudentsPage() {
   return (
     <ClassStudentsSection
       classId={classId}
-      data={adminBundle?.guardianRoster}
+      pdfData={adminBundle?.guardianRoster}
     />
   )
 }

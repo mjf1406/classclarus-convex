@@ -5,6 +5,7 @@ import { mutation, query } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { requireClassPermission } from './lib/classAuth'
+import { formatClassStudentName } from './lib/studentNames'
 
 const MAX_CLASS_STUDENTS = 500
 const MAX_GROUPS_PER_CLASS = 100
@@ -22,6 +23,7 @@ function assertIconId(icon: string | undefined): void {
 const studentValidator = v.object({
   orgStudentId: v.id('orgStudents'),
   displayName: v.string(),
+  rosterNumber: v.number(),
 })
 
 const teamValidator = v.object({
@@ -53,6 +55,7 @@ const boardValidator = v.object({
 type BoardStudent = {
   orgStudentId: Id<'orgStudents'>
   displayName: string
+  rosterNumber: number
 }
 
 async function loadActiveRoster(
@@ -80,12 +83,10 @@ async function loadActiveRoster(
     if (enrollment.status !== 'active') continue
     const orgStudent = await ctx.db.get('orgStudents', enrollment.orgStudentId)
     if (!orgStudent) continue
-    const studentUser = orgStudent.userId
-      ? await ctx.db.get('users', orgStudent.userId)
-      : null
     studentsById.set(orgStudent._id, {
       orgStudentId: orgStudent._id,
-      displayName: studentUser?.name?.trim() || orgStudent.displayName,
+      displayName: formatClassStudentName(enrollment, orgStudent),
+      rosterNumber: enrollment.rosterNumber ?? Number.MAX_SAFE_INTEGER,
     })
   }
 
@@ -120,9 +121,12 @@ function sortByOrderThenName<
 }
 
 function sortStudents(students: Array<BoardStudent>): Array<BoardStudent> {
-  return [...students].sort((left, right) =>
-    left.displayName.localeCompare(right.displayName),
-  )
+  return [...students].sort((left, right) => {
+    if (left.rosterNumber !== right.rosterNumber) {
+      return left.rosterNumber - right.rosterNumber
+    }
+    return left.displayName.localeCompare(right.displayName)
+  })
 }
 
 export const listGroupsBoard = query({

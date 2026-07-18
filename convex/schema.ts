@@ -36,7 +36,35 @@ export default defineSchema({
   }).index('by_userId', ['userId']),
   orgStudents: defineTable({
     organizationId: v.optional(v.string()),
-    displayName: v.string(),
+    // Legacy single name; optional until backfillRosterNames runs, then unused.
+    displayName: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    gender: v.optional(
+      v.union(
+        v.literal('male'),
+        v.literal('female'),
+        v.literal('nonBinary'),
+        v.literal('transgender'),
+        v.literal('agender'),
+        v.literal('genderfluid'),
+        v.literal('unspecified'),
+      ),
+    ),
+    pronouns: v.optional(
+      v.union(
+        v.literal('sheHer'),
+        v.literal('heHim'),
+        v.literal('theyThem'),
+        v.literal('itIts'),
+        v.literal('perPers'),
+        v.literal('zeHir'),
+        v.literal('xeXem'),
+        v.literal('nameOnly'),
+        v.literal('unspecified'),
+      ),
+    ),
+    email: v.optional(v.string()),
     userId: v.optional(v.id('users')),
     externalId: v.optional(v.string()),
     guardianCode: v.string(),
@@ -49,6 +77,10 @@ export default defineSchema({
     classId: v.id('classes'),
     orgStudentId: v.id('orgStudents'),
     status: v.union(v.literal('active'), v.literal('withdrawn')),
+    // 1-based class-local seat order; optional until backfillRosterNames.
+    rosterNumber: v.optional(v.number()),
+    rosterFirstName: v.optional(v.string()),
+    rosterLastName: v.optional(v.string()),
   })
     .index('by_classId', ['classId'])
     .index('by_orgStudentId', ['orgStudentId'])

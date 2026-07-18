@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf'
 
 type GroupsPdfStudent = {
   displayName: string
+  rosterNumber?: number
 }
 
 type GroupsPdfTeam = {
@@ -144,7 +145,16 @@ function drawStudentList(
   pdf.setTextColor(...INK)
   for (const student of students) {
     y = ensureSpace(pdf, y, 5, logo)
-    pdf.text(`• ${student.displayName}`, x, y)
+    pdf.text(
+      `• ${
+        student.rosterNumber !== undefined &&
+        student.rosterNumber < Number.MAX_SAFE_INTEGER
+          ? `#${student.rosterNumber} ${student.displayName}`
+          : student.displayName
+      }`,
+      x,
+      y,
+    )
     y += 5
   }
   return y
