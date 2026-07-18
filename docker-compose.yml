@@ -1,0 +1,109 @@
+# One-shot self-host stack: Convex backend + dashboard + SPA.
+# Usage: cp .env.example .env && docker compose up -d --build
+#
+# App:       http://localhost:3000
+# Dashboard: http://localhost:6791  (admin key in .convex-self-hosted/admin_key)
+# API:       http://127.0.0.1:3210
+# HTTP:      http://127.0.0.1:3211
+
+services:
+  backend:
+    image: ghcr.io/get-convex/convex-backend:${CONVEX_IMAGE_TAG:-abdd9b30f89c0e7c18c4213b99cd10e4bad33f8c}
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    ports:
+      - "${PORT:-3210}:3210"
+      - "${SITE_PROXY_PORT:-3211}:3211"
+    volumes:
+      - data:/convex/data
+    environment:
+      - INSTANCE_NAME=${INSTANCE_NAME:-convex-self-hosted}
+      - INSTANCE_SECRET=${INSTANCE_SECRET:?Set INSTANCE_SECRET in .env (openssl rand -hex 32)}
+      - CONVEX_CLOUD_ORIGIN=${CONVEX_CLOUD_ORIGIN:-http://127.0.0.1:3210}
+      - CONVEX_SITE_ORIGIN=${CONVEX_SITE_ORIGIN:-http://127.0.0.1:3211}
+      - RUST_LOG=${RUST_LOG:-info}
+      - DOCUMENT_RETENTION_DELAY=${DOCUMENT_RETENTION_DELAY:-172800}
+      - DISABLE_METRICS_ENDPOINT=${DISABLE_METRICS_ENDPOINT:-true}
+      - APPLICATION_MAX_CONCURRENT_MUTATIONS=${APPLICATION_MAX_CONCURRENT_MUTATIONS:-16}
+      - APPLICATION_MAX_CONCURRENT_NODE_ACTIONS=${APPLICATION_MAX_CONCURRENT_NODE_ACTIONS:-16}
+      - APPLICATION_MAX_CONCURRENT_QUERIES=${APPLICATION_MAX_CONCURRENT_QUERIES:-16}
+      - APPLICATION_MAX_CONCURRENT_V8_ACTIONS=${APPLICATION_MAX_CONCURRENT_V8_ACTIONS:-16}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3210/version"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
+  dashboard:
+    image: ghcr.io/get-convex/convex-dashboard:${CONVEX_IMAGE_TAG:-abdd9b30f89c0e7c18c4213b99cd10e4bad33f8c}
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    ports:
+      - "${DASHBOARD_PORT:-6791}:6791"
+    environment:
+      - NEXT_PUBLIC_DEPLOYMENT_URL=${NEXT_PUBLIC_DEPLOYMENT_URL:-http://127.0.0.1:3210}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Derives admin key from INSTANCE_NAME + INSTANCE_SECRET (same as backend).
+  admin-key:
+    image: ghcr.io/get-convex/convex-backend:${CONVEX_IMAGE_TAG:-abdd9b30f89c0e7c18c4213b99cd10e4bad33f8c}
+    working_dir: /convex
+    environment:
+      - INSTANCE_NAME=${INSTANCE_NAME:-convex-self-hosted}
+      - INSTANCE_SECRET=${INSTANCE_SECRET:?Set INSTANCE_SECRET in .env (openssl rand -hex 32)}
+    volumes:
+      - credentials:/credentials
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        ./generate_admin_key.sh | tee /credentials/admin_key
+        echo "Admin key written to credentials volume"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: "no"
+
+  deploy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.deploy
+    environment:
+      - CONVEX_SELF_HOSTED_URL=http://backend:3210
+      - SITE_URL=${SITE_URL:-http://localhost:3000}
+      - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID:-}
+      - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET:-}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - JWKS=${JWKS:-}
+      - OUTPUT_DIR=/output
+    volumes:
+      - credentials:/credentials:ro
+      - ./.convex-self-hosted:/output
+    depends_on:
+      backend:
+        condition: service_healthy
+      admin-key:
+        condition: service_completed_successfully
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_CONVEX_URL: ${VITE_CONVEX_URL:-http://127.0.0.1:3210}
+    ports:
+      - "${WEB_PORT:-3000}:80"
+    depends_on:
+      deploy:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  data:
+  credentials:

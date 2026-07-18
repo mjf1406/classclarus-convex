@@ -1,0 +1,18 @@
+# One-shot bootstrap: set Convex Auth env vars and deploy functions.
+FROM oven/bun:1.2-alpine
+
+RUN apk add --no-cache bash curl
+
+WORKDIR /app
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+COPY convex ./convex
+COPY scripts ./scripts
+COPY tsconfig.json ./tsconfig.json
+COPY docker/deploy.sh /deploy.sh
+
+RUN chmod +x /deploy.sh
+
+ENTRYPOINT ["/deploy.sh"]

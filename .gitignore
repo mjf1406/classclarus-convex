@@ -4,6 +4,7 @@ dist
 dist-ssr
 *.local
 .env
+.convex-self-hosted/
 .nitro
 .tanstack
 .wrangler
