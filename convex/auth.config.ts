@@ -9,12 +9,15 @@ const jwks = process.env.JWKS
  * that fails hairpin NAT from inside Docker). Falls back to OIDC domain
  * discovery when JWKS is not set (e.g. incomplete bootstrap).
  *
- * Use base64 data URIs (Convex-documented form) so the backend JWKS parser
- * accepts the embedded key set.
+ * Encode with TextEncoder + btoa — no Node `Buffer` (undefined in Convex V8).
  */
 function jwksDataUri(jwksJson: string): string {
-  const base64 = Buffer.from(jwksJson, 'utf8').toString('base64')
-  return `data:application/json;base64,${base64}`
+  const bytes = new TextEncoder().encode(jwksJson)
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]!)
+  }
+  return `data:application/json;base64,${btoa(binary)}`
 }
 
 export default {

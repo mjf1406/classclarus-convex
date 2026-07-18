@@ -92,7 +92,12 @@ fi
 
 echo "==> Deploying Convex functions to ${BACKEND_URL}..."
 cd /app
-bunx convex deploy --yes
+if ! bunx convex deploy --yes; then
+  echo "ERROR: convex deploy failed." >&2
+  echo "    Check convex/auth.config.ts (JWKS / CONVEX_SITE_URL) and deploy logs above." >&2
+  echo "    On the host, re-run with visible logs: docker compose up --build deploy" >&2
+  exit 1
+fi
 
 echo "==> Deploy complete"
 echo "    App:       ${SITE_URL}"

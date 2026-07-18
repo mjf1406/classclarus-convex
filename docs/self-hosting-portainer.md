@@ -283,7 +283,7 @@ Use `sudo` if you see `permission denied` on `/var/run/docker.sock`. After pulls
 
 ### `deploy` exited with an error
 
-Portainer may **remove** failed containers, so `docker logs classclarus-deploy-1` can say the container does not exist. Capture logs by running deploy on the host instead:
+Portainer may **remove** failed containers, so `docker logs classclarus-deploy-1` can say the container does not exist. Capture logs by running deploy on the host instead (logs stay on screen):
 
 ```bash
 cd /path/to/classclarus-convex   # or clone fresh under /tmp
@@ -293,7 +293,10 @@ sudo docker compose up --build admin-key
 sudo docker compose up --build deploy
 ```
 
-Watch for `Deploy complete`. If you see `Could not resolve "#/lib/..."` bundling errors, the branch is too old — pull latest `main` (Convex code must not import frontend `#/` aliases).
+Watch for `Deploy complete`. Common failures:
+
+- `Buffer is not defined` / auth.config errors — pull latest `main` (JWKS data URI must not use Node `Buffer`)
+- `Could not resolve "#/lib/..."` bundling errors — branch is too old; Convex code must not import frontend `#/` aliases
 
 In Portainer, after a successful host deploy, update/redeploy the stack (or keep using Compose). `web` only starts after `deploy` exits 0.
 
