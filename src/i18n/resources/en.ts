@@ -129,8 +129,9 @@ const en = {
     yearMin: 'Year must be 2000 or later',
     yearMax: 'Year must be 2100 or earlier',
     languageLabel: 'Class language',
+    languageUserOption: "Use user's language",
     languageDescription:
-      'Students see the class UI in this language. Teachers and guardians keep their own language.',
+      'By default, everyone uses their own language. Choose a specific language to lock the student UI to that locale. Teachers and guardians always keep their own language.',
     created: 'Class created',
     updated: 'Class updated',
     createFailed: 'Failed to create class',

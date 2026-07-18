@@ -5,8 +5,11 @@ import { useTranslation } from 'react-i18next'
 import { useClassLayout } from '#/components/classes/ClassLayoutContext'
 import { useUpdateClass } from '#/lib/classes'
 import { LanguageSelect } from '#/i18n/LanguageSelect'
-import { coerceAppLanguage, DEFAULT_APP_LANGUAGE } from '#/i18n/locales'
-import type { AppLanguage } from '#/i18n/locales'
+import {
+  coerceClassLanguage,
+  DEFAULT_CLASS_LANGUAGE,
+} from '#/i18n/locales'
+import type { ClassLanguage } from '#/i18n/locales'
 import {
   Field,
   FieldDescription,
@@ -21,10 +24,10 @@ export function ClassSettingsSection() {
   const [isSaving, setIsSaving] = useState(false)
 
   const currentLanguage = classDoc
-    ? coerceAppLanguage(classDoc.language)
-    : DEFAULT_APP_LANGUAGE
+    ? coerceClassLanguage(classDoc.language)
+    : DEFAULT_CLASS_LANGUAGE
 
-  const handleLanguageChange = (language: AppLanguage) => {
+  const handleLanguageChange = (language: ClassLanguage) => {
     if (!classDoc || language === currentLanguage || isSaving) return
 
     setIsSaving(true)
@@ -61,6 +64,8 @@ export function ClassSettingsSection() {
             <div className="mt-2 max-w-xs">
               <LanguageSelect
                 id="class-settings-language"
+                allowUserLanguage
+                userLanguageLabel={t('languageUserOption')}
                 value={currentLanguage}
                 onValueChange={handleLanguageChange}
                 disabled={isSaving}

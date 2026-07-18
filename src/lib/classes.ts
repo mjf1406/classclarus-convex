@@ -3,8 +3,8 @@ import { api } from '../../convex/_generated/api'
 import type { Doc, Id } from '../../convex/_generated/dataModel'
 import { compareClasses, DEFAULT_CLASS_SORT } from './classSort'
 import type { ClassSort } from './classSort'
-import type { AppLanguage } from '#/i18n/locales'
-import { DEFAULT_APP_LANGUAGE } from '#/i18n/locales'
+import type { ClassLanguage } from '#/i18n/locales'
+import { DEFAULT_CLASS_LANGUAGE } from '#/i18n/locales'
 import i18n from '#/i18n'
 
 export type { ClassSort } from './classSort'
@@ -35,14 +35,14 @@ export type ClassPublic = Omit<
   | 'publicDisplayPin'
   | 'language'
 > & {
-  language: AppLanguage
+  language: ClassLanguage
   myRole: ClassDisplayRole | undefined
   canManage?: boolean
   canManageMembers?: boolean
 }
 
 type ListMyClass = {
-  myRole: ClassRole | undefined
+  myRole: ClassDisplayRole | undefined
   canManage: boolean
   _id: Id<'classes'>
   _creationTime: number
@@ -55,7 +55,7 @@ type ListMyClass = {
   archivedTime?: number
   organizationId?: string
   teamId?: string
-  language: AppLanguage
+  language: ClassLanguage
 }
 
 function toListMyClass(doc: ClassPublic): ListMyClass {
@@ -72,7 +72,7 @@ function toListMyClass(doc: ClassPublic): ListMyClass {
     organizationId: doc.organizationId,
     teamId: doc.teamId,
     language: doc.language,
-    myRole: doc.myRole === 'guardian' ? undefined : doc.myRole,
+    myRole: doc.myRole,
     canManage: doc.canManage === true,
   }
 }
@@ -108,7 +108,7 @@ function applyClassPatch(
     description?: string
     icon?: string
     archived?: boolean
-    language?: AppLanguage
+    language?: ClassLanguage
   },
   now: number,
 ): ClassPublic {
@@ -145,7 +145,7 @@ export function useCreateClass() {
         description: args.description,
         icon: args.icon,
         year: args.year,
-        language: args.language ?? DEFAULT_APP_LANGUAGE,
+        language: args.language ?? DEFAULT_CLASS_LANGUAGE,
         myRole: 'creator',
         canManage: true,
       }

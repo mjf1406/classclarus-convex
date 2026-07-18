@@ -129,8 +129,9 @@ const zhs: Catalog = {
     yearMin: '学年不得早于 2000',
     yearMax: '学年不得晚于 2100',
     languageLabel: '班级语言',
+    languageUserOption: '使用用户语言',
     languageDescription:
-      '学生将以此语言查看班级界面。教师和监护人保留各自的语言设置。',
+      '默认情况下，每个人使用自己的语言。选择特定语言可将学生界面锁定为该语言。教师和监护人始终保留各自的语言设置。',
     created: '班级已创建',
     updated: '班级已更新',
     createFailed: '创建班级失败',

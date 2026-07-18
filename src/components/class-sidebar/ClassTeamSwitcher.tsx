@@ -1,10 +1,11 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
-import { Check, ChevronsUpDown, GraduationCap } from 'lucide-react'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useClassLayout } from '#/components/classes/ClassLayoutContext'
+import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
 import { classLabel } from '#/components/classes/classLabel'
 import { TEN_MINUTES } from '#/lib/queryCache'
 import { sortClasses } from '#/lib/classSort'
@@ -84,9 +85,7 @@ export function ClassTeamSwitcher() {
               className="min-w-0 overflow-hidden data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               tooltip={currentLabel}
             >
-              <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <GraduationCap className="size-4" />
-              </div>
+              <ClassRoleBadge role={classDoc.myRole} iconOnly />
               <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium" title={currentLabel}>
                   {currentLabel}
@@ -122,9 +121,11 @@ export function ClassTeamSwitcher() {
                       params={{ classId: classItem._id }}
                       className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2"
                     >
-                      <div className="flex size-6 shrink-0 items-center justify-center rounded-md border">
-                        <GraduationCap className="size-3.5 shrink-0" />
-                      </div>
+                      <ClassRoleBadge
+                        role={classItem.myRole}
+                        iconOnly
+                        className="size-6 rounded-md [&_svg]:size-3.5"
+                      />
                       <span className="truncate" title={label}>
                         {label}
                       </span>

@@ -84,15 +84,36 @@ export const CLASS_ROLE_BADGE_CONFIG: Record<
 export function ClassRoleBadge({
   role,
   className,
+  iconOnly = false,
 }: {
   role: ClassRoleBadgeRole | undefined
   className?: string
+  /** Compact role-colored icon for tight slots (e.g. class switcher). */
+  iconOnly?: boolean
 }) {
   const { t } = useTranslation('classes')
   if (!role) return null
 
   const config = ROLE_ICON_CONFIG[role]
   const Icon = config.icon
+  const label = t(config.labelKey)
+
+  if (iconOnly) {
+    return (
+      <Badge
+        variant="outline"
+        className={cn(
+          'flex size-8 shrink-0 items-center justify-center rounded-lg p-0 [&_svg]:size-4',
+          config.className,
+          className,
+        )}
+        aria-label={label}
+        title={label}
+      >
+        <Icon />
+      </Badge>
+    )
+  }
 
   return (
     <Badge
@@ -100,7 +121,7 @@ export function ClassRoleBadge({
       className={cn('shrink-0 gap-1', config.className, className)}
     >
       <Icon />
-      {t(config.labelKey)}
+      {label}
     </Badge>
   )
 }

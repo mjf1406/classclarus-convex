@@ -239,6 +239,86 @@ export const redeemJoinOrGuardianCode = mutation({
 // Guardrail against pathological accounts, not an expected limit; roles are
 // never revoked at year rollover, so long-tenured users accumulate classes.
 const MAX_CLASS_ROLES = 200
+const MAX_GUARDIAN_LINKS = 100
+const MAX_STUDENT_ENROLLMENTS = 200
+
+function matchesArchivedFilter(
+  doc: Doc<'classes'>,
+  includeArchived: boolean,
+  archivedOnly: boolean,
+): boolean {
+  if (archivedOnly) return doc.archivedTime !== undefined
+  if (includeArchived) return true
+  return doc.archivedTime === undefined
+}
+
+/** Verified guardian links with their org student (ReBAC checked). */
+async function listVerifiedGuardianLinks(
+  ctx: QueryCtx,
+  userId: Id<'users'>,
+): Promise<
+  Array<{
+    orgStudent: Doc<'orgStudents'>
+  }>
+> {
+  const links = await ctx.db
+    .query('guardianLinks')
+    .withIndex('by_guardianUserId', (index) =>
+      index.eq('guardianUserId', userId),
+    )
+    .take(MAX_GUARDIAN_LINKS)
+
+  const verified: Array<{ orgStudent: Doc<'orgStudents'> }> = []
+  for (const link of links) {
+    const orgStudent = await ctx.db.get('orgStudents', link.orgStudentId)
+    if (!orgStudent || orgStudent.organizationId !== link.organizationId) {
+      continue
+    }
+
+    const relationExists = await guardianAuthz(
+      orgStudent.organizationId,
+    ).hasRelation(
+      ctx,
+      guardianSubject(userId),
+      GUARDIAN_RELATION,
+      guardianObject(orgStudent._id),
+    )
+    if (!relationExists) continue
+
+    verified.push({ orgStudent })
+  }
+  return verified
+}
+
+/** Unique class docs reachable via the user's guardian links + active enrollments. */
+async function listGuardianAccessibleClasses(
+  ctx: QueryCtx,
+  userId: Id<'users'>,
+): Promise<Array<Doc<'classes'>>> {
+  const byId = new Map<string, Doc<'classes'>>()
+  const verified = await listVerifiedGuardianLinks(ctx, userId)
+
+  for (const { orgStudent } of verified) {
+    const enrollments = await ctx.db
+      .query('classEnrollments')
+      .withIndex('by_orgStudentId', (index) =>
+        index.eq('orgStudentId', orgStudent._id),
+      )
+      .take(MAX_STUDENT_ENROLLMENTS)
+
+    for (const enrollment of enrollments) {
+      if (enrollment.status !== 'active') continue
+      if (enrollment.organizationId !== orgStudent.organizationId) continue
+      if (byId.has(enrollment.classId)) continue
+
+      const classDoc = await ctx.db.get('classes', enrollment.classId)
+      if (!classDoc) continue
+      byId.set(classDoc._id, classDoc)
+    }
+  }
+
+  return [...byId.values()]
+}
 
 export const listMyClasses = query({
   args: {
@@ -273,25 +353,44 @@ export const listMyClasses = query({
 
     const docs = await Promise.all(classIds.map((id) => ctx.db.get(id)))
 
-    const classes = docs
+    const rosterClasses = docs
       // Drop nulls: deleted classes leave orphaned role assignments behind.
       .filter((doc): doc is Doc<'classes'> => doc !== null)
-      .filter((doc) => {
-        if (archivedOnly) return doc.archivedTime !== undefined
-        if (includeArchived) return true
-        return doc.archivedTime === undefined
-      })
+      .filter((doc) =>
+        matchesArchivedFilter(doc, includeArchived, archivedOnly),
+      )
+
+    const rosterIdSet = new Set(rosterClasses.map((doc) => doc._id))
+    const guardianOnly: Array<Doc<'classes'>> = []
+    if (rosterClasses.length < MAX_CLASS_ROLES) {
+      const guardianDocs = await listGuardianAccessibleClasses(ctx, user._id)
+      for (const doc of guardianDocs) {
+        if (rosterIdSet.has(doc._id)) continue
+        if (!matchesArchivedFilter(doc, includeArchived, archivedOnly)) continue
+        if (rosterClasses.length + guardianOnly.length >= MAX_CLASS_ROLES) break
+        guardianOnly.push(doc)
+      }
+    }
+
+    const classes = [...rosterClasses, ...guardianOnly]
 
     return sortClasses(classes, sort).map((doc) => {
-      const held = rolesByClassId.get(doc._id) ?? []
-      const myRole = highestClassRole(held) ?? undefined
-      // classTeacher and creator both hold class:manage (creator inherits).
-      const canManage =
-        held.includes('creator') || held.includes('classTeacher')
+      const held = rolesByClassId.get(doc._id)
+      if (held) {
+        const myRole = highestClassRole(held) ?? undefined
+        // classTeacher and creator both hold class:manage (creator inherits).
+        const canManage =
+          held.includes('creator') || held.includes('classTeacher')
+        return {
+          ...toPublicClass(doc),
+          myRole,
+          canManage,
+        }
+      }
       return {
         ...toPublicClass(doc),
-        myRole,
-        canManage,
+        myRole: 'guardian' as const,
+        canManage: false,
       }
     })
   },
@@ -327,9 +426,6 @@ async function listMyChildrenForAccountHome(
 }>> {
   // Keep these mirrored with `convex/guardians.ts` since we embed the “list
   // children” logic into a single home bundle query.
-  const MAX_GUARDIAN_LINKS = 100
-  const MAX_STUDENT_ENROLLMENTS = 200
-
   const children: Array<{
     orgStudentId: Id<'orgStudents'>
     organizationId?: string
@@ -342,30 +438,14 @@ async function listMyChildrenForAccountHome(
     }>
   }> = []
 
-  const links = await ctx.db
-    .query('guardianLinks')
-    .withIndex('by_guardianUserId', (index) =>
-      index.eq('guardianUserId', userId),
-    )
-    .take(MAX_GUARDIAN_LINKS)
+  const verified = await listVerifiedGuardianLinks(ctx, userId)
 
-  for (const link of links) {
-    const orgStudent = await ctx.db.get('orgStudents', link.orgStudentId)
-    if (!orgStudent || orgStudent.organizationId !== link.organizationId) {
-      continue
-    }
-
-    const relationExists = await guardianAuthz(orgStudent.organizationId).hasRelation(
-      ctx,
-      guardianSubject(userId),
-      GUARDIAN_RELATION,
-      guardianObject(orgStudent._id),
-    )
-    if (!relationExists) continue
-
+  for (const { orgStudent } of verified) {
     const enrollments = await ctx.db
       .query('classEnrollments')
-      .withIndex('by_orgStudentId', (index) => index.eq('orgStudentId', orgStudent._id))
+      .withIndex('by_orgStudentId', (index) =>
+        index.eq('orgStudentId', orgStudent._id),
+      )
       .take(MAX_STUDENT_ENROLLMENTS)
 
     const classes: Array<{

@@ -6,19 +6,19 @@ import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
 import { TEN_MINUTES } from '@/lib/queryCache'
-import { coerceAppLanguage } from './locales'
-import type { AppLanguage } from './locales'
+import { coerceClassLanguage, isAppLanguage } from './locales'
+import type { AppLanguage, ClassLanguage } from './locales'
 
 /**
  * Resolves the UI language:
  * - guardians → personal
- * - students on /c/$classId → class language
- * - everyone else → personal
+ * - students on /c/$classId with a concrete class language → that language
+ * - everyone else (including students when class language is 'user') → personal
  */
 export function useActiveLocale(personalLanguage: AppLanguage): {
   activeLanguage: AppLanguage
   canChooseLanguage: boolean
-  classLanguage: AppLanguage | null
+  classLanguage: ClassLanguage | null
   isStudentInClass: boolean
 } {
   const { isAuthenticated } = useConvexAuth()
@@ -49,15 +49,20 @@ export function useActiveLocale(personalLanguage: AppLanguage): {
     classId !== undefined && classDoc?.myRole === 'student'
   const classLanguage =
     classDoc?.language !== undefined
-      ? coerceAppLanguage(classDoc.language)
+      ? coerceClassLanguage(classDoc.language)
+      : null
+
+  const forcedClassLanguage =
+    classLanguage !== null && isAppLanguage(classLanguage)
+      ? classLanguage
       : null
 
   let activeLanguage = personalLanguage
-  if (classId && !isGuardian && isStudentInClass && classLanguage) {
-    activeLanguage = classLanguage
+  if (classId && !isGuardian && isStudentInClass && forcedClassLanguage) {
+    activeLanguage = forcedClassLanguage
   }
 
-  const canChooseLanguage = !isStudentInClass
+  const canChooseLanguage = !(isStudentInClass && forcedClassLanguage !== null)
 
   return {
     activeLanguage,

@@ -137,8 +137,9 @@ const pt: Catalog = {
     yearMin: 'O ano deve ser 2000 ou posterior',
     yearMax: 'O ano deve ser 2100 ou anterior',
     languageLabel: 'Idioma da turma',
+    languageUserOption: 'Usar o idioma do usuário',
     languageDescription:
-      'Os alunos veem a interface da turma neste idioma. Professores e responsáveis mantêm o deles.',
+      'Por padrão, cada um usa o próprio idioma. Escolha um idioma específico para fixar a interface dos alunos. Professores e responsáveis sempre mantêm o deles.',
     created: 'Turma criada',
     updated: 'Turma atualizada',
     createFailed: 'Falha ao criar a turma',

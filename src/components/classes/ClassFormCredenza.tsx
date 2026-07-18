@@ -7,9 +7,9 @@ import { z } from 'zod'
 
 import { useCreateClass, useUpdateClass } from '#/lib/classes'
 import type { ClassPublic } from '#/lib/classes'
-import { usePersonalLocale } from '#/i18n/LocaleProvider'
 import { LanguageSelect } from '#/i18n/LanguageSelect'
-import type { AppLanguage } from '#/i18n/locales'
+import { DEFAULT_CLASS_LANGUAGE } from '#/i18n/locales'
+import type { ClassLanguage } from '#/i18n/locales'
 import { Button } from '@/components/ui/button'
 import {
   Credenza,
@@ -60,7 +60,6 @@ export function ClassFormCredenza({
   classDoc,
 }: ClassFormCredenzaProps) {
   const { t } = useTranslation(['classes', 'common'])
-  const { personalLanguage } = usePersonalLocale()
   const isEdit = mode === 'edit'
   const showCreateTrigger = showTrigger === true
 
@@ -78,7 +77,7 @@ export function ClassFormCredenza({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [year, setYear] = useState(() => String(new Date().getFullYear()))
-  const [language, setLanguage] = useState<AppLanguage>(personalLanguage)
+  const [language, setLanguage] = useState<ClassLanguage>(DEFAULT_CLASS_LANGUAGE)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
@@ -90,7 +89,7 @@ export function ClassFormCredenza({
     setName('')
     setDescription('')
     setYear(String(new Date().getFullYear()))
-    setLanguage(personalLanguage)
+    setLanguage(DEFAULT_CLASS_LANGUAGE)
     setErrors({})
   }
 
@@ -102,9 +101,9 @@ export function ClassFormCredenza({
       setYear(String(classDoc.year))
       setErrors({})
     } else if (!isEdit) {
-      setLanguage(personalLanguage)
+      setLanguage(DEFAULT_CLASS_LANGUAGE)
     }
-  }, [open, classDoc, isEdit, personalLanguage])
+  }, [open, classDoc, isEdit])
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next)
@@ -286,6 +285,8 @@ export function ClassFormCredenza({
                   <FieldDescription>{t('languageDescription')}</FieldDescription>
                   <LanguageSelect
                     id={`${formId}-language`}
+                    allowUserLanguage
+                    userLanguageLabel={t('languageUserOption')}
                     value={language}
                     onValueChange={setLanguage}
                   />

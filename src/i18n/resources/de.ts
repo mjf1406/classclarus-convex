@@ -137,8 +137,9 @@ const de: Catalog = {
     yearMin: 'Jahr muss 2000 oder später sein',
     yearMax: 'Jahr muss 2100 oder früher sein',
     languageLabel: 'Klassensprache',
+    languageUserOption: 'Benutzersprache verwenden',
     languageDescription:
-      'Schüler sehen die Klassenoberfläche in dieser Sprache. Lehrer und Erziehungsberechtigte behalten ihre eigene Sprache.',
+      'Standardmäßig verwendet jeder seine eigene Sprache. Wählen Sie eine bestimmte Sprache, um die Schüleroberfläche darauf festzulegen. Lehrer und Erziehungsberechtigte behalten immer ihre eigene Sprache.',
     created: 'Klasse erstellt',
     updated: 'Klasse aktualisiert',
     createFailed: 'Erstellen der Klasse fehlgeschlagen',

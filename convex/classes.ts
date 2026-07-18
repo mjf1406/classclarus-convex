@@ -15,11 +15,11 @@ import { generateUniqueJoinCode } from './lib/joinCodes'
 import { hasGuardianAccessToClass } from './lib/guardianAuth'
 import {
   DEFAULT_APP_LANGUAGE,
-  coerceAppLanguage,
-  languageValidator
-  
+  DEFAULT_CLASS_LANGUAGE,
+  coerceClassLanguage,
+  classLanguageValidator,
 } from './lib/languages'
-import type {AppLanguage} from './lib/languages';
+import type { ClassLanguage } from './lib/languages'
 
 // Public class shape: join codes and the display pin are redacted. Codes are
 // only available via getJoinCodes — student code gated on class:manageMembers;
@@ -37,7 +37,7 @@ export const classDocPublic = v.object({
   archivedTime: v.optional(v.number()),
   organizationId: v.optional(v.string()),
   teamId: v.optional(v.string()),
-  language: languageValidator,
+  language: classLanguageValidator,
 })
 
 export const classRoleValidator = v.union(
@@ -87,7 +87,7 @@ export type ClassPublic = {
   archivedTime?: number
   organizationId?: string
   teamId?: string
-  language: AppLanguage
+  language: ClassLanguage
 }
 
 export type ClassDisplayRole = ClassRole | 'guardian'
@@ -110,7 +110,7 @@ export function toPublicClass(doc: Doc<'classes'>): ClassPublic {
     archivedTime: doc.archivedTime,
     organizationId: doc.organizationId,
     teamId: doc.teamId,
-    language: coerceAppLanguage(doc.language),
+    language: coerceClassLanguage(doc.language),
   }
 }
 
@@ -175,7 +175,7 @@ export const createClass = mutation({
     icon: v.optional(v.string()),
     year: v.number(),
     publicDisplayPin: v.optional(v.string()),
-    language: v.optional(languageValidator),
+    language: v.optional(classLanguageValidator),
   },
   returns: v.id('classes'),
   handler: async (ctx, args) => {
@@ -187,14 +187,7 @@ export const createClass = mutation({
       teacherCode,
     ])
 
-    let language = args.language
-    if (!language) {
-      const prefs = await ctx.db
-        .query('userPreferences')
-        .withIndex('by_userId', (q) => q.eq('userId', user._id))
-        .unique()
-      language = coerceAppLanguage(prefs?.language)
-    }
+    const language = args.language ?? DEFAULT_CLASS_LANGUAGE
 
     const classId = await ctx.db.insert('classes', {
       // userId is denormalized creator metadata; authorization uses authz.
@@ -227,7 +220,7 @@ export const updateClass = mutation({
     icon: v.optional(v.string()),
     publicDisplayPin: v.optional(v.string()),
     archived: v.optional(v.boolean()),
-    language: v.optional(languageValidator),
+    language: v.optional(classLanguageValidator),
     // Note: year is intentionally not accepted — it is immutable after creation.
   },
   returns: v.null(),
@@ -246,7 +239,7 @@ export const updateClass = mutation({
       icon?: string
       publicDisplayPin?: string
       archivedTime?: number | undefined
-      language?: AppLanguage
+      language?: ClassLanguage
       updatedTime: number
     } = {
       updatedTime: Date.now(),

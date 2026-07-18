@@ -137,8 +137,9 @@ const es: Catalog = {
     yearMin: 'El año debe ser 2000 o posterior',
     yearMax: 'El año debe ser 2100 o anterior',
     languageLabel: 'Idioma de la clase',
+    languageUserOption: 'Usar el idioma del usuario',
     languageDescription:
-      'Los estudiantes ven la interfaz de la clase en este idioma. Profesores y tutores mantienen el suyo.',
+      'Por defecto, cada uno usa su propio idioma. Elige un idioma concreto para fijar la interfaz de los estudiantes. Profesores y tutores siempre mantienen el suyo.',
     created: 'Clase creada',
     updated: 'Clase actualizada',
     createFailed: 'No se pudo crear la clase',

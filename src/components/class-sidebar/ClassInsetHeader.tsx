@@ -57,22 +57,26 @@ export function ClassInsetHeader() {
           className="mr-2 data-[orientation=vertical]:h-4"
         />
         <Breadcrumb className="min-w-0">
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
+          <BreadcrumbList className="flex-nowrap">
+            <BreadcrumbItem className="hidden shrink-0 md:block">
               <BreadcrumbLink asChild>
                 <Link to="/">{t('home:title')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem className="hidden sm:block">
+            <BreadcrumbSeparator className="hidden shrink-0 md:block" />
+            <BreadcrumbItem className="min-w-0">
               <BreadcrumbLink asChild>
-                <Link to="/c/$classId/points" params={{ classId }}>
+                <Link
+                  to="/c/$classId/points"
+                  params={{ classId }}
+                  className="block truncate"
+                >
                   {label}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden sm:block" />
-            <BreadcrumbItem>
+            <BreadcrumbSeparator className="shrink-0" />
+            <BreadcrumbItem className="shrink-0">
               <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>

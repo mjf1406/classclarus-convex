@@ -136,8 +136,9 @@ const ko: Catalog = {
     yearMin: '학년도는 2000 이상이어야 합니다',
     yearMax: '학년도는 2100 이하여야 합니다',
     languageLabel: '수업 언어',
+    languageUserOption: '사용자 언어 사용',
     languageDescription:
-      '학생은 이 언어로 수업 UI를 봅니다. 교사와 보호자는 각자의 언어 설정을 유지합니다.',
+      '기본적으로 각자 자신의 언어를 사용합니다. 특정 언어를 선택하면 학생 UI가 해당 언어로 고정됩니다. 교사와 보호자는 항상 각자의 언어 설정을 유지합니다.',
     created: '수업이 생성되었습니다',
     updated: '수업이 업데이트되었습니다',
     createFailed: '수업 생성에 실패했습니다',
