@@ -215,23 +215,20 @@ docker compose up -d --build deploy web
 
 Open http://localhost:3000/login — you should see email/password fields (not Google).
 
-### 3. Verify auth discovery (LAN / after signup)
+### 3. Verify auth endpoints (LAN / after signup)
 
-After signup, if the home page stays on a skeleton loader and the nav still shows **Sign in**, the browser usually cannot complete **Auth provider discovery**. Confirm both HTTP-action endpoints from the **same machine/browser** that opens the app (replace the host with your `CONVEX_SITE_ORIGIN`):
+Password mode validates JWTs with a **static JWKS** embedded in [`convex/auth.config.ts`](../convex/auth.config.ts) (custom JWT provider). That avoids the Convex backend having to HTTP-fetch its own public OpenID URL — a common Docker **hairpin NAT** failure when `CONVEX_SITE_ORIGIN` is a LAN IP (browser can reach `http://YOUR_SERVER_IP:3211/...`, but `curl` from inside the backend container to that same address times out).
+
+The well-known routes remain available as diagnostics. From the **same machine/browser** that opens the app:
 
 ```text
 http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
 http://YOUR_SERVER_IP:3211/.well-known/jwks.json
 ```
 
-Expect JSON: OpenID config must include `issuer` and `jwks_uri`; JWKS must include a `keys` array. A missing OpenID route (`No matching routes found`) causes a permanent unauthenticated loader / WebSocket reconnect loop even when user rows exist in the dashboard.
+Expect JSON: OpenID config must include `issuer` and `jwks_uri`; JWKS must include a `keys` array. A missing OpenID route (`No matching routes found`) is still a deployment problem — the `deploy` service smoke-checks these endpoints on the Docker network (`http://backend:3211`) after each Convex deploy.
 
-The `deploy` service smoke-checks these endpoints on the Docker network (`http://backend:3211`) after each Convex deploy and fails the stack if either is broken.
-
-If **both** endpoints work in the browser but auth discovery still fails:
-
-1. From the backend container, confirm the same URLs (or `http://127.0.0.1:3211/...`) respond.
-2. For a public deployment, terminate TLS on a reverse proxy and set `CONVEX_SITE_ORIGIN` / `SITE_URL` to HTTPS hostnames the browser can reach — see [Public server / domain](#public-server--domain).
+If endpoints work in the browser but login still loops on `Auth provider discovery … failed`, pull the latest password-mode deploy (static JWKS) and recreate `deploy`. You no longer need the backend container to reach the public LAN IP for token validation.
 
 ### 4. Admin password reset (dashboard)
 
@@ -474,11 +471,12 @@ docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin
 
 ### Signed in but home page never leaves the loader
 
-Console often shows `Auth provider discovery of http://…:3211 failed`. Check:
+Console often shows `Auth provider discovery of http://…:3211 failed`. With current password mode this usually means an **old deploy** still using OIDC discovery (backend tries to fetch its own LAN OpenID URL and times out under Docker hairpin NAT). Fix:
 
-1. Browser can open `CONVEX_SITE_ORIGIN` + `/.well-known/openid-configuration` **and** `/.well-known/jwks.json` (see [Verify auth discovery](#3-verify-auth-discovery-lan--after-signup)).
-2. `CONVEX_SITE_ORIGIN` matches the host/port the browser uses (LAN IP, not `backend` or only-host `127.0.0.1` when browsing from another device).
-3. Redeploy so password-mode HTTP routes and the deploy smoke check run: `docker compose up -d --build deploy`.
+1. Confirm you are on a build that embeds static JWKS for password mode (latest `main` / stack pull).
+2. Browser can open `CONVEX_SITE_ORIGIN` + `/.well-known/openid-configuration` **and** `/.well-known/jwks.json` (see [Verify auth endpoints](#3-verify-auth-endpoints-lan--after-signup)) — useful diagnostics, but not what the backend uses for JWT validation anymore.
+3. `CONVEX_SITE_ORIGIN` matches the host/port the browser uses (LAN IP, not `backend` or only-host `127.0.0.1` when browsing from another device).
+4. Redeploy: `docker compose up -d --build deploy` (and rebuild `web` if the auth UI flag changed).
 
 ### Google sign-in fails
 

@@ -173,15 +173,15 @@ curl http://127.0.0.1:3210/version
 
 2. **Update the stack** so both `deploy` and `web` rebuild (the SPA bakes the same flag as `VITE_AUTH_PASSWORD_ENABLED`).
 3. Open `/login` — email/password registration and sign-in appear instead of Google.
-4. From the same device that opens the app, verify auth discovery (replace with your `CONVEX_SITE_ORIGIN`):
+4. From the same device that opens the app, verify the diagnostic auth endpoints (replace with your `CONVEX_SITE_ORIGIN`):
 
    ```text
    http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
    http://YOUR_SERVER_IP:3211/.well-known/jwks.json
    ```
 
-   Both must return JSON (`issuer` / `jwks_uri`, and a `keys` array). If OpenID is missing (`No matching routes found`), the UI stays on a permanent loader after signup even though users appear in the dashboard. The `deploy` job also smoke-checks these URLs inside Docker and should fail the stack before `web` starts if they are broken.
-5. If both endpoints work but discovery still fails, test reachability from the backend container and use HTTPS + reverse proxy for a public deployment (see [self-hosting.md](self-hosting.md#3-verify-auth-discovery-lan--after-signup)).
+   Both should return JSON (`issuer` / `jwks_uri`, and a `keys` array). Password mode validates JWTs with **static JWKS** in auth config so the backend does **not** need to fetch those URLs over the LAN IP (Docker hairpin NAT often times out from inside the backend container even when the browser succeeds). The `deploy` job still smoke-checks `http://backend:3211/...` on the Docker network.
+5. If you still see `Auth provider discovery … failed` after endpoints look fine, pull latest and recreate `deploy` so the static-JWKS auth config is applied (see [self-hosting.md](self-hosting.md#3-verify-auth-endpoints-lan--after-signup)).
 6. There is **no** self-service password reset. Admins reset passwords in the Convex dashboard by running **`adminAuth:resetPassword`** with `email` and `newPassword` (min 8 characters). Existing passwords cannot be read — only replaced.
 
 Full details: [self-hosting.md](self-hosting.md#enable-emailpassword-sign-in-self-host).
@@ -339,14 +339,16 @@ Change `WEB_PORT`, `PORT`, `SITE_PROXY_PORT`, `DASHBOARD_PORT` in stack env, and
 
 ### Signed in but home page never leaves the loader
 
-Usually `Auth provider discovery of http://…:3211 failed`. From the same device that opens the app, open:
+Usually `Auth provider discovery of http://…:3211 failed`. That error often means an older deploy still performed OIDC discovery against the public LAN IP from **inside** the backend container (hairpin timeout). Pull latest password-mode code (static JWKS) and update the stack so `deploy` runs again.
+
+Diagnostic checks from the browser (not required for backend validation anymore):
 
 ```text
 http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
 http://YOUR_SERVER_IP:3211/.well-known/jwks.json
 ```
 
-Both must return JSON. A missing OpenID route leaves the SPA unauthenticated forever. Redeploy so `deploy` runs (it smoke-checks these URLs). If the endpoints work but discovery still fails, see [self-hosting.md](self-hosting.md#3-verify-auth-discovery-lan--after-signup).
+Details: [self-hosting.md](self-hosting.md#3-verify-auth-endpoints-lan--after-signup).
 
 ### Dashboard rejects the key
 
