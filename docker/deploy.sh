@@ -112,7 +112,7 @@ SITE_ORIGIN="${CONVEX_SITE_INTERNAL_URL:-http://backend:3211}"
 smoke_auth_endpoints() {
   local openid_url="${SITE_ORIGIN}/.well-known/openid-configuration"
   local jwks_url="${SITE_ORIGIN}/.well-known/jwks.json"
-  local openid_body jwks_body
+  local openid_body jwks_body issuer issuer_host
 
   echo "==> Smoke-checking auth discovery at ${SITE_ORIGIN}..."
 
@@ -140,6 +140,31 @@ smoke_auth_endpoints() {
     exit 1
   fi
   echo "==> JWKS endpoint OK"
+
+  # The backend fetches {issuer}/.well-known/openid-configuration during JWT
+  # validation. Issuer comes from CONVEX_SITE_ORIGIN. Loopback is reachable from
+  # inside the backend container; a LAN IP often is not (Docker hairpin NAT).
+  issuer="$(printf '%s' "$openid_body" | sed -n 's/.*"issuer"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+  if [ -z "$issuer" ]; then
+    echo "ERROR: Could not parse issuer from OpenID discovery response" >&2
+    exit 1
+  fi
+  issuer_host="$(printf '%s' "$issuer" | sed -E 's|^https?://([^/:]+).*|\1|')"
+  case "$issuer_host" in
+    127.0.0.1|localhost)
+      echo "==> Issuer is loopback (${issuer}) — backend can reach it; skipping external reachability check"
+      ;;
+    *)
+      echo "==> Checking issuer reachability from deploy network: ${issuer}/.well-known/openid-configuration"
+      if ! curl -sf --max-time 10 "${issuer}/.well-known/openid-configuration" >/dev/null; then
+        echo "ERROR: Backend cannot reach issuer ${issuer} (Docker hairpin NAT / unreachable host)." >&2
+        echo "       Set CONVEX_SITE_ORIGIN=http://127.0.0.1:3211 on the backend service and recreate it." >&2
+        echo "       Keep LAN IPs only on VITE_CONVEX_URL / CONVEX_CLOUD_ORIGIN / SITE_URL / NEXT_PUBLIC_DEPLOYMENT_URL." >&2
+        exit 1
+      fi
+      echo "==> Issuer reachability OK"
+      ;;
+  esac
 }
 
 smoke_auth_endpoints

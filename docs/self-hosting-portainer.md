@@ -58,7 +58,7 @@ In the stack’s **Environment variables** section, add at least:
 | `INSTANCE_SECRET` | **Required.** Generate with `openssl rand -hex 32` (64 hex chars). Treat like a password. |
 | `SITE_URL` | `http://localhost:3000` or `http://YOUR_SERVER_IP:3000` |
 | `CONVEX_CLOUD_ORIGIN` | `http://127.0.0.1:3210` (or `http://YOUR_SERVER_IP:3210` if browsers are not on the same machine) |
-| `CONVEX_SITE_ORIGIN` | `http://127.0.0.1:3211` (same idea as above). Backend-only; Convex exposes this to functions as reserved `CONVEX_SITE_URL` automatically — do not set `CONVEX_SITE_URL` yourself. |
+| `CONVEX_SITE_ORIGIN` | **Keep** `http://127.0.0.1:3211` (JWT issuer the backend fetches from inside the container). Do **not** set this to a LAN IP — Docker hairpin NAT breaks auth discovery. Do not set `CONVEX_SITE_URL` yourself. |
 | `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` — used by the **dashboard** UI in the browser |
 | `VITE_CONVEX_URL` | Same as `CONVEX_CLOUD_ORIGIN` (baked into the site image at build time) |
 | `CONVEX_IMAGE_TAG` | Leave the value from [`.env.example`](../.env.example) unless you intentionally upgrade |
@@ -76,11 +76,12 @@ For email/password self-host auth:
 
 ```text
 AUTH_PASSWORD_ENABLED=true
+CONVEX_SITE_ORIGIN=http://127.0.0.1:3211
 ```
 
 You can copy the full list from [`.env.example`](../.env.example). Do **not** upload a committed `.env` with real secrets into git.
 
-**URL tip:** Values used by the **browser** (`VITE_CONVEX_URL`, `NEXT_PUBLIC_DEPLOYMENT_URL`, `CONVEX_CLOUD_ORIGIN`, `SITE_URL`, etc.) must be reachable from the user’s machine. Never use Docker-internal names like `http://backend:3210` there. Use `http://127.0.0.1:...` only when the browser is on the Docker host; from another LAN device use `http://YOUR_SERVER_IP:...`.
+**URL tip:** Values used by the **browser** (`VITE_CONVEX_URL`, `NEXT_PUBLIC_DEPLOYMENT_URL`, `CONVEX_CLOUD_ORIGIN`, `SITE_URL`, etc.) must be reachable from the user’s machine. Never use Docker-internal names like `http://backend:3210` there. Use `http://127.0.0.1:...` only when the browser is on the Docker host; from another LAN device use `http://YOUR_SERVER_IP:...` for those browser-facing vars — but leave `CONVEX_SITE_ORIGIN` on loopback.
 
 ---
 
@@ -169,19 +170,22 @@ curl http://127.0.0.1:3210/version
 
    ```text
    AUTH_PASSWORD_ENABLED=true
+   CONVEX_SITE_ORIGIN=http://127.0.0.1:3211
    ```
 
-2. **Update the stack** so both `deploy` and `web` rebuild (the SPA bakes the same flag as `VITE_AUTH_PASSWORD_ENABLED`).
+   Keep `CONVEX_SITE_ORIGIN` on loopback even when other URLs use a LAN IP. A LAN IP issuer breaks auth discovery inside the backend container (Docker hairpin NAT).
+
+2. **Update the stack** so `backend`, `deploy`, and `web` recreate/rebuild (backend must pick up the issuer; the SPA bakes `VITE_AUTH_PASSWORD_ENABLED`).
 3. Open `/login` — email/password registration and sign-in appear instead of Google.
-4. From the same device that opens the app, verify the diagnostic auth endpoints (replace with your `CONVEX_SITE_ORIGIN`):
+4. From the Docker host, confirm discovery inside the backend:
 
-   ```text
-   http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
-   http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+   ```bash
+   sudo docker exec "$(sudo docker ps -q --filter name=backend | head -n 1)" \
+     curl -sf http://127.0.0.1:3211/.well-known/openid-configuration
    ```
 
-   Both should return JSON (`issuer` / `jwks_uri`, and a `keys` array). Password mode validates JWTs with **static JWKS** in auth config so the backend does **not** need to fetch those URLs over the LAN IP (Docker hairpin NAT often times out from inside the backend container even when the browser succeeds). The `deploy` job still smoke-checks `http://backend:3211/...` on the Docker network.
-5. If you still see `Auth provider discovery … failed` after endpoints look fine, pull latest and recreate `deploy` so the static-JWKS auth config is applied (see [self-hosting.md](self-hosting.md#3-verify-auth-endpoints-lan--after-signup)).
+   Expect JSON whose `issuer` is `http://127.0.0.1:3211`. The `deploy` job also smoke-checks discovery and fails the stack if a non-loopback issuer is unreachable.
+5. If you still see `Auth provider discovery … failed`, the stack almost certainly still has a LAN IP in `CONVEX_SITE_ORIGIN` — fix that and recreate `backend` + `deploy` (see [self-hosting.md](self-hosting.md#3-verify-auth-discovery-after-signup)).
 6. There is **no** self-service password reset. Admins reset passwords in the Convex dashboard by running **`adminAuth:resetPassword`** with `email` and `newPassword` (min 8 characters). Existing passwords cannot be read — only replaced.
 
 Full details: [self-hosting.md](self-hosting.md#enable-emailpassword-sign-in-self-host).
@@ -337,18 +341,16 @@ Change `WEB_PORT`, `PORT`, `SITE_PROXY_PORT`, `DASHBOARD_PORT` in stack env, and
 
 `VITE_CONVEX_URL` must be a URL the **browser** can open (host IP or domain), not `http://backend:3210`. Fix env → rebuild `web`.
 
-### Signed in but home page never leaves the loader
+### Signed in but home page never leaves the loader / jumps to Sign in
 
-Usually `Auth provider discovery of http://…:3211 failed`. That error often means an older deploy still performed OIDC discovery against the public LAN IP from **inside** the backend container (hairpin timeout). Pull latest password-mode code (static JWKS) and update the stack so `deploy` runs again.
+Usually `Auth provider discovery of http://…:3211 failed`. Cause: `CONVEX_SITE_ORIGIN` is a LAN IP the backend cannot reach from inside Docker (hairpin NAT). Fix:
 
-Diagnostic checks from the browser (not required for backend validation anymore):
+1. Set `CONVEX_SITE_ORIGIN=http://127.0.0.1:3211`.
+2. Keep LAN IPs only on browser-facing vars (`VITE_CONVEX_URL`, `CONVEX_CLOUD_ORIGIN`, `SITE_URL`, `NEXT_PUBLIC_DEPLOYMENT_URL`).
+3. Update the stack so **backend** and **deploy** recreate.
+4. Confirm: `sudo docker exec … curl -sf http://127.0.0.1:3211/.well-known/openid-configuration` returns a loopback `issuer`.
 
-```text
-http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
-http://YOUR_SERVER_IP:3211/.well-known/jwks.json
-```
-
-Details: [self-hosting.md](self-hosting.md#3-verify-auth-endpoints-lan--after-signup).
+Details: [self-hosting.md](self-hosting.md#3-verify-auth-discovery-after-signup).
 
 ### Dashboard rejects the key
 

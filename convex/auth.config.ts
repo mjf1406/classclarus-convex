@@ -1,17 +1,15 @@
 import type { AuthConfig } from 'convex/server'
-import { buildAuthProviders } from './lib/authProviders'
 
 /**
- * Password self-host mode embeds JWKS as a data URI (customJwt) so JWT
- * validation does not require the backend to HTTP-fetch its own public
- * CONVEX_SITE_URL OpenID discovery endpoint (fails under Docker hairpin NAT).
- *
- * Google / production mode keeps standard OIDC domain discovery.
+ * OIDC provider for Convex Auth tokens.
+ * Domain must be reachable from the backend (self-host: use loopback
+ * CONVEX_SITE_ORIGIN so Docker hairpin NAT does not break discovery).
  */
 export default {
-  providers: buildAuthProviders({
-    passwordEnabled: process.env.AUTH_PASSWORD_ENABLED === 'true',
-    siteUrl: process.env.CONVEX_SITE_URL,
-    jwks: process.env.JWKS,
-  }),
+  providers: [
+    {
+      domain: process.env.CONVEX_SITE_URL,
+      applicationID: 'convex',
+    },
+  ],
 } satisfies AuthConfig

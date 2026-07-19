@@ -205,7 +205,7 @@ AUTH_PASSWORD_ENABLED=true
 
 `deploy` pushes this to the Convex deployment. The SPA also bakes `VITE_AUTH_PASSWORD_ENABLED` from the same flag at image build time, so backend and UI stay in sync.
 
-Configure the browser-reachable HTTP-actions URL with `CONVEX_SITE_ORIGIN` on the **backend** service (e.g. `http://127.0.0.1:3211`). The self-hosted backend exposes that as the reserved system variable `CONVEX_SITE_URL` inside Convex functions — used as the JWT issuer by [`convex/auth.config.ts`](../convex/auth.config.ts). Do **not** run `convex env set CONVEX_SITE_URL`; that name is reserved and the CLI will reject it.
+Keep **`CONVEX_SITE_ORIGIN=http://127.0.0.1:3211`** (loopback) on the backend. That value becomes the JWT issuer (`CONVEX_SITE_URL`) that the backend fetches **from inside its own container** during OIDC discovery. A LAN IP here fails under Docker hairpin NAT even when browsers can open it. Do **not** run `convex env set CONVEX_SITE_URL`; that name is reserved and the CLI will reject it.
 
 ### 2. Rebuild deploy + website
 
@@ -215,20 +215,20 @@ docker compose up -d --build deploy web
 
 Open http://localhost:3000/login — you should see email/password fields (not Google).
 
-### 3. Verify auth endpoints (LAN / after signup)
+### 3. Verify auth discovery (after signup)
 
-Password mode validates JWTs with a **static JWKS** embedded in [`convex/auth.config.ts`](../convex/auth.config.ts) (custom JWT provider). That avoids the Convex backend having to HTTP-fetch its own public OpenID URL — a common Docker **hairpin NAT** failure when `CONVEX_SITE_ORIGIN` is a LAN IP (browser can reach `http://YOUR_SERVER_IP:3211/...`, but `curl` from inside the backend container to that same address times out).
+Convex Auth validates JWTs via **OIDC discovery**: the backend HTTP-fetches `{issuer}/.well-known/openid-configuration`, then the JWKS. Issuer must be reachable **from inside the backend container**.
 
-The well-known routes remain available as diagnostics. From the **same machine/browser** that opens the app:
+With the recommended loopback issuer, confirm from the host:
 
-```text
-http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
-http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+```bash
+sudo docker exec "$(sudo docker ps -q --filter name=backend | head -n 1)" \
+  curl -sf http://127.0.0.1:3211/.well-known/openid-configuration
 ```
 
-Expect JSON: OpenID config must include `issuer` and `jwks_uri`; JWKS must include a `keys` array. A missing OpenID route (`No matching routes found`) is still a deployment problem — the `deploy` service smoke-checks these endpoints on the Docker network (`http://backend:3211`) after each Convex deploy.
+Expect JSON with `"issuer":"http://127.0.0.1:3211"` (or `localhost`) and a `jwks_uri`. The `deploy` service smoke-checks discovery on the Docker network and **fails the stack** if the issuer is a non-loopback host that cannot be reached (typical LAN-IP hairpin failure).
 
-If endpoints work in the browser but login still loops on `Auth provider discovery … failed`, pull the latest password-mode deploy (static JWKS) and recreate `deploy`. You no longer need the backend container to reach the public LAN IP for token validation.
+Password login does **not** require browsers to open port 3211. The SPA talks to `VITE_CONVEX_URL` (3210) only. Browser-facing use of 3211 (Google OAuth callbacks, file-storage URLs) needs a reverse-proxied hostname — see [Public server / domain](#public-server--domain).
 
 ### 4. Admin password reset (dashboard)
 
@@ -314,15 +314,18 @@ Your **app data** (classes, users, etc.) lives in the Docker volume **`data`** (
 
 ## Access from another device on your LAN
 
-Defaults use `127.0.0.1` / `localhost`, which only work when the **browser** is on the Docker host. To use the app or dashboard from a phone or another PC, put the server’s LAN IP in `.env`:
+Defaults use `127.0.0.1` / `localhost`, which only work when the **browser** is on the Docker host. To use the app or dashboard from a phone or another PC, put the server’s LAN IP on the **browser-facing** URLs only — keep the JWT issuer on loopback:
 
 ```env
 SITE_URL=http://YOUR_SERVER_IP:3000
 CONVEX_CLOUD_ORIGIN=http://YOUR_SERVER_IP:3210
-CONVEX_SITE_ORIGIN=http://YOUR_SERVER_IP:3211
 NEXT_PUBLIC_DEPLOYMENT_URL=http://YOUR_SERVER_IP:3210
 VITE_CONVEX_URL=http://YOUR_SERVER_IP:3210
+# Keep loopback — backend fetches this from inside the container for OIDC discovery
+CONVEX_SITE_ORIGIN=http://127.0.0.1:3211
 ```
+
+Do **not** set `CONVEX_SITE_ORIGIN` to the LAN IP. That makes auth discovery time out inside Docker (hairpin NAT) even when a browser on the LAN can open `http://YOUR_SERVER_IP:3211/...`.
 
 Replace `YOUR_SERVER_IP` with the host address (e.g. `192.168.0.148`). Then rebuild so `web` and `dashboard` pick up the URLs:
 
@@ -330,10 +333,10 @@ Replace `YOUR_SERVER_IP` with the host address (e.g. `192.168.0.148`). Then rebu
 docker compose up -d --build
 ```
 
-That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebuilds `web` (needs the new `VITE_CONVEX_URL`).
+That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebuilds `web` (needs the new `VITE_CONVEX_URL`). Recreate `backend` as well if you changed `CONVEX_SITE_ORIGIN`.
 
 - **Dashboard login** talks to `NEXT_PUBLIC_DEPLOYMENT_URL` from the browser. With `127.0.0.1` still set, a valid full admin key (`INSTANCE_NAME|hex`) still fails from another device.
-- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. See [Enable Sign in with Google](#enable-sign-in-with-google-optional).
+- **Google sign-in** still only works in a browser on the host machine; LAN IP access does not make OAuth work. Browser-facing 3211 (OAuth / storage) needs a [public domain](#public-server--domain). See [Enable Sign in with Google](#enable-sign-in-with-google-optional).
 - From that other device, check: `curl http://YOUR_SERVER_IP:3210/version`
 - Paste the **full** admin key from the bootstrap volume, not the hex alone.
 
@@ -469,14 +472,17 @@ docker compose up -d --build admin-key deploy
 docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
 
-### Signed in but home page never leaves the loader
+### Signed in but home page never leaves the loader / jumps to Sign in
 
-Console often shows `Auth provider discovery of http://…:3211 failed`. With current password mode this usually means an **old deploy** still using OIDC discovery (backend tries to fetch its own LAN OpenID URL and times out under Docker hairpin NAT). Fix:
+Console often shows `Auth provider discovery of http://…:3211 failed`. Cause: the backend cannot fetch its own JWT issuer OpenID URL (almost always `CONVEX_SITE_ORIGIN` set to a LAN IP under Docker hairpin NAT). Fix:
 
-1. Confirm you are on a build that embeds static JWKS for password mode (latest `main` / stack pull).
-2. Browser can open `CONVEX_SITE_ORIGIN` + `/.well-known/openid-configuration` **and** `/.well-known/jwks.json` (see [Verify auth endpoints](#3-verify-auth-endpoints-lan--after-signup)) — useful diagnostics, but not what the backend uses for JWT validation anymore.
-3. `CONVEX_SITE_ORIGIN` matches the host/port the browser uses (LAN IP, not `backend` or only-host `127.0.0.1` when browsing from another device).
-4. Redeploy: `docker compose up -d --build deploy` (and rebuild `web` if the auth UI flag changed).
+1. Set `CONVEX_SITE_ORIGIN=http://127.0.0.1:3211` (do **not** use the LAN IP).
+2. Keep LAN IPs only on `VITE_CONVEX_URL`, `CONVEX_CLOUD_ORIGIN`, `SITE_URL`, and `NEXT_PUBLIC_DEPLOYMENT_URL`.
+3. Recreate backend + redeploy: `docker compose up -d --build` (backend must pick up the new origin, then `deploy` must re-push auth config).
+4. Confirm from inside the backend: `curl -sf http://127.0.0.1:3211/.well-known/openid-configuration` returns JSON whose `issuer` is loopback.
+5. Sign in again (existing users stay valid; old tokens signed with a LAN-IP issuer are replaced).
+
+See [Verify auth discovery](#3-verify-auth-discovery-after-signup) and [Access from another device on your LAN](#access-from-another-device-on-your-lan).
 
 ### Google sign-in fails
 
