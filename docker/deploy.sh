@@ -106,6 +106,44 @@ echo "==> Deploying Convex functions to ${BACKEND_URL}..."
 cd /app
 bunx convex deploy --yes
 
+# HTTP actions / OIDC discovery live on the site origin (port 3211), not cloud (3210).
+SITE_ORIGIN="${CONVEX_SITE_INTERNAL_URL:-http://backend:3211}"
+
+smoke_auth_endpoints() {
+  local openid_url="${SITE_ORIGIN}/.well-known/openid-configuration"
+  local jwks_url="${SITE_ORIGIN}/.well-known/jwks.json"
+  local openid_body jwks_body
+
+  echo "==> Smoke-checking auth discovery at ${SITE_ORIGIN}..."
+
+  openid_body="$(curl -sf --max-time 15 "$openid_url")" || {
+    echo "ERROR: OpenID discovery failed: GET ${openid_url}" >&2
+    echo "       Auth will fail with 'Auth provider discovery ... failed' until this returns JSON." >&2
+    exit 1
+  }
+  if ! printf '%s' "$openid_body" | grep -q '"issuer"'; then
+    echo "ERROR: OpenID discovery response missing issuer: ${openid_body}" >&2
+    exit 1
+  fi
+  if ! printf '%s' "$openid_body" | grep -q 'jwks_uri'; then
+    echo "ERROR: OpenID discovery response missing jwks_uri: ${openid_body}" >&2
+    exit 1
+  fi
+  echo "==> OpenID discovery OK"
+
+  jwks_body="$(curl -sf --max-time 15 "$jwks_url")" || {
+    echo "ERROR: JWKS endpoint failed: GET ${jwks_url}" >&2
+    exit 1
+  }
+  if ! printf '%s' "$jwks_body" | grep -q '"keys"'; then
+    echo "ERROR: JWKS response missing keys: ${jwks_body}" >&2
+    exit 1
+  fi
+  echo "==> JWKS endpoint OK"
+}
+
+smoke_auth_endpoints
+
 echo "==> Deploy complete"
 echo "    App:       ${SITE_URL}"
 echo "    Dashboard: http://localhost:6791"

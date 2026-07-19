@@ -173,7 +173,16 @@ curl http://127.0.0.1:3210/version
 
 2. **Update the stack** so both `deploy` and `web` rebuild (the SPA bakes the same flag as `VITE_AUTH_PASSWORD_ENABLED`).
 3. Open `/login` — email/password registration and sign-in appear instead of Google.
-4. There is **no** self-service password reset. Admins reset passwords in the Convex dashboard by running **`adminAuth:resetPassword`** with `email` and `newPassword` (min 8 characters). Existing passwords cannot be read — only replaced.
+4. From the same device that opens the app, verify auth discovery (replace with your `CONVEX_SITE_ORIGIN`):
+
+   ```text
+   http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
+   http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+   ```
+
+   Both must return JSON (`issuer` / `jwks_uri`, and a `keys` array). If OpenID is missing (`No matching routes found`), the UI stays on a permanent loader after signup even though users appear in the dashboard. The `deploy` job also smoke-checks these URLs inside Docker and should fail the stack before `web` starts if they are broken.
+5. If both endpoints work but discovery still fails, test reachability from the backend container and use HTTPS + reverse proxy for a public deployment (see [self-hosting.md](self-hosting.md#3-verify-auth-discovery-lan--after-signup)).
+6. There is **no** self-service password reset. Admins reset passwords in the Convex dashboard by running **`adminAuth:resetPassword`** with `email` and `newPassword` (min 8 characters). Existing passwords cannot be read — only replaced.
 
 Full details: [self-hosting.md](self-hosting.md#enable-emailpassword-sign-in-self-host).
 
@@ -327,6 +336,17 @@ Change `WEB_PORT`, `PORT`, `SITE_PROXY_PORT`, `DASHBOARD_PORT` in stack env, and
 ### Website cannot reach Convex
 
 `VITE_CONVEX_URL` must be a URL the **browser** can open (host IP or domain), not `http://backend:3210`. Fix env → rebuild `web`.
+
+### Signed in but home page never leaves the loader
+
+Usually `Auth provider discovery of http://…:3211 failed`. From the same device that opens the app, open:
+
+```text
+http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
+http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+```
+
+Both must return JSON. A missing OpenID route leaves the SPA unauthenticated forever. Redeploy so `deploy` runs (it smoke-checks these URLs). If the endpoints work but discovery still fails, see [self-hosting.md](self-hosting.md#3-verify-auth-discovery-lan--after-signup).
 
 ### Dashboard rejects the key
 

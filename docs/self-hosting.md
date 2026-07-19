@@ -215,7 +215,25 @@ docker compose up -d --build deploy web
 
 Open http://localhost:3000/login — you should see email/password fields (not Google).
 
-### 3. Admin password reset (dashboard)
+### 3. Verify auth discovery (LAN / after signup)
+
+After signup, if the home page stays on a skeleton loader and the nav still shows **Sign in**, the browser usually cannot complete **Auth provider discovery**. Confirm both HTTP-action endpoints from the **same machine/browser** that opens the app (replace the host with your `CONVEX_SITE_ORIGIN`):
+
+```text
+http://YOUR_SERVER_IP:3211/.well-known/openid-configuration
+http://YOUR_SERVER_IP:3211/.well-known/jwks.json
+```
+
+Expect JSON: OpenID config must include `issuer` and `jwks_uri`; JWKS must include a `keys` array. A missing OpenID route (`No matching routes found`) causes a permanent unauthenticated loader / WebSocket reconnect loop even when user rows exist in the dashboard.
+
+The `deploy` service smoke-checks these endpoints on the Docker network (`http://backend:3211`) after each Convex deploy and fails the stack if either is broken.
+
+If **both** endpoints work in the browser but auth discovery still fails:
+
+1. From the backend container, confirm the same URLs (or `http://127.0.0.1:3211/...`) respond.
+2. For a public deployment, terminate TLS on a reverse proxy and set `CONVEX_SITE_ORIGIN` / `SITE_URL` to HTTPS hostnames the browser can reach — see [Public server / domain](#public-server--domain).
+
+### 4. Admin password reset (dashboard)
 
 Passwords are stored as **hashes**. The dashboard cannot reveal a user’s password; an admin can only **replace** it.
 
@@ -453,6 +471,14 @@ Common causes (a valid key still fails for the URL mismatch):
 docker compose up -d --build admin-key deploy
 docker run --rm -v classclarus-convex_bootstrap:/output alpine cat /output/admin_key
 ```
+
+### Signed in but home page never leaves the loader
+
+Console often shows `Auth provider discovery of http://…:3211 failed`. Check:
+
+1. Browser can open `CONVEX_SITE_ORIGIN` + `/.well-known/openid-configuration` **and** `/.well-known/jwks.json` (see [Verify auth discovery](#3-verify-auth-discovery-lan--after-signup)).
+2. `CONVEX_SITE_ORIGIN` matches the host/port the browser uses (LAN IP, not `backend` or only-host `127.0.0.1` when browsing from another device).
+3. Redeploy so password-mode HTTP routes and the deploy smoke check run: `docker compose up -d --build deploy`.
 
 ### Google sign-in fails
 
