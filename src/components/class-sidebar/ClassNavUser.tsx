@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next'
 
 import { ONE_HOUR } from '#/lib/queryCache'
+import { getDisplayName, getInitials } from '#/lib/userDisplay'
 import { api } from '../../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,49 +31,8 @@ import {
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-type CurrentUser = {
-  name?: string
-  email?: string
-  image?: string
-}
-
 type ClassNavUserProps = {
   variant?: 'sidebar' | 'avatar'
-}
-
-function getInitials(user: CurrentUser) {
-  if (user.name && user.name.trim()) {
-    const parts = user.name.trim().split(/\s+/).filter(Boolean)
-    if (parts.length >= 2) {
-      return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase()
-    }
-    return user.name.trim().slice(0, 2).toUpperCase()
-  }
-  const local = user.email?.split('@')[0] ?? user.email
-  const localStr = local ?? ''
-  const parts = localStr.split(/[._-]/).filter(Boolean)
-  if (parts.length >= 2) {
-    return `${parts[0]!.charAt(0)}${parts[1]!.charAt(0)}`.toUpperCase()
-  }
-  return local ?? ''
-}
-
-function getDisplayName(user: CurrentUser) {
-  if (user.name && user.name.trim()) {
-    return user.name
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join(' ')
-  }
-  const local = user.email?.split('@')[0] ?? user.email
-  const localStr = local ?? ''
-  return localStr
-    .split(/[._-]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
 }
 
 function useAccountMenuState() {

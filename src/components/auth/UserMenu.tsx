@@ -4,6 +4,7 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react'
 import { useTranslation } from 'react-i18next'
 import { ONE_HOUR } from '#/lib/queryCache'
+import { getDisplayName, getInitials } from '#/lib/userDisplay'
 import { Button } from '../ui/button'
 import { api } from '../../../convex/_generated/api'
 import {
@@ -15,46 +16,6 @@ import {
 } from '../ui/dropdown-menu'
 import { SignOutButton } from './SignOut'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-type CurrentUser = {
-  name?: string
-  email?: string
-  image?: string
-}
-
-function getInitials(user: CurrentUser) {
-  if (user.name && user.name.trim()) {
-    const parts = user.name.trim().split(/\s+/).filter(Boolean)
-    if (parts.length >= 2) {
-      return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase()
-    }
-    return user.name.trim().slice(0, 2).toUpperCase()
-  }
-  const local = user.email?.split('@')[0] ?? user.email
-  const localStr = local ?? ''
-  const parts = localStr.split(/[._-]/).filter(Boolean)
-  if (parts.length >= 2) {
-    return `${parts[0]!.charAt(0)}${parts[1]!.charAt(0)}`.toUpperCase()
-  }
-  return local ?? ''
-}
-
-function getDisplayName(user: CurrentUser) {
-  if (user.name && user.name.trim()) {
-    return user.name
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join(' ')
-  }
-  const local = user.email?.split('@')[0] ?? user.email
-  const localStr = local ?? ''
-  return localStr
-    .split(/[._-]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-}
 
 export function UserMenu() {
   const { t } = useTranslation('common')

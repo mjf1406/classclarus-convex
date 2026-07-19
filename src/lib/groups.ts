@@ -3,6 +3,7 @@ import type { FunctionReturnType } from 'convex/server'
 
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
+import { createPendingId } from './pendingId'
 
 const PENDING_ID_PREFIX = 'PENDING-'
 
@@ -11,8 +12,8 @@ type BoardStudent = GroupsBoard['ungrouped'][number]
 type BoardGroup = GroupsBoard['groups'][number]
 type BoardTeam = BoardGroup['teams'][number]
 
-function pendingId<Table extends 'classGroups' | 'classTeams'>(): Id<Table> {
-  return `${PENDING_ID_PREFIX}${crypto.randomUUID()}` as Id<Table>
+function pendingId<TTable extends 'classGroups' | 'classTeams'>(): Id<TTable> {
+  return createPendingId(PENDING_ID_PREFIX) as Id<TTable>
 }
 
 function findStudentOnBoard(

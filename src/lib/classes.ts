@@ -6,6 +6,7 @@ import type { ClassSort } from './classSort'
 import type { ClassLanguage } from '#/i18n/locales'
 import { DEFAULT_CLASS_LANGUAGE } from '#/i18n/locales'
 import i18n from '#/i18n'
+import { createPendingId } from './pendingId'
 
 export type { ClassSort } from './classSort'
 
@@ -140,7 +141,7 @@ export function useCreateClass() {
 
       const now = Date.now()
       const optimisticClass: ClassPublic = {
-        _id: `${PENDING_ID_PREFIX}${crypto.randomUUID()}` as Id<'classes'>,
+        _id: createPendingId(PENDING_ID_PREFIX) as Id<'classes'>,
         _creationTime: now,
         userId: user._id,
         name: args.name,
