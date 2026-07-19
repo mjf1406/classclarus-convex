@@ -16,6 +16,7 @@ import {
   INVITE_TTL_HOURS,
   MAX_INVITE_USES,
 } from '#/lib/inviteCodes'
+import { copyTextToClipboard } from '#/lib/clipboard'
 import {
   formatJoinCodeDisplay,
   getJoinShareUrl,
@@ -246,8 +247,7 @@ export function InviteList({
   const handleCopy = (invite: InvitePublic) => {
     if (invite.code.length !== JOIN_CODE_LENGTH) return
     const label = roleLabel(invite.role)
-    void navigator.clipboard
-      .writeText(invite.code)
+    void copyTextToClipboard(invite.code)
       .then(() => toast.success(t('codeCopied', { role: label })))
       .catch(() => toast.error(t('codeCopyFailed')))
   }

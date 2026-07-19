@@ -76,6 +76,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatJoinCodeDisplay, getJoinUrl } from '@/lib/joinCode'
+import { copyTextToClipboard } from '#/lib/clipboard'
 import { cn } from '@/lib/utils'
 
 function findScrollAreaViewport(root: HTMLElement | null) {
@@ -677,15 +678,13 @@ export function ClassStudentsSection({
   }
 
   const handleCopyCode = (code: string, displayName: string) => {
-    void navigator.clipboard
-      .writeText(code)
+    void copyTextToClipboard(code)
       .then(() => toast.success(t('codeForCopied', { name: displayName })))
       .catch(() => toast.error(t('codeCopyFailed')))
   }
 
   const handleCopyLink = (code: string, displayName: string) => {
-    void navigator.clipboard
-      .writeText(getJoinUrl(code))
+    void copyTextToClipboard(getJoinUrl(code))
       .then(() => toast.success(t('linkForCopied', { name: displayName })))
       .catch(() => toast.error(t('linkCopyFailed')))
   }
@@ -698,7 +697,7 @@ export function ClassStudentsSection({
     void regenerateGuardianCode({ orgStudentId, classId })
       .then((newCode) => {
         toast.success(t('guardianCodeRegenerated', { name: displayName }))
-        void navigator.clipboard.writeText(newCode).catch(() => {
+        void copyTextToClipboard(newCode).catch(() => {
           /* clipboard optional */
         })
       })

@@ -22,6 +22,7 @@ import {
   getJoinPageUrl,
   getJoinUrl,
 } from '@/lib/joinCode'
+import { copyTextToClipboard } from '#/lib/clipboard'
 import { cn } from '@/lib/utils'
 
 type JoinSharePanelProps = {
@@ -44,8 +45,7 @@ export function JoinSharePanel({
   const joinUrl = getJoinUrl(code)
 
   const handleCopyCode = () => {
-    void navigator.clipboard
-      .writeText(code)
+    void copyTextToClipboard(code)
       .then(() =>
         toast.success(t('codeCopied', { role: translateClassRole(t, role) })),
       )
@@ -53,8 +53,7 @@ export function JoinSharePanel({
   }
 
   const handleCopyLink = () => {
-    void navigator.clipboard
-      .writeText(joinUrl)
+    void copyTextToClipboard(joinUrl)
       .then(() => toast.success(t('joinLinkCopied')))
       .catch(() => toast.error(t('linkCopyFailed')))
   }
