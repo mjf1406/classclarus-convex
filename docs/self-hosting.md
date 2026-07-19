@@ -25,7 +25,8 @@ Install these before you start:
 
 Optional later:
 
-- A Google Cloud project (only if you want **Sign in with Google**)
+- Email/password login (`AUTH_PASSWORD_ENABLED=true` — recommended for self-host without a Google Cloud domain)
+- A Google Cloud project (only if you want **Sign in with Google** instead)
 - [Bun](https://bun.sh) (only if you want helper scripts outside Docker)
 
 Check Docker works:
@@ -177,7 +178,7 @@ docker compose logs -f web
 docker compose up -d --build deploy
 ```
 
-**Rebuild only the website** (required if you change `VITE_CONVEX_URL` or other public URLs):
+**Rebuild only the website** (required if you change `VITE_CONVEX_URL`, `AUTH_PASSWORD_ENABLED`, or other public URLs):
 
 ```bash
 docker compose up -d --build web
@@ -185,9 +186,60 @@ docker compose up -d --build web
 
 ---
 
+## Enable email/password sign-in (self-host)
+
+Self-hosting can use **email + password** registration instead of Google. This is controlled by a single host flag and does **not** apply to Convex Cloud / production (leave the flag `false` or unset there).
+
+### What you get
+
+- Users can **sign up** and **sign in** with email and password on the login page
+- Google OAuth is **disabled** on that deployment while the flag is on
+- **No** self-service password reset or email verification in this phase
+- Site admins reset passwords from the **Convex dashboard** (see below)
+
+### 1. Enable in `.env`
+
+```env
+AUTH_PASSWORD_ENABLED=true
+```
+
+`deploy` pushes this to the Convex deployment. The SPA also bakes `VITE_AUTH_PASSWORD_ENABLED` from the same flag at image build time, so backend and UI stay in sync.
+
+Deploy also sets `CONVEX_SITE_URL` from `CONVEX_SITE_ORIGIN` (the HTTP-actions URL, e.g. `http://127.0.0.1:3211`). That value is the JWT issuer used by [`convex/auth.config.ts`](../convex/auth.config.ts).
+
+### 2. Rebuild deploy + website
+
+```bash
+docker compose up -d --build deploy web
+```
+
+Open http://localhost:3000/login — you should see email/password fields (not Google).
+
+### 3. Admin password reset (dashboard)
+
+Passwords are stored as **hashes**. The dashboard cannot reveal a user’s password; an admin can only **replace** it.
+
+1. Open the Convex dashboard (`http://localhost:6791`) with your admin key.
+2. Run the internal function **`adminAuth:resetPassword`** with:
+   - `email` — the account email (normalized to lowercase)
+   - `newPassword` — at least 8 characters
+3. Existing sessions for that user are invalidated; they must sign in again with the new password.
+
+The function refuses to run unless `AUTH_PASSWORD_ENABLED=true` on the deployment.
+
+### Limitations
+
+- No outbound email (no magic links, OTP, or “forgot password” emails)
+- Forgotten passwords require an administrator
+- Switching the flag back to `false` restores Google-only mode after redeploy (existing password accounts remain in the database but the UI/provider no longer use them until password mode is re-enabled)
+
+---
+
 ## Enable Sign in with Google (optional)
 
-Local defaults work without Google, but login needs OAuth credentials.
+Local defaults work without Google, but login needs OAuth credentials unless you use [email/password](#enable-emailpassword-sign-in-self-host) instead.
+
+> **Do not combine:** when `AUTH_PASSWORD_ENABLED=true`, Google credentials are ignored. Set `AUTH_PASSWORD_ENABLED=false` to use Google.
 
 > **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (`http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN — even if you followed [Access from another device on your LAN](#access-from-another-device-on-your-lan). To use Google login from other devices, put the app on a real domain with HTTPS (see [Public server / domain](#public-server--domain)).
 
@@ -212,6 +264,7 @@ Local defaults work without Google, but login needs OAuth credentials.
 ### 2. Put them in `.env`
 
 ```env
+AUTH_PASSWORD_ENABLED=false
 AUTH_GOOGLE_ID=your-client-id.apps.googleusercontent.com
 AUTH_GOOGLE_SECRET=your-client-secret
 ```
@@ -219,7 +272,7 @@ AUTH_GOOGLE_SECRET=your-client-secret
 ### 3. Apply and redeploy
 
 ```bash
-docker compose up -d --build deploy
+docker compose up -d --build deploy web
 ```
 
 Then try Google sign-in on http://localhost:3000.

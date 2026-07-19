@@ -80,7 +80,26 @@ printf '%s' "$JWKS_VALUE" > "${OUTPUT_DIR}/jwks"
 set_env_file JWT_PRIVATE_KEY "${OUTPUT_DIR}/jwt_private_key"
 set_env_file JWKS "${OUTPUT_DIR}/jwks"
 
-if [ -n "${AUTH_GOOGLE_ID:-}" ] && [ -n "${AUTH_GOOGLE_SECRET:-}" ]; then
+# JWT issuer for convex/auth.config.ts — must be the HTTP-actions origin.
+CONVEX_SITE_URL_VALUE="${CONVEX_SITE_URL:-${CONVEX_SITE_ORIGIN:-}}"
+if [ -n "$CONVEX_SITE_URL_VALUE" ]; then
+  set_env_value CONVEX_SITE_URL "$CONVEX_SITE_URL_VALUE"
+else
+  echo "==> WARNING: CONVEX_SITE_URL / CONVEX_SITE_ORIGIN not set; JWT validation may fail"
+fi
+
+# Always set explicitly so toggling off does not leave a stale true value.
+PASSWORD_ENABLED="${AUTH_PASSWORD_ENABLED:-false}"
+case "$PASSWORD_ENABLED" in
+  true|TRUE|1|yes|YES) PASSWORD_ENABLED=true ;;
+  *) PASSWORD_ENABLED=false ;;
+esac
+set_env_value AUTH_PASSWORD_ENABLED "$PASSWORD_ENABLED"
+echo "==> AUTH_PASSWORD_ENABLED=${PASSWORD_ENABLED}"
+
+if [ "$PASSWORD_ENABLED" = "true" ]; then
+  echo "==> Password auth enabled — skipping Google OAuth env"
+elif [ -n "${AUTH_GOOGLE_ID:-}" ] && [ -n "${AUTH_GOOGLE_SECRET:-}" ]; then
   set_env_value AUTH_GOOGLE_ID "$AUTH_GOOGLE_ID"
   set_env_value AUTH_GOOGLE_SECRET "$AUTH_GOOGLE_SECRET"
 else

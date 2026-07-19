@@ -62,12 +62,20 @@ In the stack’s **Environment variables** section, add at least:
 | `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` — used by the **dashboard** UI in the browser |
 | `VITE_CONVEX_URL` | Same as `CONVEX_CLOUD_ORIGIN` (baked into the site image at build time) |
 | `CONVEX_IMAGE_TAG` | Leave the value from [`.env.example`](../.env.example) unless you intentionally upgrade |
+| `AUTH_PASSWORD_ENABLED` | `false` (default) or `true` for email/password instead of Google |
 
-Optional later:
+Optional later (Google only when password auth is off):
 
 ```text
+AUTH_PASSWORD_ENABLED=false
 AUTH_GOOGLE_ID=...
 AUTH_GOOGLE_SECRET=...
+```
+
+For email/password self-host auth:
+
+```text
+AUTH_PASSWORD_ENABLED=true
 ```
 
 You can copy the full list from [`.env.example`](../.env.example). Do **not** upload a committed `.env` with real secrets into git.
@@ -155,7 +163,25 @@ curl http://127.0.0.1:3210/version
 
 ---
 
+## Enable email/password sign-in (self-host)
+
+1. In Portainer → your stack env vars, set:
+
+   ```text
+   AUTH_PASSWORD_ENABLED=true
+   ```
+
+2. **Update the stack** so both `deploy` and `web` rebuild (the SPA bakes the same flag as `VITE_AUTH_PASSWORD_ENABLED`).
+3. Open `/login` — email/password registration and sign-in appear instead of Google.
+4. There is **no** self-service password reset. Admins reset passwords in the Convex dashboard by running **`adminAuth:resetPassword`** with `email` and `newPassword` (min 8 characters). Existing passwords cannot be read — only replaced.
+
+Full details: [self-hosting.md](self-hosting.md#enable-emailpassword-sign-in-self-host).
+
+---
+
 ## Enable Google sign-in (optional)
+
+> **Do not combine with password mode:** leave `AUTH_PASSWORD_ENABLED=false` (or unset) when using Google.
 
 > **Host machine only:** Sign in with Google works only when you open the app on the **Docker host** (e.g. `http://localhost:3000`). It will **not** work from a phone, laptop, or other device on your LAN. For Google login from other devices, use a real domain with HTTPS — see [self-hosting.md](self-hosting.md#public-server--domain).
 
@@ -172,11 +198,12 @@ curl http://127.0.0.1:3210/version
 4. In Portainer → your stack → **Editor** / env vars, set:
 
    ```text
+   AUTH_PASSWORD_ENABLED=false
    AUTH_GOOGLE_ID=...
    AUTH_GOOGLE_SECRET=...
    ```
 
-5. **Update the stack** (recreate so `deploy` runs again with the new env).
+5. **Update the stack** (recreate so `deploy` and `web` run again with the new env).
 
 Details and production URLs: [self-hosting.md](self-hosting.md#enable-sign-in-with-google-optional).
 

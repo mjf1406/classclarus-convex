@@ -12,8 +12,10 @@ import {
 } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { SignInWithGoogle } from '@/components/auth/SignInWithGoogle'
+import { SignInWithPassword } from '@/components/auth/SignInWithPassword'
 import { ModeToggle } from '#/components/theme/mode-toggle'
 import { LanguageToggle } from '#/i18n/LanguageToggle'
+import { isPasswordAuthEnabled } from '@/lib/authPassword'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -28,6 +30,7 @@ function RouteComponent() {
   const { redirect } = Route.useSearch()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const { t } = useTranslation(['auth', 'common'])
+  const passwordEnabled = isPasswordAuthEnabled()
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
@@ -100,11 +103,20 @@ function RouteComponent() {
               .
             </label>
           </div>
-          <SignInWithGoogle
-            termsAccepted={termsAccepted}
-            redirectTo={redirect}
-          />
-          <p className="opacity-50 text-sm">{t('googleOnlyNote')}</p>
+          {passwordEnabled ? (
+            <SignInWithPassword
+              termsAccepted={termsAccepted}
+              redirectTo={redirect}
+            />
+          ) : (
+            <SignInWithGoogle
+              termsAccepted={termsAccepted}
+              redirectTo={redirect}
+            />
+          )}
+          <p className="opacity-50 text-sm">
+            {passwordEnabled ? t('passwordAuthNote') : t('googleOnlyNote')}
+          </p>
           <div className="pt-4 mt-4 border-t">
             <p className="text-xs text-center text-muted-foreground">
               {t('appFooter')}{' '}
