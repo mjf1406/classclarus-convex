@@ -205,7 +205,7 @@ AUTH_PASSWORD_ENABLED=true
 
 `deploy` pushes this to the Convex deployment. The SPA also bakes `VITE_AUTH_PASSWORD_ENABLED` from the same flag at image build time, so backend and UI stay in sync.
 
-Deploy also sets `CONVEX_SITE_URL` from `CONVEX_SITE_ORIGIN` (the HTTP-actions URL, e.g. `http://127.0.0.1:3211`). That value is the JWT issuer used by [`convex/auth.config.ts`](../convex/auth.config.ts).
+Configure the browser-reachable HTTP-actions URL with `CONVEX_SITE_ORIGIN` on the **backend** service (e.g. `http://127.0.0.1:3211`). The self-hosted backend exposes that as the reserved system variable `CONVEX_SITE_URL` inside Convex functions — used as the JWT issuer by [`convex/auth.config.ts`](../convex/auth.config.ts). Do **not** run `convex env set CONVEX_SITE_URL`; that name is reserved and the CLI will reject it.
 
 ### 2. Rebuild deploy + website
 

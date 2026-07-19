@@ -80,13 +80,9 @@ printf '%s' "$JWKS_VALUE" > "${OUTPUT_DIR}/jwks"
 set_env_file JWT_PRIVATE_KEY "${OUTPUT_DIR}/jwt_private_key"
 set_env_file JWKS "${OUTPUT_DIR}/jwks"
 
-# JWT issuer for convex/auth.config.ts — must be the HTTP-actions origin.
-CONVEX_SITE_URL_VALUE="${CONVEX_SITE_URL:-${CONVEX_SITE_ORIGIN:-}}"
-if [ -n "$CONVEX_SITE_URL_VALUE" ]; then
-  set_env_value CONVEX_SITE_URL "$CONVEX_SITE_URL_VALUE"
-else
-  echo "==> WARNING: CONVEX_SITE_URL / CONVEX_SITE_ORIGIN not set; JWT validation may fail"
-fi
+# Do NOT set CONVEX_SITE_URL via `convex env set` — it is a reserved system
+# variable. The self-hosted backend exposes it automatically from CONVEX_SITE_ORIGIN
+# (configured on the backend service). auth.config.ts reads process.env.CONVEX_SITE_URL.
 
 # Always set explicitly so toggling off does not leave a stale true value.
 PASSWORD_ENABLED="${AUTH_PASSWORD_ENABLED:-false}"

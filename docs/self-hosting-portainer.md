@@ -58,7 +58,7 @@ In the stack’s **Environment variables** section, add at least:
 | `INSTANCE_SECRET` | **Required.** Generate with `openssl rand -hex 32` (64 hex chars). Treat like a password. |
 | `SITE_URL` | `http://localhost:3000` or `http://YOUR_SERVER_IP:3000` |
 | `CONVEX_CLOUD_ORIGIN` | `http://127.0.0.1:3210` (or `http://YOUR_SERVER_IP:3210` if browsers are not on the same machine) |
-| `CONVEX_SITE_ORIGIN` | `http://127.0.0.1:3211` (same idea as above) |
+| `CONVEX_SITE_ORIGIN` | `http://127.0.0.1:3211` (same idea as above). Backend-only; Convex exposes this to functions as reserved `CONVEX_SITE_URL` automatically — do not set `CONVEX_SITE_URL` yourself. |
 | `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` — used by the **dashboard** UI in the browser |
 | `VITE_CONVEX_URL` | Same as `CONVEX_CLOUD_ORIGIN` (baked into the site image at build time) |
 | `CONVEX_IMAGE_TAG` | Leave the value from [`.env.example`](../.env.example) unless you intentionally upgrade |
