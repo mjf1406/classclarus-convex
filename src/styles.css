@@ -17,6 +17,8 @@ body,
 #app {
   min-height: 100%;
   scrollbar-gutter: stable;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 /* Higher specificity than RemoveScroll's injected body[data-scroll-locked] */
@@ -88,8 +90,7 @@ body {
   @keyframes button-pulse {
     0%,
     100% {
-      box-shadow: 0 0 0 0
-        var(--pulse-color, oklch(from var(--bg) l c h / 0.5));
+      box-shadow: 0 0 0 0 var(--pulse-color, oklch(from var(--bg) l c h / 0.5));
     }
     50% {
       box-shadow: 0 0 0 var(--distance, 8px)

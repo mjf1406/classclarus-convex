@@ -83,13 +83,13 @@
     "typescript": "^6.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.5",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "4.1.10",
-    "vite-plus": "0.2.5"
+    "vite-plus": "0.2.5",
+    "vitest": "4.1.10"
   },
-  "trustedDependencies": [
-    "esbuild",
-    "lightningcss"
-  ],
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.5",
+    "vitest": "4.1.10"
+  },
   "devEngines": {
     "packageManager": {
       "name": "bun",
@@ -97,8 +97,8 @@
       "onFail": "download"
     }
   },
-  "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.5",
-    "vitest": "4.1.10"
-  }
+  "trustedDependencies": [
+    "esbuild",
+    "lightningcss"
+  ]
 }

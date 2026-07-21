@@ -1,17 +1,38 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/webp" href="/brand/icon-removebg.webp" />
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/brand/icon-removebg-xs.webp"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>ClassClarus | App</title>
+    <script>
+      ;(function () {
+        try {
+          var key = 'vite-ui-theme'
+          var stored = localStorage.getItem(key) || 'system'
+          var isDark =
+            stored === 'dark' ||
+            (stored === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var root = document.documentElement
+          root.classList.add(isDark ? 'dark' : 'light')
+          root.style.colorScheme = isDark ? 'dark' : 'light'
+        } catch (e) {}
+      })()
+    </script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/webp" href="/brand/icon-removebg.webp" />
-  <link rel="preload" as="image" type="image/webp" href="/brand/icon-removebg-xs.webp" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>ClassClarus | App</title>
-</head>
-
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
-
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
