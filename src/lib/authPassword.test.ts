@@ -1,8 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import {
-  passwordSignInSchema,
-  passwordSignUpSchema,
-} from './authPassword'
+import { describe, expect, it } from 'vite-plus/test'
+import { passwordSignInSchema, passwordSignUpSchema } from './authPassword'
 
 describe('passwordSignInSchema', () => {
   it('accepts a valid email and password', () => {
