@@ -1,3 +1,6 @@
+// Side-effect: attach the stale-chunk recovery listener before any router
+// modules evaluate, so a failed dynamic import can self-heal.
+import '#/lib/pwa/recoverFromStaleChunks'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'

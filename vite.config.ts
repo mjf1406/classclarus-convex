@@ -7,13 +7,6 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-/** Heavy jspdf ecosystem chunks — load on demand, not in the SW precache. */
-const PDF_PRECACHE_SKIP =
-  /(?:^|\/)(?:guardianCodesPdf|html2canvas|index\.es|purify\.es)-[^/]+\.js$/
-
-/** Font Awesome letter-bucket chunks — load on demand when resolving icons. */
-const FA_ICON_PRECACHE_SKIP = /(?:^|\/)fa-pack-[^/]+\.js$/
-
 function faPackChunkName(moduleId: string): string | undefined {
   const match = moduleId.match(
     /[\\/]fa-packs[\\/](solid|regular)[\\/]([^\\/]+?)(?:\.ts)?$/,
@@ -359,40 +352,6 @@ const config = defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2,json}'],
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
-        manifestTransforms: [
-          async (entries) => ({
-            manifest: entries.filter(
-              (entry) =>
-                !PDF_PRECACHE_SKIP.test(entry.url) &&
-                !FA_ICON_PRECACHE_SKIP.test(entry.url),
-            ),
-            warnings: [],
-          }),
-        ],
-        runtimeCaching: [
-          {
-            urlPattern: PDF_PRECACHE_SKIP,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'pdf-chunks',
-              expiration: {
-                maxEntries: 8,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-            },
-          },
-          {
-            urlPattern: FA_ICON_PRECACHE_SKIP,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fa-icon-chunks',
-              expiration: {
-                maxEntries: 80,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-            },
-          },
-        ],
       },
       devOptions: {
         enabled: false,
