@@ -11,7 +11,8 @@ import {
 
 const passwordProvider = Password<DataModel>({
   profile(params: Record<string, Value | undefined>) {
-    const email = assertValidEmail(String(params.email ?? ''))
+    const emailRaw = params.email
+    const email = assertValidEmail(typeof emailRaw === 'string' ? emailRaw : '')
     const nameRaw = params.name
     const name =
       typeof nameRaw === 'string' && nameRaw.trim().length > 0

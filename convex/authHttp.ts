@@ -27,23 +27,27 @@ export function registerPasswordAuthHttpRoutes(http: HttpRouter): void {
   http.route({
     path: '/.well-known/openid-configuration',
     method: 'GET',
-    handler: httpAction(async () => {
+    handler: httpAction(() => {
       const body = buildOpenIdConfiguration(requireSiteUrl())
-      return new Response(JSON.stringify(body), {
-        status: 200,
-        headers: JSON_HEADERS,
-      })
+      return Promise.resolve(
+        new Response(JSON.stringify(body), {
+          status: 200,
+          headers: JSON_HEADERS,
+        }),
+      )
     }),
   })
 
   http.route({
     path: '/.well-known/jwks.json',
     method: 'GET',
-    handler: httpAction(async () => {
-      return new Response(buildJwksResponseBody(requireJwks()), {
-        status: 200,
-        headers: JSON_HEADERS,
-      })
+    handler: httpAction(() => {
+      return Promise.resolve(
+        new Response(buildJwksResponseBody(requireJwks()), {
+          status: 200,
+          headers: JSON_HEADERS,
+        }),
+      )
     }),
   })
 }

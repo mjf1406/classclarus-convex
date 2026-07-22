@@ -1,9 +1,7 @@
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
-import {
-  hasClassPermission,
-  type ClassPermission,
-} from './classAuth'
+import { hasClassPermission } from './classAuth'
+import type { ClassPermission } from './classAuth'
 import { hasGuardianAccess, requireGuardianAccess } from './guardianAuth'
 
 type ContentCtx = QueryCtx | MutationCtx

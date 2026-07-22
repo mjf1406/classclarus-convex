@@ -67,7 +67,7 @@ const MANAGE_MEMBERS_ROLES = new Set<string>([
 ])
 
 function isSchoolOrgRole(role: string): role is SchoolOrgRole {
-  return (SCHOOL_ORG_ROLES as readonly string[]).includes(role)
+  return (SCHOOL_ORG_ROLES as ReadonlyArray<string>).includes(role)
 }
 
 function toSchoolPublic(org: {
@@ -246,7 +246,12 @@ export const updateSchool = mutation({
     if (args.slug !== undefined) {
       updates.slug = args.slug.trim().toLowerCase()
     }
-    await tenantsClient.updateOrganization(ctx, user._id, args.schoolId, updates)
+    await tenantsClient.updateOrganization(
+      ctx,
+      user._id,
+      args.schoolId,
+      updates,
+    )
     return null
   },
 })
@@ -302,12 +307,10 @@ export const listSchoolMembers = query({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
     await requireSchoolMember(ctx, user._id, args.schoolId)
-    await tenantsClient.requireOperation(
-      ctx,
-      user._id,
-      'listMembers',
-      { type: 'organization', id: args.schoolId },
-    )
+    await tenantsClient.requireOperation(ctx, user._id, 'listMembers', {
+      type: 'organization',
+      id: args.schoolId,
+    })
 
     const members = await tenantsClient.listMembers(ctx, args.schoolId, {
       status: 'all',
@@ -480,11 +483,7 @@ export const assignClassToTeam = mutation({
     if (!classDoc?.organizationId) {
       throw new Error('Class is not part of a school')
     }
-    await requireSchoolManageMembers(
-      ctx,
-      user._id,
-      classDoc.organizationId,
-    )
+    await requireSchoolManageMembers(ctx, user._id, classDoc.organizationId)
 
     if (args.teamId !== null) {
       const team = await tenantsClient.getTeam(ctx, args.teamId)
@@ -535,11 +534,7 @@ export const assignClassStaff = mutation({
       'class:manage',
     )
     if (!canManageClass) {
-      await requireSchoolManageMembers(
-        ctx,
-        caller._id,
-        classDoc.organizationId,
-      )
+      await requireSchoolManageMembers(ctx, caller._id, classDoc.organizationId)
     }
 
     const schoolMember = await tenantsClient.getMember(
@@ -581,11 +576,7 @@ export const removeClassStaff = mutation({
       'class:manage',
     )
     if (!canManageClass) {
-      await requireSchoolManageMembers(
-        ctx,
-        caller._id,
-        classDoc.organizationId,
-      )
+      await requireSchoolManageMembers(ctx, caller._id, classDoc.organizationId)
     }
 
     const scope = classScope(args.classId)

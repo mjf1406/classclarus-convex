@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { ONE_HOUR, TEN_MINUTES } from '#/lib/queryCache'
 import { classLabel } from '#/components/classes/classLabel'
 import { ClassLayoutProvider } from '#/components/classes/ClassLayoutContext'
-import type { ClassAdminBundle } from '#/components/classes/ClassLayoutContext'
 import { ClassSidebar } from '#/components/class-sidebar/ClassSidebar'
 import { ClassInsetHeader } from '#/components/class-sidebar/ClassInsetHeader'
 import i18n from '#/i18n'
@@ -14,10 +13,7 @@ import { api } from '../../../../convex/_generated/api'
 import type { Id } from '../../../../convex/_generated/dataModel'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  SidebarInset,
-  SidebarProvider,
-} from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 export const Route = createFileRoute('/_account/c/$classId')({
   loader: async ({ context, params, cause }) => {
@@ -90,7 +86,7 @@ function ClassLayout() {
   const contextValue = {
     classId: typedClassId,
     classDoc,
-    adminBundle: adminBundle as ClassAdminBundle | undefined,
+    adminBundle: adminBundle,
     canManage,
     canManageMembers,
     isPending,
@@ -113,7 +109,9 @@ function ClassLayout() {
                 <h1 className="text-3xl font-bold tracking-tight">
                   {t('notFoundTitle')}
                 </h1>
-                <p className="text-muted-foreground">{t('notFoundDescription')}</p>
+                <p className="text-muted-foreground">
+                  {t('notFoundDescription')}
+                </p>
                 <Button className="mt-4 w-fit" asChild>
                   <Link to="/">{t('common:goHome')}</Link>
                 </Button>

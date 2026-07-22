@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { X } from 'lucide-react'
+import { UsersRound, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { FontAwesomeIconFromId } from '@/components/icons/FontAwesomeIconFromId'
@@ -10,7 +10,6 @@ import {
   resolveIconId,
 } from '@/components/icons/fontawesome-icon-catalog'
 import { Button } from '@/components/ui/button'
-import { UsersRound } from 'lucide-react'
 
 type IconFieldProps = {
   value: string | null

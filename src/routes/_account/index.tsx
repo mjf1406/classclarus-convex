@@ -20,7 +20,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ArrowDown, ArrowUp, GripVertical, LayoutGrid, List } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  GripVertical,
+  LayoutGrid,
+  List,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import i18n from '#/i18n'
@@ -86,19 +92,19 @@ const CLASS_ROLE_FILTER_OPTIONS = [
   'assistantTeacher',
   'student',
   'guardian',
-] as const satisfies readonly ClassDisplayRole[]
+] as const satisfies ReadonlyArray<ClassDisplayRole>
 
 function isClassRoleFilter(value: string): value is ClassRoleFilter {
   return (
     value === 'all' ||
-    (CLASS_ROLE_FILTER_OPTIONS as readonly string[]).includes(value)
+    (CLASS_ROLE_FILTER_OPTIONS as ReadonlyArray<string>).includes(value)
   )
 }
 
 function isSchoolRoleFilter(value: string): value is SchoolRoleFilter {
   return (
     value === 'all' ||
-    (SCHOOL_ORG_ROLES as readonly string[]).includes(value)
+    (SCHOOL_ORG_ROLES as ReadonlyArray<string>).includes(value)
   )
 }
 
@@ -200,8 +206,14 @@ function SortableHomeSection({
   id: HomeSectionId
   children: React.ReactNode
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
   const { t } = useTranslation('home')
 
   return (
@@ -246,15 +258,14 @@ function Home() {
 
   const [classView, setClassView] = useState<ClassListView>('grid')
   const [classSort, setClassSort] = useState<ClassSort>(DEFAULT_CLASS_SORT)
-  const [classRoleFilter, setClassRoleFilter] =
-    useState<ClassRoleFilter>('all')
+  const [classRoleFilter, setClassRoleFilter] = useState<ClassRoleFilter>('all')
 
   const [schoolView, setSchoolView] = useState<ClassListView>('grid')
   const [schoolSort, setSchoolSort] = useState<ClassSort>(DEFAULT_CLASS_SORT)
   const [schoolRoleFilter, setSchoolRoleFilter] =
     useState<SchoolRoleFilter>('all')
 
-  const [sectionOrder, setSectionOrder] = useState<HomeSectionId[]>([
+  const [sectionOrder, setSectionOrder] = useState<Array<HomeSectionId>>([
     ...DEFAULT_HOME_SECTION_ORDER,
   ])
 
@@ -310,11 +321,15 @@ function Home() {
   const activeSchools =
     allSchools === undefined
       ? undefined
-      : allSchools.filter((school) => !isSchoolArchived(school)).filter(matchesSchoolRole)
+      : allSchools
+          .filter((school) => !isSchoolArchived(school))
+          .filter(matchesSchoolRole)
   const archivedSchools =
     allSchools === undefined
       ? undefined
-      : allSchools.filter((school) => isSchoolArchived(school)).filter(matchesSchoolRole)
+      : allSchools
+          .filter((school) => isSchoolArchived(school))
+          .filter(matchesSchoolRole)
 
   useEffect(() => {
     return () => {
@@ -435,7 +450,7 @@ function Home() {
         }}
       />
 
-      <LinkedStudentsSection children={children} />
+      <LinkedStudentsSection linkedChildren={children} />
 
       <div className="mt-12">
         <h3 className="mb-4 text-xl font-semibold tracking-tight">

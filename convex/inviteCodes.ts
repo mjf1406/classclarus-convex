@@ -5,14 +5,9 @@ import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { components } from './_generated/api'
 import { authz } from './authz'
-import {
-  classScope,
-  requireClassPermission,
-} from './lib/classAuth'
+import { classScope, requireClassPermission } from './lib/classAuth'
 import { generateUniqueJoinCode, JOIN_CODE_LENGTH } from './lib/joinCodes'
-import {
-  ensureSoloStudentEnrollment,
-} from './lib/soloRoster'
+import { ensureSoloStudentEnrollment } from './lib/soloRoster'
 import { orgScope } from '@djpanda/convex-tenants'
 import { tenantsClient } from './tenants'
 import type { SchoolOrgRole } from './tenants'
@@ -133,11 +128,13 @@ function validateMaxUses(maxUses: number | undefined): number | undefined {
 }
 
 function validateTtlHours(ttlHours: number): InviteTtlHours {
-  if (!(INVITE_TTL_HOURS as readonly number[]).includes(ttlHours)) {
+  if (!(INVITE_TTL_HOURS as ReadonlyArray<number>).includes(ttlHours)) {
     throw new Error('Invalid invite duration')
   }
   if (ttlHours > MAX_INVITE_TTL_HOURS) {
-    throw new Error(`Invite duration cannot exceed ${MAX_INVITE_TTL_HOURS} hours`)
+    throw new Error(
+      `Invite duration cannot exceed ${MAX_INVITE_TTL_HOURS} hours`,
+    )
   }
   return ttlHours as InviteTtlHours
 }
@@ -164,9 +161,7 @@ function isSchoolInviteRole(role: string): role is SchoolInviteRole {
 
 function isClassInviteRole(role: string): role is ClassInviteRole {
   return (
-    role === 'student' ||
-    role === 'classTeacher' ||
-    role === 'assistantTeacher'
+    role === 'student' || role === 'classTeacher' || role === 'assistantTeacher'
   )
 }
 
@@ -225,10 +220,7 @@ export const createClassInvite = mutation({
       throw new Error('Cannot create invites for an archived class')
     }
     // Org students join via roster linking, not invite codes.
-    if (
-      classDoc.organizationId !== undefined &&
-      args.role === 'student'
-    ) {
+    if (classDoc.organizationId !== undefined && args.role === 'student') {
       throw new Error(
         'Student invites are not available for school classes; add students to the roster instead',
       )
@@ -338,7 +330,11 @@ export const revokeInvite = mutation({
       )
     } else {
       if (!invite.organizationId) throw new Error('Invite not found')
-      await requireSchoolManageMembersAccess(ctx, user._id, invite.organizationId)
+      await requireSchoolManageMembersAccess(
+        ctx,
+        user._id,
+        invite.organizationId,
+      )
     }
 
     await ctx.db.patch(args.inviteId, { revokedAt: Date.now() })
@@ -408,10 +404,7 @@ export async function tryRedeemInviteCode(
     if (!classDoc || classDoc.archivedTime !== undefined) {
       return { ok: false, error: INVALID_CODE_ERROR }
     }
-    if (
-      classDoc.organizationId !== undefined &&
-      invite.role === 'student'
-    ) {
+    if (classDoc.organizationId !== undefined && invite.role === 'student') {
       return { ok: false, error: INVALID_CODE_ERROR }
     }
 

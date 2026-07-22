@@ -1,212 +1,213 @@
-"use client";
+'use client'
 
-import * as React from "react";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import * as React from 'react'
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faImage } from '@fortawesome/free-solid-svg-icons/faImage'
+import { useVirtualizer } from '@tanstack/react-virtual'
 
-import { resolveIconId } from "./fontawesome-icon-catalog";
-import { UI_CATEGORIES } from "./fa-icon-categories";
-import iconCategoriesData from "./fontawesome-icon-categories.json";
-import { cn } from "@/lib/utils";
+import { resolveIconId } from './fontawesome-icon-catalog'
+import { UI_CATEGORIES } from './fa-icon-categories'
+import iconCategoriesData from './fontawesome-icon-categories.json'
+import { cn } from '@/lib/utils'
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 type IconCategoriesData = {
   metadata: {
-    scrape_date: string;
-    total_categories: number;
-    total_icons: number;
-  };
-  categories: Record<string, string[]>;
-};
+    scrape_date: string
+    total_categories: number
+    total_icons: number
+  }
+  categories: Record<string, Array<string>>
+}
 
-const categoriesData = iconCategoriesData as IconCategoriesData;
+const categoriesData = iconCategoriesData as IconCategoriesData
 
 export type FontAwesomeIconPickerProps = {
-  value?: IconDefinition | null;
-  onChange?: (icon: IconDefinition) => void;
+  value?: IconDefinition | null
+  onChange?: (icon: IconDefinition) => void
 
-  placeholder?: string;
-  disabled?: boolean;
+  placeholder?: string
+  disabled?: boolean
 
-  className?: string;
-};
+  className?: string
+}
 
 type ParsedIcon = {
-  id: string; // e.g. "fas:address-card"
-  iconName: string;
-  prefix: "fas" | "far";
-  iconString: string;
-};
+  id: string // e.g. "fas:address-card"
+  iconName: string
+  prefix: 'fas' | 'far'
+  iconString: string
+}
 
 type IconLoadState = {
-  status: "idle" | "loading" | "loaded" | "error";
-  icon: IconDefinition | null;
-};
+  status: 'idle' | 'loading' | 'loaded' | 'error'
+  icon: IconDefinition | null
+}
 
 function parseIconClassString(iconString: string): ParsedIcon | null {
   // Parse "fa-classic fa-solid fa-address-card" or "fa-classic fa-regular fa-address-card"
-  const parts = iconString.split(" ");
-  const solidIndex = parts.indexOf("fa-solid");
-  const regularIndex = parts.indexOf("fa-regular");
-  
-  let prefix: "fas" | "far" | null = null;
-  let iconName: string | null = null;
+  const parts = iconString.split(' ')
+  const solidIndex = parts.indexOf('fa-solid')
+  const regularIndex = parts.indexOf('fa-regular')
 
-  if (solidIndex !== -1 && parts[solidIndex + 1]?.startsWith("fa-")) {
-    prefix = "fas";
-    iconName = parts[solidIndex + 1].replace("fa-", "");
-  } else if (regularIndex !== -1 && parts[regularIndex + 1]?.startsWith("fa-")) {
-    prefix = "far";
-    iconName = parts[regularIndex + 1].replace("fa-", "");
+  let prefix: 'fas' | 'far' | null = null
+  let iconName: string | null = null
+
+  if (solidIndex !== -1 && parts[solidIndex + 1]?.startsWith('fa-')) {
+    prefix = 'fas'
+    iconName = parts[solidIndex + 1].replace('fa-', '')
+  } else if (
+    regularIndex !== -1 &&
+    parts[regularIndex + 1]?.startsWith('fa-')
+  ) {
+    prefix = 'far'
+    iconName = parts[regularIndex + 1].replace('fa-', '')
   }
 
-  if (!prefix || !iconName) return null;
+  if (!prefix || !iconName) return null
 
   return {
     id: `${prefix}:${iconName}`,
     iconName,
     prefix,
     iconString,
-  };
+  }
 }
 
 function findScrollAreaViewport(root: HTMLElement | null) {
-  if (!root) return null;
+  if (!root) return null
   return (
-    root.querySelector<HTMLDivElement>(
-      "[data-radix-scroll-area-viewport]",
-    ) ?? null
-  );
+    root.querySelector<HTMLDivElement>('[data-radix-scroll-area-viewport]') ??
+    null
+  )
 }
 
 function formatCategoryName(categoryId: string): string {
-  const fromUi = UI_CATEGORIES.find((category) => category.id === categoryId);
-  if (fromUi) return fromUi.label;
+  const fromUi = UI_CATEGORIES.find((category) => category.id === categoryId)
+  if (fromUi) return fromUi.label
   return categoryId
-    .split("-")
+    .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .join(' ')
 }
 
-function formatIconNameForDisplay(iconName: string): string[] {
-  return iconName.split("-");
+function formatIconNameForDisplay(iconName: string): Array<string> {
+  return iconName.split('-')
 }
 
 // Simple fuzzy search - checks if query characters appear in order in the text
-function fuzzyMatch(text: string, query: string): { match: boolean; score: number } {
-  if (!query) return { match: true, score: 0 };
-  
-  const textLower = text.toLowerCase();
-  const queryLower = query.toLowerCase();
-  
+function fuzzyMatch(
+  text: string,
+  query: string,
+): { match: boolean; score: number } {
+  if (!query) return { match: true, score: 0 }
+
+  const textLower = text.toLowerCase()
+  const queryLower = query.toLowerCase()
+
   // Exact match gets highest score
-  if (textLower === queryLower) return { match: true, score: 1000 };
-  
+  if (textLower === queryLower) return { match: true, score: 1000 }
+
   // Starts with query gets high score
-  if (textLower.startsWith(queryLower)) return { match: true, score: 500 };
-  
+  if (textLower.startsWith(queryLower)) return { match: true, score: 500 }
+
   // Contains query gets medium score
-  if (textLower.includes(queryLower)) return { match: true, score: 100 };
-  
+  if (textLower.includes(queryLower)) return { match: true, score: 100 }
+
   // Fuzzy match: check if all query characters appear in order
-  let textIndex = 0;
-  let queryIndex = 0;
-  let consecutiveMatches = 0;
-  let maxConsecutive = 0;
-  
+  let textIndex = 0
+  let queryIndex = 0
+  let consecutiveMatches = 0
+  let maxConsecutive = 0
+
   while (textIndex < textLower.length && queryIndex < queryLower.length) {
     if (textLower[textIndex] === queryLower[queryIndex]) {
-      queryIndex++;
-      consecutiveMatches++;
-      maxConsecutive = Math.max(maxConsecutive, consecutiveMatches);
+      queryIndex++
+      consecutiveMatches++
+      maxConsecutive = Math.max(maxConsecutive, consecutiveMatches)
     } else {
-      consecutiveMatches = 0;
+      consecutiveMatches = 0
     }
-    textIndex++;
+    textIndex++
   }
-  
+
   // All query characters found in order
   if (queryIndex === queryLower.length) {
     // Score based on how close together the matches are
-    const score = maxConsecutive * 10 + (queryLower.length / textLower.length) * 50;
-    return { match: true, score };
+    const score =
+      maxConsecutive * 10 + (queryLower.length / textLower.length) * 50
+    return { match: true, score }
   }
-  
-  return { match: false, score: 0 };
+
+  return { match: false, score: 0 }
 }
 
 type LazyIconCellProps = {
-  parsedIcon: ParsedIcon;
-  isSelected: boolean;
-  onSelect: (icon: IconDefinition) => void;
-};
+  parsedIcon: ParsedIcon
+  isSelected: boolean
+  onSelect: (icon: IconDefinition) => void
+}
 
 function LazyIconCell({ parsedIcon, isSelected, onSelect }: LazyIconCellProps) {
   const [loadState, setLoadState] = React.useState<IconLoadState>({
-    status: "idle",
+    status: 'idle',
     icon: null,
-  });
-  const cellRef = React.useRef<HTMLButtonElement>(null);
-  const hasStartedLoadingRef = React.useRef(false);
+  })
+  const cellRef = React.useRef<HTMLButtonElement>(null)
+  const hasStartedLoadingRef = React.useRef(false)
 
   React.useEffect(() => {
-    const cell = cellRef.current;
-    if (!cell || hasStartedLoadingRef.current) return;
+    const cell = cellRef.current
+    if (!cell || hasStartedLoadingRef.current) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting && !hasStartedLoadingRef.current) {
-          hasStartedLoadingRef.current = true;
-          setLoadState({ status: "loading", icon: null });
+        const entry = entries[0]
+        if (entry.isIntersecting && !hasStartedLoadingRef.current) {
+          hasStartedLoadingRef.current = true
+          setLoadState({ status: 'loading', icon: null })
           resolveIconId(parsedIcon.id)
             .then((icon) => {
               if (icon) {
-                setLoadState({ status: "loaded", icon });
+                setLoadState({ status: 'loaded', icon })
               } else {
-                setLoadState({ status: "error", icon: null });
+                setLoadState({ status: 'error', icon: null })
               }
             })
             .catch(() => {
-              setLoadState({ status: "error", icon: null });
-            });
+              setLoadState({ status: 'error', icon: null })
+            })
         }
       },
-      { rootMargin: "50px" }
-    );
+      { rootMargin: '50px' },
+    )
 
-    observer.observe(cell);
-    return () => observer.disconnect();
-  }, [parsedIcon.id]);
+    observer.observe(cell)
+    return () => observer.disconnect()
+  }, [parsedIcon.id])
 
   const handleClick = () => {
-    if (loadState.status === "loaded" && loadState.icon) {
-      onSelect(loadState.icon);
+    if (loadState.status === 'loaded' && loadState.icon) {
+      onSelect(loadState.icon)
     }
-  };
+  }
 
   return (
     <Button
       ref={cellRef}
       type="button"
-      variant={isSelected ? "default" : "ghost"}
+      variant={isSelected ? 'default' : 'ghost'}
       size="icon"
       className="h-auto w-full min-w-0 flex flex-col items-center justify-center gap-1 p-2"
       onClick={handleClick}
-      disabled={loadState.status !== "loaded"}
+      disabled={loadState.status !== 'loaded'}
     >
-      {loadState.status === "loading" || loadState.status === "idle" ? (
+      {loadState.status === 'loading' || loadState.status === 'idle' ? (
         <>
           <FontAwesomeIcon
             icon={faImage}
@@ -217,230 +218,234 @@ function LazyIconCell({ parsedIcon, isSelected, onSelect }: LazyIconCellProps) {
             Loading...
           </span>
         </>
-      ) : loadState.status === "error" ? (
+      ) : loadState.status === 'error' ? (
         <>
           <div className="text-muted-foreground text-xs">?</div>
           <div className="text-[10px] text-muted-foreground leading-tight w-full min-w-0 text-center">
             {(() => {
-              const words = formatIconNameForDisplay(parsedIcon.iconName);
+              const words = formatIconNameForDisplay(parsedIcon.iconName)
               return words.map((word, idx) => (
                 <React.Fragment key={idx}>
                   {word}
                   {idx < words.length - 1 && <br />}
                 </React.Fragment>
-              ));
+              ))
             })()}
           </div>
         </>
       ) : loadState.icon ? (
         <>
-          <FontAwesomeIcon icon={loadState.icon} className="text-2xl" fixedWidth />
+          <FontAwesomeIcon
+            icon={loadState.icon}
+            className="text-2xl"
+            fixedWidth
+          />
           <div className="text-[10px] leading-tight w-full min-w-0 text-center">
             {(() => {
-              const words = formatIconNameForDisplay(parsedIcon.iconName);
+              const words = formatIconNameForDisplay(parsedIcon.iconName)
               return words.map((word, idx) => (
                 <React.Fragment key={idx}>
                   {word}
                   {idx < words.length - 1 && <br />}
                 </React.Fragment>
-              ));
+              ))
             })()}
           </div>
         </>
       ) : null}
     </Button>
-  );
+  )
 }
 
 export function FontAwesomeIconPicker({
   value = null,
   onChange,
-  placeholder = "Pick an icon",
+  placeholder = 'Pick an icon',
   disabled,
   className,
 }: FontAwesomeIconPickerProps) {
-  const [open, setOpen] = React.useState(false);
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-  const [query, setQuery] = React.useState("");
-  const deferredQuery = React.useDeferredValue(query.trim().toLowerCase());
+  const [open, setOpen] = React.useState(false)
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
+    null,
+  )
+  const [query, setQuery] = React.useState('')
+  const deferredQuery = React.useDeferredValue(query.trim().toLowerCase())
 
   // Load ALL icons from all categories (for search)
   const allIcons = React.useMemo(() => {
-    const unique = new Map<string, ParsedIcon>();
+    const unique = new Map<string, ParsedIcon>()
     for (const categoryId of Object.keys(categoriesData.categories)) {
-      const iconStrings = categoriesData.categories[categoryId] || [];
+      const iconStrings = categoriesData.categories[categoryId]
       const parsed = iconStrings
         .map(parseIconClassString)
-        .filter((p): p is ParsedIcon => p !== null);
+        .filter((p): p is ParsedIcon => p !== null)
       for (const icon of parsed) {
         if (!unique.has(icon.id)) {
-          unique.set(icon.id, icon);
+          unique.set(icon.id, icon)
         }
       }
     }
-    return Array.from(unique.values());
-  }, []);
+    return Array.from(unique.values())
+  }, [])
 
   // Parse icons from the selected category (when not searching)
   const parsedIcons = React.useMemo(() => {
-    if (deferredQuery) return []; // Don't use category icons when searching
-    if (!selectedCategory) return [];
-    const iconStrings = categoriesData.categories[selectedCategory] || [];
+    if (deferredQuery) return [] // Don't use category icons when searching
+    if (!selectedCategory) return []
+    const iconStrings = categoriesData.categories[selectedCategory]
     const parsed = iconStrings
       .map(parseIconClassString)
-      .filter((p): p is ParsedIcon => p !== null);
+      .filter((p): p is ParsedIcon => p !== null)
     // Remove duplicates by id (in case same icon appears multiple times)
-    const unique = new Map<string, ParsedIcon>();
+    const unique = new Map<string, ParsedIcon>()
     for (const icon of parsed) {
       if (!unique.has(icon.id)) {
-        unique.set(icon.id, icon);
+        unique.set(icon.id, icon)
       }
     }
     return Array.from(unique.values()).sort((a, b) =>
-      a.iconName.localeCompare(b.iconName)
-    );
-  }, [selectedCategory, deferredQuery]);
+      a.iconName.localeCompare(b.iconName),
+    )
+  }, [selectedCategory, deferredQuery])
 
   // Filter icons by search query using fuzzy search
   const filteredIcons = React.useMemo(() => {
-    if (!deferredQuery) return parsedIcons;
-    
+    if (!deferredQuery) return parsedIcons
+
     // Search across all icons when there's a query
     const results = allIcons
       .map((icon) => {
-        const match = fuzzyMatch(icon.iconName, deferredQuery);
-        return { icon, ...match };
+        const match = fuzzyMatch(icon.iconName, deferredQuery)
+        return { icon, ...match }
       })
       .filter((result) => result.match)
       .sort((a, b) => b.score - a.score) // Sort by score descending
-      .map((result) => result.icon);
-    
-    return results;
-  }, [allIcons, parsedIcons, deferredQuery]);
+      .map((result) => result.icon)
+
+    return results
+  }, [allIcons, parsedIcons, deferredQuery])
 
   // Prefer curated UI category order, then any remaining scrape categories
   const categories = React.useMemo(() => {
-    const available = new Set(Object.keys(categoriesData.categories));
+    const available = new Set(Object.keys(categoriesData.categories))
     const ordered = UI_CATEGORIES.map((category) => category.id).filter((id) =>
       available.has(id),
-    );
-    const extras = [...available]
-      .filter((id) => !ordered.includes(id))
-      .sort();
-    return [...ordered, ...extras];
-  }, []);
+    )
+    const extras = [...available].filter((id) => !ordered.includes(id)).sort()
+    return [...ordered, ...extras]
+  }, [])
 
   // Vertical icon grid ScrollArea
-  const gridScrollAreaRootRef = React.useRef<HTMLDivElement | null>(null);
+  const gridScrollAreaRootRef = React.useRef<HTMLDivElement | null>(null)
   const [gridViewportEl, setGridViewportEl] =
-    React.useState<HTMLDivElement | null>(null);
+    React.useState<HTMLDivElement | null>(null)
 
   React.useEffect(() => {
     if (!open) {
-      setGridViewportEl(null);
-      return;
+      setGridViewportEl(null)
+      return
     }
 
-    let raf = 0;
-    let cancelled = false;
+    let raf = 0
+    let cancelled = false
 
     const tick = () => {
-      if (cancelled) return;
-      const viewport = findScrollAreaViewport(gridScrollAreaRootRef.current);
+      if (cancelled) return
+      const viewport = findScrollAreaViewport(gridScrollAreaRootRef.current)
       if (viewport) {
-        setGridViewportEl(viewport);
-        return;
+        setGridViewportEl(viewport)
+        return
       }
-      raf = window.requestAnimationFrame(tick);
-    };
+      raf = window.requestAnimationFrame(tick)
+    }
 
-    raf = window.requestAnimationFrame(tick);
+    raf = window.requestAnimationFrame(tick)
     return () => {
-      cancelled = true;
-      window.cancelAnimationFrame(raf);
-    };
-  }, [open]);
+      cancelled = true
+      window.cancelAnimationFrame(raf)
+    }
+  }, [open])
 
-  const cols = 4; // Fixed to 4 columns for larger icons
+  const cols = 4 // Fixed to 4 columns for larger icons
 
-  const rowSize = 90; // Increased to accommodate larger icon + text
-  const rowCount = Math.ceil(filteredIcons.length / cols);
+  const rowSize = 90 // Increased to accommodate larger icon + text
+  const rowCount = Math.ceil(filteredIcons.length / cols)
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => gridViewportEl,
     estimateSize: () => rowSize,
     overscan: 10,
-  });
+  })
 
   React.useEffect(() => {
-    if (!gridViewportEl) return;
-    rowVirtualizer.measure();
-  }, [gridViewportEl, cols, filteredIcons.length, rowVirtualizer]);
+    if (!gridViewportEl) return
+    rowVirtualizer.measure()
+  }, [gridViewportEl, cols, filteredIcons.length, rowVirtualizer])
 
   // Horizontal categories ScrollArea (wheel -> horizontal)
-  const catScrollAreaRootRef = React.useRef<HTMLDivElement | null>(null);
+  const catScrollAreaRootRef = React.useRef<HTMLDivElement | null>(null)
   const [catViewportEl, setCatViewportEl] =
-    React.useState<HTMLDivElement | null>(null);
+    React.useState<HTMLDivElement | null>(null)
 
   React.useEffect(() => {
     if (!open) {
-      setCatViewportEl(null);
-      return;
+      setCatViewportEl(null)
+      return
     }
 
-    let raf = 0;
-    let cancelled = false;
+    let raf = 0
+    let cancelled = false
 
     const tick = () => {
-      if (cancelled) return;
-      const viewport = findScrollAreaViewport(catScrollAreaRootRef.current);
+      if (cancelled) return
+      const viewport = findScrollAreaViewport(catScrollAreaRootRef.current)
       if (viewport) {
-        setCatViewportEl(viewport);
-        return;
+        setCatViewportEl(viewport)
+        return
       }
-      raf = window.requestAnimationFrame(tick);
-    };
+      raf = window.requestAnimationFrame(tick)
+    }
 
-    raf = window.requestAnimationFrame(tick);
+    raf = window.requestAnimationFrame(tick)
     return () => {
-      cancelled = true;
-      window.cancelAnimationFrame(raf);
-    };
-  }, [open]);
+      cancelled = true
+      window.cancelAnimationFrame(raf)
+    }
+  }, [open])
 
   React.useEffect(() => {
-    const el = catViewportEl;
-    if (!el) return;
+    const el = catViewportEl
+    if (!el) return
 
     // Convert vertical wheel into horizontal scroll when hovering categories.
     const onWheel = (e: WheelEvent) => {
       // If user is already horizontal scrolling (trackpad) or holding Shift,
       // let the browser handle it.
-      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
 
-      if (Math.abs(e.deltaY) < 1) return;
+      if (Math.abs(e.deltaY) < 1) return
 
-      e.preventDefault();
-      el.scrollLeft += e.deltaY;
-    };
+      e.preventDefault()
+      el.scrollLeft += e.deltaY
+    }
 
-    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener('wheel', onWheel, { passive: false })
     return () => {
-      el.removeEventListener("wheel", onWheel as EventListener);
-    };
-  }, [catViewportEl]);
+      el.removeEventListener('wheel', onWheel as EventListener)
+    }
+  }, [catViewportEl])
 
-  const selectedId = value ? `${value.prefix}:${value.iconName}` : null;
+  const selectedId = value ? `${value.prefix}:${value.iconName}` : null
 
   function handleSelect(icon: IconDefinition) {
-    onChange?.(icon);
-    setOpen(false);
+    onChange?.(icon)
+    setOpen(false)
   }
 
   function handleCategorySelect(categoryId: string) {
-    setSelectedCategory(categoryId);
-    setQuery(""); // Clear search when selecting category
+    setSelectedCategory(categoryId)
+    setQuery('') // Clear search when selecting category
   }
 
   return (
@@ -450,7 +455,7 @@ export function FontAwesomeIconPicker({
           type="button"
           variant="outline"
           disabled={disabled}
-          className={cn("w-[280px] justify-start gap-2", className)}
+          className={cn('w-[280px] justify-start gap-2', className)}
         >
           {value ? (
             <>
@@ -476,7 +481,7 @@ export function FontAwesomeIconPicker({
           <Button
             type="button"
             variant="secondary"
-            onClick={() => setQuery("")}
+            onClick={() => setQuery('')}
             disabled={!query}
           >
             Clear
@@ -486,7 +491,7 @@ export function FontAwesomeIconPicker({
         <div className="text-xs text-muted-foreground">
           {deferredQuery
             ? `Searching all icons (${filteredIcons.length} results)`
-            : "Select a category to browse icons"}
+            : 'Select a category to browse icons'}
         </div>
 
         <ScrollArea
@@ -495,15 +500,15 @@ export function FontAwesomeIconPicker({
         >
           <div className="flex w-max gap-2 p-2">
             {categories.map((categoryId) => {
-              const active = selectedCategory === categoryId;
-              const count = categoriesData.categories[categoryId]?.length ?? 0;
+              const active = selectedCategory === categoryId
+              const count = categoriesData.categories[categoryId].length
 
               return (
                 <Button
                   key={categoryId}
                   type="button"
                   size="sm"
-                  variant={active ? "default" : "secondary"}
+                  variant={active ? 'default' : 'secondary'}
                   className="shrink-0 gap-2"
                   onClick={() => handleCategorySelect(categoryId)}
                   title={`${formatCategoryName(categoryId)} (${count} icons)`}
@@ -511,7 +516,7 @@ export function FontAwesomeIconPicker({
                   <span>{formatCategoryName(categoryId)}</span>
                   <span className="text-xs opacity-70">{count}</span>
                 </Button>
-              );
+              )
             })}
           </div>
           <ScrollBar orientation="horizontal" />
@@ -523,7 +528,7 @@ export function FontAwesomeIconPicker({
             className="h-full w-full"
             onWheelCapture={(e) => {
               // Prevent Dialog from interfering with wheel.
-              e.stopPropagation();
+              e.stopPropagation()
             }}
           >
             <div className="relative p-2">
@@ -533,7 +538,9 @@ export function FontAwesomeIconPicker({
                 </div>
               ) : filteredIcons.length === 0 ? (
                 <div className="p-4 text-sm text-muted-foreground text-center">
-                  {deferredQuery ? "No icons match your search." : "No icons in this category."}
+                  {deferredQuery
+                    ? 'No icons match your search.'
+                    : 'No icons in this category.'}
                 </div>
               ) : !gridViewportEl ? (
                 <div className="p-4 text-sm text-muted-foreground text-center">
@@ -545,9 +552,9 @@ export function FontAwesomeIconPicker({
                   style={{ height: rowVirtualizer.getTotalSize() }}
                 >
                   {rowVirtualizer.getVirtualItems().map((row) => {
-                    const start = row.index * cols;
-                    const end = Math.min(start + cols, filteredIcons.length);
-                    const slice = filteredIcons.slice(start, end);
+                    const start = row.index * cols
+                    const end = Math.min(start + cols, filteredIcons.length)
+                    const slice = filteredIcons.slice(start, end)
 
                     return (
                       <div
@@ -562,7 +569,7 @@ export function FontAwesomeIconPicker({
                           }}
                         >
                           {slice.map((parsedIcon) => {
-                            const active = parsedIcon.id === selectedId;
+                            const active = parsedIcon.id === selectedId
 
                             return (
                               <LazyIconCell
@@ -571,11 +578,11 @@ export function FontAwesomeIconPicker({
                                 isSelected={active}
                                 onSelect={handleSelect}
                               />
-                            );
+                            )
                           })}
                         </div>
                       </div>
-                    );
+                    )
                   })}
                 </div>
               )}
@@ -588,14 +595,14 @@ export function FontAwesomeIconPicker({
         <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground">
           <span>
             {selectedCategory
-              ? `${filteredIcons.length.toLocaleString()} ${filteredIcons.length === 1 ? "icon" : "icons"} shown`
-              : "—"}
+              ? `${filteredIcons.length.toLocaleString()} ${filteredIcons.length === 1 ? 'icon' : 'icons'} shown`
+              : '—'}
           </span>
           <span>
-            {selectedCategory ? formatCategoryName(selectedCategory) : ""}
+            {selectedCategory ? formatCategoryName(selectedCategory) : ''}
           </span>
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

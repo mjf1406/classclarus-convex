@@ -9,7 +9,7 @@ export function useAssignClassToTeam(_schoolId: string) {
       for (const { args: queryArgs, value } of localStore.getAllQueries(
         api.schools.listSchoolClasses,
       )) {
-        if (!value || !queryArgs) continue
+        if (!value) continue
         const next = value.map((cls) =>
           cls._id === args.classId
             ? {
@@ -31,17 +31,23 @@ export function useAssignClassStaff(_classId: Id<'classes'> | null) {
         classId: args.classId,
       })
       if (!current) return
-      if (current.some((s) => s.userId === args.userId && s.role === args.role)) {
+      if (
+        current.some((s) => s.userId === args.userId && s.role === args.role)
+      ) {
         return
       }
       const without = current.filter((s) => s.userId !== args.userId)
-      localStore.setQuery(api.schools.listClassStaff, { classId: args.classId }, [
-        ...without,
-        {
-          userId: args.userId,
-          role: args.role,
-        },
-      ])
+      localStore.setQuery(
+        api.schools.listClassStaff,
+        { classId: args.classId },
+        [
+          ...without,
+          {
+            userId: args.userId,
+            role: args.role,
+          },
+        ],
+      )
     },
   )
 }
@@ -75,12 +81,16 @@ export function useUnenrollStudent(_classId: Id<'classes'> | null) {
         classId: args.classId,
       })
       if (!roster) return
-      localStore.setQuery(api.students.listClassRoster, { classId: args.classId }, {
-        ...roster,
-        students: roster.students.filter(
-          (s) => s.orgStudentId !== args.orgStudentId,
-        ),
-      })
+      localStore.setQuery(
+        api.students.listClassRoster,
+        { classId: args.classId },
+        {
+          ...roster,
+          students: roster.students.filter(
+            (s) => s.orgStudentId !== args.orgStudentId,
+          ),
+        },
+      )
     },
   )
 }

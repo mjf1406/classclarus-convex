@@ -23,16 +23,16 @@ export const CLASS_SORT_FIELDS = [
   'name',
   'created',
   'updated',
-] as const satisfies readonly ClassSortField[]
+] as const satisfies ReadonlyArray<ClassSortField>
 
 export const DEFAULT_CLASS_SORT: ClassSort = 'nameAsc'
 
 export function isClassSort(value: string): value is ClassSort {
-  return (CLASS_SORTS as readonly string[]).includes(value)
+  return (CLASS_SORTS as ReadonlyArray<string>).includes(value)
 }
 
 export function isClassSortField(value: string): value is ClassSortField {
-  return (CLASS_SORT_FIELDS as readonly string[]).includes(value)
+  return (CLASS_SORT_FIELDS as ReadonlyArray<string>).includes(value)
 }
 
 export function getSortField(sort: ClassSort): ClassSortField {
@@ -79,16 +79,10 @@ type SortableClass = {
 }
 
 function localeForCompare(language?: string): string {
-  return LANGUAGE_BCP47[
-    coerceAppLanguage(language ?? DEFAULT_APP_LANGUAGE)
-  ]
+  return LANGUAGE_BCP47[coerceAppLanguage(language ?? DEFAULT_APP_LANGUAGE)]
 }
 
-function compareNames(
-  left: string,
-  right: string,
-  language?: string,
-): number {
+function compareNames(left: string, right: string, language?: string): number {
   return left.localeCompare(right, localeForCompare(language), {
     sensitivity: 'base',
   })
@@ -139,10 +133,10 @@ export function compareClasses(
 }
 
 export function sortClasses<T extends SortableClass>(
-  classes: readonly T[],
+  classes: ReadonlyArray<T>,
   sort: ClassSort,
   language?: string,
-): T[] {
+): Array<T> {
   return [...classes].sort((left, right) =>
     compareClasses(left, right, sort, language),
   )

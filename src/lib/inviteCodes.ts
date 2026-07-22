@@ -27,10 +27,7 @@ export type InvitePublic = {
   remainingUses: number | null
 }
 
-export type ClassInviteRole =
-  | 'student'
-  | 'classTeacher'
-  | 'assistantTeacher'
+export type ClassInviteRole = 'student' | 'classTeacher' | 'assistantTeacher'
 
 export type SchoolInviteRole =
   | 'principal'
@@ -89,7 +86,7 @@ export function useCreateClassInvite(classId: Id<'classes'>, now: number) {
       }
       queryClient.setQueryData(
         query.queryKey,
-        (old: InvitePublic[] | undefined) => [pending, ...(old ?? [])],
+        (old: Array<InvitePublic> | undefined) => [pending, ...(old ?? [])],
       )
       return { previous, pendingId }
     },
@@ -101,7 +98,7 @@ export function useCreateClassInvite(classId: Id<'classes'>, now: number) {
     onSuccess: (invite, _args, context) => {
       queryClient.setQueryData(
         query.queryKey,
-        (old: InvitePublic[] | undefined) => {
+        (old: Array<InvitePublic> | undefined) => {
           if (!old || !context.pendingId) return old
           return old.map((row) =>
             row._id === context.pendingId ? invite : row,
@@ -143,7 +140,7 @@ export function useCreateSchoolInvite(schoolId: string, now: number) {
       }
       queryClient.setQueryData(
         query.queryKey,
-        (old: InvitePublic[] | undefined) => [pending, ...(old ?? [])],
+        (old: Array<InvitePublic> | undefined) => [pending, ...(old ?? [])],
       )
       return { previous, pendingId }
     },
@@ -155,7 +152,7 @@ export function useCreateSchoolInvite(schoolId: string, now: number) {
     onSuccess: (invite, _args, context) => {
       queryClient.setQueryData(
         query.queryKey,
-        (old: InvitePublic[] | undefined) => {
+        (old: Array<InvitePublic> | undefined) => {
           if (!old || !context.pendingId) return old
           return old.map((row) =>
             row._id === context.pendingId ? invite : row,
@@ -187,7 +184,7 @@ export function useRevokeInvite(
       const previous = queryClient.getQueryData(query.queryKey)
       queryClient.setQueryData(
         query.queryKey,
-        (old: InvitePublic[] | undefined) =>
+        (old: Array<InvitePublic> | undefined) =>
           old?.filter((invite) => invite._id !== args.inviteId),
       )
       return { previous }

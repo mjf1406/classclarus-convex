@@ -118,7 +118,7 @@ export function useUpdateGroup() {
       for (const { args: queryArgs, value: board } of localStore.getAllQueries(
         api.groups.listGroupsBoard,
       )) {
-        if (!board || !queryArgs) continue
+        if (!board) continue
         if (!board.groups.some((group) => group._id === args.groupId)) continue
 
         localStore.setQuery(api.groups.listGroupsBoard, queryArgs, {
@@ -155,7 +155,7 @@ export function useCreateTeam() {
       for (const { args: queryArgs, value: board } of localStore.getAllQueries(
         api.groups.listGroupsBoard,
       )) {
-        if (!board || !queryArgs) continue
+        if (!board) continue
         if (!board.groups.some((group) => group._id === args.groupId)) continue
 
         localStore.setQuery(api.groups.listGroupsBoard, queryArgs, {
@@ -192,7 +192,7 @@ export function useUpdateTeam() {
       for (const { args: queryArgs, value: board } of localStore.getAllQueries(
         api.groups.listGroupsBoard,
       )) {
-        if (!board || !queryArgs) continue
+        if (!board) continue
         if (
           !board.groups.some((group) =>
             group.teams.some((team) => team._id === args.teamId),
@@ -238,7 +238,7 @@ export function useAssignStudent() {
       for (const { args: queryArgs, value: board } of localStore.getAllQueries(
         api.groups.listGroupsBoard,
       )) {
-        if (!board || !queryArgs) continue
+        if (!board) continue
         if (queryArgs.classId !== args.classId) continue
 
         const student = findStudentOnBoard(board, args.orgStudentId)
@@ -292,7 +292,7 @@ export function useDeleteGroup() {
       for (const { args: queryArgs, value: board } of localStore.getAllQueries(
         api.groups.listGroupsBoard,
       )) {
-        if (!board || !queryArgs) continue
+        if (!board) continue
         const group = board.groups.find((g) => g._id === args.groupId)
         if (!group) continue
 
@@ -322,7 +322,7 @@ export function useDeleteTeam() {
       for (const { args: queryArgs, value: board } of localStore.getAllQueries(
         api.groups.listGroupsBoard,
       )) {
-        if (!board || !queryArgs) continue
+        if (!board) continue
         const parent = board.groups.find((group) =>
           group.teams.some((team) => team._id === args.teamId),
         )

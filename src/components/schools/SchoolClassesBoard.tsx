@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -8,9 +9,8 @@ import {
   useSensor,
   useSensors,
   closestCenter,
-  type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { BookOpen, Plus, Users } from 'lucide-react'
@@ -75,13 +75,6 @@ type OrgStudent = {
   lastName: string
 }
 
-type ClassStaff = {
-  userId: Id<'users'>
-  name?: string
-  email?: string
-  role: 'classTeacher' | 'assistantTeacher'
-}
-
 type RosterStudent = {
   orgStudentId: Id<'orgStudents'>
   displayName: string
@@ -92,7 +85,9 @@ type DragPayload =
   | { kind: 'staff'; userId: Id<'users'> }
   | { kind: 'student'; orgStudentId: Id<'orgStudents'> }
 
-function flattenTeams(nodes: Array<TeamNode>): Array<{ id: string; name: string; depth: number }> {
+function flattenTeams(
+  nodes: Array<TeamNode>,
+): Array<{ id: string; name: string; depth: number }> {
   const out: Array<{ id: string; name: string; depth: number }> = []
   const walk = (list: Array<TeamNode>, depth: number) => {
     for (const node of list) {
@@ -277,7 +272,7 @@ export function SchoolClassesBoard({ schoolId }: { schoolId: string }) {
   )
 
   const classesByTeam = useMemo(() => {
-    const map = new Map<string | 'unassigned', Array<SchoolClass>>()
+    const map = new Map<string, Array<SchoolClass>>()
     map.set('unassigned', [])
     for (const team of teams) map.set(team.id, [])
     for (const cls of classes ?? []) {
@@ -303,9 +298,9 @@ export function SchoolClassesBoard({ schoolId }: { schoolId: string }) {
   const staffPool = ((members as Array<StaffMember> | undefined) ?? []).filter(
     (m) => !assignedStaffIds.has(m.userId as Id<'users'>),
   )
-  const studentPool = ((studentsPage?.page as Array<OrgStudent> | undefined) ?? []).filter(
-    (s) => !enrolledStudentIds.has(s._id),
-  )
+  const studentPool = (
+    (studentsPage?.page as Array<OrgStudent> | undefined) ?? []
+  ).filter((s) => !enrolledStudentIds.has(s._id))
 
   const selectedClass = (classes ?? []).find((c) => c._id === selectedClassId)
 
@@ -385,9 +380,7 @@ export function SchoolClassesBoard({ schoolId }: { schoolId: string }) {
     }
 
     if (payload.kind === 'staff' && overId === 'pool:staff') {
-      const current = (classStaff as Array<ClassStaff> | undefined)?.find(
-        (s) => s.userId === payload.userId,
-      )
+      const current = classStaff?.find((s) => s.userId === payload.userId)
       if (!current) return
       void removeClassStaff({
         classId: selectedClassId,
@@ -459,10 +452,8 @@ export function SchoolClassesBoard({ schoolId }: { schoolId: string }) {
       })
   }
 
-  const teachers = ((classStaff as Array<ClassStaff> | undefined) ?? []).filter(
-    (s) => s.role === 'classTeacher',
-  )
-  const assistants = ((classStaff as Array<ClassStaff> | undefined) ?? []).filter(
+  const teachers = (classStaff ?? []).filter((s) => s.role === 'classTeacher')
+  const assistants = (classStaff ?? []).filter(
     (s) => s.role === 'assistantTeacher',
   )
   const enrolled = (roster?.students as Array<RosterStudent> | undefined) ?? []
@@ -649,7 +640,9 @@ export function SchoolClassesBoard({ schoolId }: { schoolId: string }) {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">{t('selectClassHint')}</p>
+            <p className="text-sm text-muted-foreground">
+              {t('selectClassHint')}
+            </p>
           )}
         </div>
 

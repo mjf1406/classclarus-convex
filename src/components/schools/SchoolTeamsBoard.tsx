@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { useMutation } from 'convex/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
-import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -143,7 +142,7 @@ export function SchoolTeamsBoard({ schoolId }: { schoolId: string }) {
       </div>
       {node.children.length > 0 ? (
         <div className="mt-3 space-y-3">
-          {node.children.map((child) => renderNode(child as TeamNode, depth + 1))}
+          {node.children.map((child) => renderNode(child, depth + 1))}
         </div>
       ) : null}
     </div>
@@ -178,7 +177,7 @@ export function SchoolTeamsBoard({ schoolId }: { schoolId: string }) {
           </div>
         ) : (
           <div className="mt-4 space-y-3">
-            {(tree as TeamNode[]).map((node) => renderNode(node))}
+            {(tree as Array<TeamNode>).map((node) => renderNode(node))}
           </div>
         )}
       </section>
@@ -193,7 +192,9 @@ export function SchoolTeamsBoard({ schoolId }: { schoolId: string }) {
           <CredenzaBody>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="team-name">{t('teamNameLabel')}</FieldLabel>
+                <FieldLabel htmlFor="team-name">
+                  {t('teamNameLabel')}
+                </FieldLabel>
                 <Input
                   id="team-name"
                   value={name}

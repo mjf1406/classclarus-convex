@@ -91,9 +91,7 @@ function JoinPage() {
             ? t('roleStudent')
             : result.role === 'classTeacher'
               ? t('roleTeacher')
-              : result.role === 'assistantTeacher'
-                ? t('roleAssistant')
-                : result.role
+              : t('roleAssistant')
         toast.success(t('joinedAs', { role: roleLabel }))
         await navigate({
           to: '/c/$classId',

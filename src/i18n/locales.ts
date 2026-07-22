@@ -59,7 +59,7 @@ export type ClassLanguage = AppLanguage | typeof CLASS_LANGUAGE_USER
 export const DEFAULT_CLASS_LANGUAGE: ClassLanguage = CLASS_LANGUAGE_USER
 
 export function isAppLanguage(value: string): value is AppLanguage {
-  return (APP_LANGUAGES as readonly string[]).includes(value)
+  return (APP_LANGUAGES as ReadonlyArray<string>).includes(value)
 }
 
 export function isClassLanguage(value: string): value is ClassLanguage {
@@ -89,8 +89,10 @@ export function mapBrowserLanguageToApp(tag: string): AppLanguage {
   const normalized = tag.trim().toLowerCase().replace(/_/g, '-')
   if (!normalized) return DEFAULT_APP_LANGUAGE
 
-  if (normalized === 'zh-hans' || normalized.startsWith('zh-hans-')) return 'zhs'
-  if (normalized === 'zh-hant' || normalized.startsWith('zh-hant-')) return 'zht'
+  if (normalized === 'zh-hans' || normalized.startsWith('zh-hans-'))
+    return 'zhs'
+  if (normalized === 'zh-hant' || normalized.startsWith('zh-hant-'))
+    return 'zht'
   if (
     normalized === 'zh-cn' ||
     normalized === 'zh-sg' ||

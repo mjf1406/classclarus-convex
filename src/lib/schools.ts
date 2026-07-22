@@ -1,5 +1,8 @@
 import { useMutation } from 'convex/react'
-import { useMutation as useTanstackMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useMutation as useTanstackMutation,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 
 import { api } from '../../convex/_generated/api'
@@ -39,7 +42,7 @@ export type SchoolMember = {
 
 export type HomeSectionId = 'classes' | 'schools'
 
-export const DEFAULT_HOME_SECTION_ORDER: HomeSectionId[] = [
+export const DEFAULT_HOME_SECTION_ORDER: Array<HomeSectionId> = [
   'classes',
   'schools',
 ]
@@ -52,7 +55,7 @@ export const SCHOOL_ORG_ROLES = [
   'assistantVicePrincipal',
   'teacher',
   'member',
-] as const satisfies readonly SchoolOrgRole[]
+] as const satisfies ReadonlyArray<SchoolOrgRole>
 
 const PENDING_ID_PREFIX = 'PENDING-'
 
@@ -66,10 +69,10 @@ export function isSchoolArchived(school: SchoolPublic): boolean {
 
 /** Reuse class sort comparator — school cards share the same sortable fields. */
 export function sortSchools<T extends SchoolPublic>(
-  schools: readonly T[],
+  schools: ReadonlyArray<T>,
   sort: ClassSort,
   language?: string,
-): T[] {
+): Array<T> {
   return [...schools].sort((left, right) =>
     compareClasses(left, right, sort, language),
   )
@@ -92,7 +95,9 @@ export function useCreateSchool() {
       await queryClient.cancelQueries({
         queryKey: accountHomeQueryOptions().queryKey,
       })
-      const previous = queryClient.getQueryData(accountHomeQueryOptions().queryKey)
+      const previous = queryClient.getQueryData(
+        accountHomeQueryOptions().queryKey,
+      )
       const pendingId = `${PENDING_ID_PREFIX}${Date.now()}`
       const pending: SchoolPublic = {
         _id: pendingId,
@@ -107,7 +112,7 @@ export function useCreateSchool() {
       }
       queryClient.setQueryData(
         accountHomeQueryOptions().queryKey,
-        (old: { schools?: SchoolPublic[] } | undefined) => {
+        (old: { schools?: Array<SchoolPublic> } | undefined) => {
           if (!old) return old
           return {
             ...old,
@@ -128,8 +133,8 @@ export function useCreateSchool() {
     onSuccess: (schoolId, _args, context) => {
       queryClient.setQueryData(
         accountHomeQueryOptions().queryKey,
-        (old: { schools?: SchoolPublic[] } | undefined) => {
-          if (!old?.schools || !context?.pendingId) return old
+        (old: { schools?: Array<SchoolPublic> } | undefined) => {
+          if (!old?.schools) return old
           return {
             ...old,
             schools: old.schools.map((school) =>
@@ -159,10 +164,12 @@ export function useArchiveSchool() {
       await queryClient.cancelQueries({
         queryKey: accountHomeQueryOptions().queryKey,
       })
-      const previous = queryClient.getQueryData(accountHomeQueryOptions().queryKey)
+      const previous = queryClient.getQueryData(
+        accountHomeQueryOptions().queryKey,
+      )
       queryClient.setQueryData(
         accountHomeQueryOptions().queryKey,
-        (old: { schools?: SchoolPublic[] } | undefined) => {
+        (old: { schools?: Array<SchoolPublic> } | undefined) => {
           if (!old?.schools) return old
           return {
             ...old,
@@ -202,10 +209,12 @@ export function useUnarchiveSchool() {
       await queryClient.cancelQueries({
         queryKey: accountHomeQueryOptions().queryKey,
       })
-      const previous = queryClient.getQueryData(accountHomeQueryOptions().queryKey)
+      const previous = queryClient.getQueryData(
+        accountHomeQueryOptions().queryKey,
+      )
       queryClient.setQueryData(
         accountHomeQueryOptions().queryKey,
-        (old: { schools?: SchoolPublic[] } | undefined) => {
+        (old: { schools?: Array<SchoolPublic> } | undefined) => {
           if (!old?.schools) return old
           return {
             ...old,
@@ -240,19 +249,18 @@ export function useUpdateSchool() {
   const queryClient = useQueryClient()
 
   return useTanstackMutation({
-    mutationFn: (args: {
-      schoolId: string
-      name?: string
-      slug?: string
-    }) => updateSchool(args),
+    mutationFn: (args: { schoolId: string; name?: string; slug?: string }) =>
+      updateSchool(args),
     onMutate: async (args) => {
       await queryClient.cancelQueries({
         queryKey: accountHomeQueryOptions().queryKey,
       })
-      const previous = queryClient.getQueryData(accountHomeQueryOptions().queryKey)
+      const previous = queryClient.getQueryData(
+        accountHomeQueryOptions().queryKey,
+      )
       queryClient.setQueryData(
         accountHomeQueryOptions().queryKey,
-        (old: { schools?: SchoolPublic[] } | undefined) => {
+        (old: { schools?: Array<SchoolPublic> } | undefined) => {
           if (!old?.schools) return old
           return {
             ...old,
@@ -296,14 +304,18 @@ export function useDeleteSchool() {
       await queryClient.cancelQueries({
         queryKey: accountHomeQueryOptions().queryKey,
       })
-      const previous = queryClient.getQueryData(accountHomeQueryOptions().queryKey)
+      const previous = queryClient.getQueryData(
+        accountHomeQueryOptions().queryKey,
+      )
       queryClient.setQueryData(
         accountHomeQueryOptions().queryKey,
-        (old: { schools?: SchoolPublic[] } | undefined) => {
+        (old: { schools?: Array<SchoolPublic> } | undefined) => {
           if (!old?.schools) return old
           return {
             ...old,
-            schools: old.schools.filter((school) => school._id !== args.schoolId),
+            schools: old.schools.filter(
+              (school) => school._id !== args.schoolId,
+            ),
           }
         },
       )
@@ -334,14 +346,19 @@ export function useSetHomeSectionOrder() {
   }
 
   return useTanstackMutation({
-    mutationFn: (args: { homeSectionOrder: HomeSectionId[] }) =>
+    mutationFn: (args: { homeSectionOrder: Array<HomeSectionId> }) =>
       setOrder(args),
     onMutate: async (args) => {
       await queryClient.cancelQueries({ queryKey: prefsQuery.queryKey })
       const previous = queryClient.getQueryData(prefsQuery.queryKey)
       queryClient.setQueryData(
         prefsQuery.queryKey,
-        (old: { language: string; homeSectionOrder?: HomeSectionId[] } | null | undefined) => {
+        (
+          old:
+            | { language: string; homeSectionOrder?: Array<HomeSectionId> }
+            | null
+            | undefined,
+        ) => {
           if (old === undefined || old === null) {
             return {
               language: 'en',
@@ -395,13 +412,16 @@ export function useRemoveSchoolMember(schoolId: string) {
 
   return useTanstackMutation({
     mutationFn: (args: { memberUserId: string }) =>
-      removeMember({ organizationId: schoolId, memberUserId: args.memberUserId }),
+      removeMember({
+        organizationId: schoolId,
+        memberUserId: args.memberUserId,
+      }),
     onMutate: async (args) => {
       await queryClient.cancelQueries({ queryKey: membersQuery.queryKey })
       const previous = queryClient.getQueryData(membersQuery.queryKey)
       queryClient.setQueryData(
         membersQuery.queryKey,
-        (old: SchoolMember[] | undefined) =>
+        (old: Array<SchoolMember> | undefined) =>
           old?.filter((member) => member.userId !== args.memberUserId),
       )
       return { previous }

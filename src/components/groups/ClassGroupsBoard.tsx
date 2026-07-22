@@ -8,9 +8,8 @@ import {
   useSensor,
   useSensors,
   closestCenter,
-  type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import {
@@ -26,10 +25,8 @@ import { toast } from 'sonner'
 
 import { api } from '../../../convex/_generated/api'
 import type { Id } from '../../../convex/_generated/dataModel'
-import {
-  GroupEntityFormCredenza,
-  type GroupEntityDraft,
-} from '@/components/groups/GroupEntityFormCredenza'
+import { GroupEntityFormCredenza } from '@/components/groups/GroupEntityFormCredenza'
+import type { GroupEntityDraft } from '@/components/groups/GroupEntityFormCredenza'
 import { FontAwesomeIconFromId } from '@/components/icons/FontAwesomeIconFromId'
 import { useAssignStudent, useDeleteGroup, useDeleteTeam } from '@/lib/groups'
 import { ONE_HOUR } from '@/lib/queryCache'
@@ -213,7 +210,9 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
   }
 
   const handleDragStart = (event: DragStartEvent) => {
-    const student = event.active.data.current?.student as BoardStudent | undefined
+    const student = event.active.data.current?.student as
+      | BoardStudent
+      | undefined
     setActiveStudent(student ?? null)
   }
 
@@ -310,9 +309,7 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
         toast.success(t(successKey))
       })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : t('deleteFailed'),
-        )
+        toast.error(error instanceof Error ? error.message : t('deleteFailed'))
       })
       .finally(() => {
         setIsDeleting(false)
@@ -367,7 +364,9 @@ export function ClassGroupsBoard({ classId }: { classId: Id<'classes'> }) {
         <div className="grid gap-4 xl:grid-cols-[minmax(220px,280px)_1fr]">
           <DropZone id="ungrouped" title={t('ungrouped')}>
             {board.ungrouped.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t('noUngrouped')}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('noUngrouped')}
+              </p>
             ) : (
               board.ungrouped.map((student) => (
                 <StudentChip

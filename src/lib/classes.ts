@@ -91,14 +91,13 @@ export function isPendingClass(classDoc: ClassPublic): boolean {
 
 /** Insert using the same ordering as the Convex list queries. */
 function insertSorted(
-  list: ListMyClass[],
+  list: Array<ListMyClass>,
   doc: ClassPublic,
   sort: ClassSort,
-): ListMyClass[] {
+): Array<ListMyClass> {
   const next = [...list]
   const insertAt = next.findIndex(
-    (existing) =>
-      compareClasses(doc, existing, sort, i18n.language) < 0,
+    (existing) => compareClasses(doc, existing, sort, i18n.language) < 0,
   )
   next.splice(insertAt === -1 ? next.length : insertAt, 0, toListMyClass(doc))
   return next
@@ -160,7 +159,7 @@ export function useCreateClass() {
         for (const { args: queryArgs, value } of localStore.getAllQueries(
           api.schools.listSchoolClasses,
         )) {
-          if (!value || !queryArgs) continue
+          if (!value) continue
           if (queryArgs.schoolId !== args.organizationId) continue
           localStore.setQuery(api.schools.listSchoolClasses, queryArgs, [
             ...value,
@@ -190,10 +189,14 @@ export function useCreateClass() {
         DEFAULT_CLASS_SORT,
       )
 
-      localStore.setQuery(api.memberships.getAccountHome, {}, {
-        ...home,
-        classes: nextClasses as typeof home.classes,
-      })
+      localStore.setQuery(
+        api.memberships.getAccountHome,
+        {},
+        {
+          ...home,
+          classes: nextClasses as typeof home.classes,
+        },
+      )
     },
   )
 }
@@ -224,11 +227,15 @@ export function useUpdateClass() {
       const updated = applyClassPatch(source, args, now)
 
       // getClass always returns permission flags; preserve them when patching.
-      localStore.setQuery(api.classes.getClass, { classId: args.classId }, {
-        ...updated,
-        canManage: updated.canManage ?? false,
-        canManageMembers: updated.canManageMembers ?? false,
-      })
+      localStore.setQuery(
+        api.classes.getClass,
+        { classId: args.classId },
+        {
+          ...updated,
+          canManage: updated.canManage ?? false,
+          canManageMembers: updated.canManageMembers ?? false,
+        },
+      )
 
       const home = localStore.getQuery(api.memberships.getAccountHome, {})
       if (!home) return
@@ -243,10 +250,14 @@ export function useUpdateClass() {
         DEFAULT_CLASS_SORT,
       )
 
-      localStore.setQuery(api.memberships.getAccountHome, {}, {
-        ...home,
-        classes: nextClasses as typeof home.classes,
-      })
+      localStore.setQuery(
+        api.memberships.getAccountHome,
+        {},
+        {
+          ...home,
+          classes: nextClasses as typeof home.classes,
+        },
+      )
     },
   )
 }
@@ -258,10 +269,12 @@ export function useRemoveClass() {
 
       const home = localStore.getQuery(api.memberships.getAccountHome, {})
       if (!home) return
-      const nextClasses = home.classes.filter(
-        (c) => c._id !== args.classId,
+      const nextClasses = home.classes.filter((c) => c._id !== args.classId)
+      localStore.setQuery(
+        api.memberships.getAccountHome,
+        {},
+        { ...home, classes: nextClasses },
       )
-      localStore.setQuery(api.memberships.getAccountHome, {}, { ...home, classes: nextClasses })
     },
   )
 }

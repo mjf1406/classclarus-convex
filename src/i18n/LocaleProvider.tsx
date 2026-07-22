@@ -39,10 +39,7 @@ function applyDocumentLang(language: AppLanguage) {
 
 function PersonalLocaleInner({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useConvexAuth()
-  const currentUser = useQuery(
-    api.users.current,
-    isAuthenticated ? {} : 'skip',
-  )
+  const currentUser = useQuery(api.users.current, isAuthenticated ? {} : 'skip')
   const prefs = useQuery(
     api.userPreferences.getMyPreferences,
     isAuthenticated && currentUser ? {} : 'skip',
@@ -84,17 +81,17 @@ function PersonalLocaleInner({ children }: { children: ReactNode }) {
     useActiveLocale(personalLanguage)
 
   useLayoutEffect(() => {
-    let cancelled = false
+    const cancelled = { current: false }
     void (async () => {
       await ensureLanguageLoaded(activeLanguage)
-      if (cancelled) return
+      if (cancelled.current) return
       if (i18n.language !== activeLanguage) {
         await i18n.changeLanguage(activeLanguage)
       }
       applyDocumentLang(activeLanguage)
     })()
     return () => {
-      cancelled = true
+      cancelled.current = true
     }
   }, [activeLanguage])
 

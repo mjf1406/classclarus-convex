@@ -1,5 +1,4 @@
 import { ChevronDownIcon } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 
 import {
   DropdownMenu,
@@ -34,13 +33,12 @@ type ClassLanguageSelectProps = LanguageSelectBaseProps & {
 type LanguageSelectProps = AppLanguageSelectProps | ClassLanguageSelectProps
 
 export function LanguageSelect(props: LanguageSelectProps) {
-  const { t } = useTranslation('common')
   const { value, id, disabled } = props
 
   const displayLabel =
     props.allowUserLanguage === true && value === 'user'
       ? props.userLanguageLabel
-      : LANGUAGE_LABELS[value as AppLanguage] ?? t('chooseLanguage')
+      : LANGUAGE_LABELS[value as AppLanguage]
 
   return (
     <DropdownMenu>

@@ -56,7 +56,7 @@ export const SparklesText = ({
   sparklesCount = 10,
   ...props
 }: SparklesTextProps) => {
-  const [sparkles, setSparkles] = useState<Sparkle[]>([])
+  const [sparkles, setSparkles] = useState<Array<Sparkle>>([])
 
   useEffect(() => {
     const generateStar = (): Sparkle => {

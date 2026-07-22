@@ -13,7 +13,7 @@ const ROLE_KEYS: Record<ClassDisplayRole, string> = {
 /** Localized class role label (classes namespace). */
 export function translateClassRole(
   t: TFunction<'classes'>,
-  role: ClassDisplayRole | string | undefined,
+  role: string | undefined,
   options?: { shortAssistant?: boolean },
 ): string {
   if (!role) return ''

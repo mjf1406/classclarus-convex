@@ -7,10 +7,8 @@ import { convexQuery } from '@convex-dev/react-query'
 
 import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
 import type { ClassRole } from '#/lib/classes'
-import {
-  type ClassMember,
-  useRemoveMember,
-} from '#/lib/memberships'
+import { useRemoveMember } from '#/lib/memberships'
+import type { ClassMember } from '#/lib/memberships'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
 import type { Id } from '../../../convex/_generated/dataModel'
@@ -57,13 +55,11 @@ export function ClassStaffMembersSection({
 
   const members = useMemo(() => {
     if (!bundle) return undefined
-    const roles =
-      roleFilter === 'teachers' ? TEACHER_ROLES : ASSISTANT_ROLES
+    const roles = roleFilter === 'teachers' ? TEACHER_ROLES : ASSISTANT_ROLES
     return bundle.members.filter((member) => roles.has(member.role))
   }, [bundle, roleFilter])
 
-  const titleKey =
-    roleFilter === 'teachers' ? 'teachers' : 'assistantTeachers'
+  const titleKey = roleFilter === 'teachers' ? 'teachers' : 'assistantTeachers'
   const descriptionKey =
     roleFilter === 'teachers'
       ? 'teachersDescription'
@@ -99,7 +95,9 @@ export function ClassStaffMembersSection({
     <>
       <section>
         <h2 className="text-xl font-semibold tracking-tight">{t(titleKey)}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t(descriptionKey)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t(descriptionKey)}
+        </p>
 
         {members === undefined ? (
           <div className="mt-4 overflow-hidden rounded-lg border">

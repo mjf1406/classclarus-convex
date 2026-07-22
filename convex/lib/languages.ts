@@ -48,7 +48,7 @@ export const classLanguageValidator = v.union(
 )
 
 export function isAppLanguage(value: string): value is AppLanguage {
-  return (APP_LANGUAGES as readonly string[]).includes(value)
+  return (APP_LANGUAGES as ReadonlyArray<string>).includes(value)
 }
 
 export function isClassLanguage(value: string): value is ClassLanguage {

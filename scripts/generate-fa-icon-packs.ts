@@ -5,71 +5,71 @@
  * Each bucket embeds icon data (no runtime imports from @fortawesome/free-*-svg-icons)
  * so Vite dev does not discover hundreds of deep imports and force a reload.
  */
-import fs from "node:fs";
-import path from "node:path";
-import { createRequire } from "node:module";
+import fs from 'node:fs'
+import path from 'node:path'
+import { createRequire } from 'node:module'
 
-const require = createRequire(import.meta.url);
-const ROOT = path.resolve(import.meta.dirname, "..");
-const OUT_ROOT = path.join(ROOT, "src/components/icons/fa-packs");
+const require = createRequire(import.meta.url)
+const ROOT = path.resolve(import.meta.dirname, '..')
+const OUT_ROOT = path.join(ROOT, 'src/components/icons/fa-packs')
 
 type Pack = {
-  pkg: string;
-  outDir: string;
-};
+  pkg: string
+  outDir: string
+}
 
 type IconDefinitionLike = {
-  prefix: string;
-  iconName: string;
-  icon: [number, number, (string | number)[], string, string];
-};
+  prefix: string
+  iconName: string
+  icon: [number, number, Array<string | number>, string, string]
+}
 
-const PACKS: Pack[] = [
+const PACKS: Array<Pack> = [
   {
-    pkg: "@fortawesome/free-solid-svg-icons",
-    outDir: path.join(OUT_ROOT, "solid"),
+    pkg: '@fortawesome/free-solid-svg-icons',
+    outDir: path.join(OUT_ROOT, 'solid'),
   },
   {
-    pkg: "@fortawesome/free-regular-svg-icons",
-    outDir: path.join(OUT_ROOT, "regular"),
+    pkg: '@fortawesome/free-regular-svg-icons',
+    outDir: path.join(OUT_ROOT, 'regular'),
   },
-];
+]
 
-function listExportNames(pkg: string): string[] {
-  const dir = path.join(ROOT, "node_modules", pkg);
+function listExportNames(pkg: string): Array<string> {
+  const dir = path.join(ROOT, 'node_modules', pkg)
   return fs
     .readdirSync(dir)
     .filter((f) => /^fa.+\.js$/.test(f))
-    .map((f) => f.replace(/\.js$/, ""))
-    .sort((a, b) => a.localeCompare(b));
+    .map((f) => f.replace(/\.js$/, ''))
+    .sort((a, b) => a.localeCompare(b))
 }
 
 function bucketKey(exportName: string): string {
-  const rest = exportName.slice(2);
-  const letter = (rest[0] ?? "_").toLowerCase();
-  return /[a-z0-9]/.test(letter) ? letter : "_";
+  const rest = exportName.slice(2)
+  const letter = rest.charAt(0).toLowerCase()
+  return /[a-z0-9]/.test(letter) ? letter : '_'
 }
 
 function loadIconDefinition(
   pkg: string,
   exportName: string,
 ): IconDefinitionLike {
-  const filePath = path.join(ROOT, "node_modules", pkg, `${exportName}.js`);
+  const filePath = path.join(ROOT, 'node_modules', pkg, `${exportName}.js`)
   const mod = require(filePath) as {
-    definition?: IconDefinitionLike;
-    [key: string]: unknown;
-  };
-  const def = mod.definition ?? mod[exportName];
+    definition?: IconDefinitionLike
+    [key: string]: unknown
+  }
+  const def = mod.definition ?? mod[exportName]
   if (
     !def ||
-    typeof def !== "object" ||
-    typeof (def as IconDefinitionLike).prefix !== "string" ||
-    typeof (def as IconDefinitionLike).iconName !== "string" ||
+    typeof def !== 'object' ||
+    typeof (def as IconDefinitionLike).prefix !== 'string' ||
+    typeof (def as IconDefinitionLike).iconName !== 'string' ||
     !Array.isArray((def as IconDefinitionLike).icon)
   ) {
-    throw new Error(`Invalid icon definition: ${pkg}/${exportName}`);
+    throw new Error(`Invalid icon definition: ${pkg}/${exportName}`)
   }
-  return def as IconDefinitionLike;
+  return def as IconDefinitionLike
 }
 
 function serializeIcon(def: IconDefinitionLike): string {
@@ -81,49 +81,51 @@ function serializeIcon(def: IconDefinitionLike): string {
     },
     null,
     2,
-  );
+  )
 }
 
 function writePack({ pkg, outDir }: Pack) {
-  fs.mkdirSync(outDir, { recursive: true });
+  fs.mkdirSync(outDir, { recursive: true })
   for (const existing of fs.readdirSync(outDir)) {
-    if (existing.endsWith(".ts")) {
-      fs.unlinkSync(path.join(outDir, existing));
+    if (existing.endsWith('.ts')) {
+      fs.unlinkSync(path.join(outDir, existing))
     }
   }
 
-  const byBucket = new Map<string, string[]>();
+  const byBucket = new Map<string, Array<string>>()
   for (const name of listExportNames(pkg)) {
-    const key = bucketKey(name);
-    const list = byBucket.get(key) ?? [];
-    list.push(name);
-    byBucket.set(key, list);
+    const key = bucketKey(name)
+    const list = byBucket.get(key) ?? []
+    list.push(name)
+    byBucket.set(key, list)
   }
 
-  const keys = [...byBucket.keys()].sort();
+  const keys = [...byBucket.keys()].sort()
   for (const key of keys) {
-    const names = byBucket.get(key)!;
+    const names = byBucket.get(key)!
     const exports = names.map((n) => {
-      const def = loadIconDefinition(pkg, n);
-      return `export const ${n} = ${serializeIcon(def)} as IconDefinition;`;
-    });
+      const def = loadIconDefinition(pkg, n)
+      // Cast via unknown: JSON icon tuples use number[] aliases that don't
+      // structurally overlap IconDefinition's IconPrefix / IconName brands.
+      return `export const ${n} = ${serializeIcon(def)} as unknown as IconDefinition;`
+    })
 
     const body = [
       `/** Auto-generated by scripts/generate-fa-icon-packs.ts - do not edit. */`,
       `import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";`,
-      "",
+      '',
       ...exports,
-      "",
-    ].join("\n");
-    fs.writeFileSync(path.join(outDir, `${key}.ts`), body, "utf8");
+      '',
+    ].join('\n')
+    fs.writeFileSync(path.join(outDir, `${key}.ts`), body, 'utf8')
   }
 
   console.log(
     `${pkg}: ${listExportNames(pkg).length} icons → ${keys.length} buckets in ${path.relative(ROOT, outDir)}`,
-  );
+  )
 }
 
-fs.mkdirSync(OUT_ROOT, { recursive: true });
+fs.mkdirSync(OUT_ROOT, { recursive: true })
 for (const pack of PACKS) {
-  writePack(pack);
+  writePack(pack)
 }

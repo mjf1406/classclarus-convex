@@ -76,6 +76,10 @@ export function ClassTeamSwitcher() {
   const sortedClasses = sortClasses(activeClasses, 'nameAsc', i18n.language)
   const currentLabel = classLabel(classDoc, t('classFallback'))
 
+  if (!classDoc) {
+    return null
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>

@@ -1,8 +1,5 @@
-import {
-  DEFAULT_APP_LANGUAGE,
-  coerceAppLanguage,
-  type AppLanguage,
-} from './languages'
+import { DEFAULT_APP_LANGUAGE, coerceAppLanguage } from './languages'
+import type { AppLanguage } from './languages'
 
 /** BCP-47 tags for Intl name compares (mirrors src/i18n/locales). */
 const LANGUAGE_BCP47: Record<AppLanguage, string> = {
@@ -44,11 +41,7 @@ function localeForCompare(language?: string): string {
   return LANGUAGE_BCP47[coerceAppLanguage(language ?? DEFAULT_APP_LANGUAGE)]
 }
 
-function compareNames(
-  left: string,
-  right: string,
-  language?: string,
-): number {
+function compareNames(left: string, right: string, language?: string): number {
   return left.localeCompare(right, localeForCompare(language), {
     sensitivity: 'base',
   })
@@ -99,10 +92,10 @@ export function compareClasses(
 }
 
 export function sortClasses<T extends SortableClass>(
-  classes: readonly T[],
+  classes: ReadonlyArray<T>,
   sort: ClassSort,
   language?: string,
-): T[] {
+): Array<T> {
   return [...classes].sort((left, right) =>
     compareClasses(left, right, sort, language),
   )

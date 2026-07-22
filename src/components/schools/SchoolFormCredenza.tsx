@@ -159,7 +159,7 @@ export function SchoolFormCredenza({
   const onKeyDown = (event: KeyboardEvent) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault()
-      handleSubmit(event as unknown as FormEvent)
+      handleSubmit(event)
     }
   }
 

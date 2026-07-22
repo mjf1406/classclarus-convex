@@ -133,7 +133,9 @@ export function GroupEntityFormCredenza({
         : t('createGroup')
 
   const descriptionText =
-    draft?.kind === 'team' ? t('teamFormDescription') : t('groupFormDescription')
+    draft?.kind === 'team'
+      ? t('teamFormDescription')
+      : t('groupFormDescription')
 
   const submit = (event?: FormEvent) => {
     event?.preventDefault()
@@ -156,23 +158,25 @@ export function GroupEntityFormCredenza({
       | 'teamCreated'
       | 'teamUpdated'
 
-    if (draft.kind === 'group' && draft.mode === 'create') {
-      mutationPromise = createGroup({
-        classId: draft.classId,
-        name: trimmed,
-        description: trimmedDescription || undefined,
-        icon: icon ?? undefined,
-      })
-      successKey = 'groupCreated'
-    } else if (draft.kind === 'group' && draft.mode === 'edit') {
-      mutationPromise = updateGroup({
-        groupId: draft.groupId,
-        name: trimmed,
-        description: trimmedDescription ? trimmedDescription : null,
-        icon: icon ?? null,
-      })
-      successKey = 'groupUpdated'
-    } else if (draft.kind === 'team' && draft.mode === 'create') {
+    if (draft.kind === 'group') {
+      if (draft.mode === 'create') {
+        mutationPromise = createGroup({
+          classId: draft.classId,
+          name: trimmed,
+          description: trimmedDescription || undefined,
+          icon: icon ?? undefined,
+        })
+        successKey = 'groupCreated'
+      } else {
+        mutationPromise = updateGroup({
+          groupId: draft.groupId,
+          name: trimmed,
+          description: trimmedDescription ? trimmedDescription : null,
+          icon: icon ?? null,
+        })
+        successKey = 'groupUpdated'
+      }
+    } else if (draft.mode === 'create') {
       mutationPromise = createTeam({
         groupId: draft.groupId,
         name: trimmed,
@@ -197,9 +201,7 @@ export function GroupEntityFormCredenza({
         toast.success(t(successKey))
       })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : t('saveFailed'),
-        )
+        toast.error(error instanceof Error ? error.message : t('saveFailed'))
       })
       .finally(() => {
         submittingRef.current = false

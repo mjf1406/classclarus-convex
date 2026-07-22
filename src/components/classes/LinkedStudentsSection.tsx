@@ -14,28 +14,30 @@ type LinkedChildClass = {
 type LinkedChild = {
   orgStudentId: Id<'orgStudents'>
   displayName: string
-  classes: LinkedChildClass[]
+  classes: Array<LinkedChildClass>
 }
 
 export function LinkedStudentsSection({
-  children,
+  linkedChildren,
 }: {
-  children?: LinkedChild[]
+  linkedChildren?: Array<LinkedChild>
 }) {
   const { t } = useTranslation('home')
 
-  if (children === undefined || children.length === 0) {
+  if (linkedChildren === undefined || linkedChildren.length === 0) {
     return null
   }
 
   return (
     <section className="mt-12">
-      <h2 className="text-xl font-semibold tracking-tight">{t('myChildren')}</h2>
+      <h2 className="text-xl font-semibold tracking-tight">
+        {t('myChildren')}
+      </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         {t('childrenClasses')}
       </p>
       <ul className="mt-4 space-y-4">
-        {children.map((child) => (
+        {linkedChildren.map((child) => (
           <li
             key={child.orgStudentId}
             className="rounded-xl border border-border p-4"

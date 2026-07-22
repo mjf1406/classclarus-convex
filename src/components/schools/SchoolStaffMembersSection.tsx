@@ -6,11 +6,8 @@ import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 
 import { OrgRoleBadge } from '#/components/schools/OrgRoleBadge'
-import {
-  useRemoveSchoolMember,
-  type SchoolMember,
-  type SchoolOrgRole,
-} from '#/lib/schools'
+import { useRemoveSchoolMember } from '#/lib/schools'
+import type { SchoolMember, SchoolOrgRole } from '#/lib/schools'
 import { ONE_HOUR } from '#/lib/queryCache'
 import { api } from '../../../convex/_generated/api'
 import {
@@ -97,7 +94,9 @@ export function SchoolStaffMembersSection({
     <>
       <section>
         <h2 className="text-xl font-semibold tracking-tight">{t(titleKey)}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t(descriptionKey)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t(descriptionKey)}
+        </p>
 
         {filtered === undefined ? (
           <div className="mt-4 overflow-hidden rounded-lg border">
