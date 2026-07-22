@@ -82,7 +82,9 @@ export function ClassFormCredenza({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [year, setYear] = useState(() => String(new Date().getFullYear()))
-  const [language, setLanguage] = useState<ClassLanguage>(DEFAULT_CLASS_LANGUAGE)
+  const [language, setLanguage] = useState<ClassLanguage>(
+    DEFAULT_CLASS_LANGUAGE,
+  )
   const [errors, setErrors] = useState<FieldErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
@@ -127,10 +129,7 @@ export function ClassFormCredenza({
         .trim()
         .min(1, t('nameRequired'))
         .max(100, t('nameTooLong')),
-      description: z
-        .string()
-        .trim()
-        .max(500, t('descriptionTooLong')),
+      description: z.string().trim().max(500, t('descriptionTooLong')),
       year: z
         .number({ error: t('yearRequired') })
         .int(t('yearWholeNumber'))
@@ -289,7 +288,9 @@ export function ClassFormCredenza({
                   <FieldLabel htmlFor={`${formId}-language`}>
                     {t('languageLabel')}
                   </FieldLabel>
-                  <FieldDescription>{t('languageDescription')}</FieldDescription>
+                  <FieldDescription>
+                    {t('languageDescription')}
+                  </FieldDescription>
                   <LanguageSelect
                     id={`${formId}-language`}
                     allowUserLanguage

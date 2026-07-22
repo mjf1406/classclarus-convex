@@ -30,8 +30,7 @@ export const Route = createFileRoute('/_account/s/$schoolId')({
     }
   },
   head: ({ loaderData }) => {
-    const label =
-      loaderData?.school?.name ?? i18n.t('schools:schoolFallback')
+    const label = loaderData?.school?.name ?? i18n.t('schools:schoolFallback')
     return {
       meta: [
         {
@@ -84,7 +83,9 @@ function SchoolLayout() {
                 <h1 className="text-3xl font-bold tracking-tight">
                   {t('notFoundTitle')}
                 </h1>
-                <p className="text-muted-foreground">{t('notFoundDescription')}</p>
+                <p className="text-muted-foreground">
+                  {t('notFoundDescription')}
+                </p>
                 <Button className="mt-4 w-fit" asChild>
                   <Link to="/">{t('common:goHome')}</Link>
                 </Button>

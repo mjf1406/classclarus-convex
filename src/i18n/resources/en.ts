@@ -78,8 +78,7 @@ const en = {
     sortAscending: 'ascending',
     sortDescending: 'descending',
     sortByField: 'Sort by {{field}}',
-    sortByFieldActive:
-      'Sort by {{field}}, {{direction}}. Click to reverse.',
+    sortByFieldActive: 'Sort by {{field}}, {{direction}}. Click to reverse.',
     viewGrid: 'Grid view',
     viewList: 'List view',
     archived: 'Archived',
@@ -232,8 +231,7 @@ const en = {
     settingsTitle: 'School settings',
     settingsDescription: 'Update school details or archive the school.',
     bringClassesTitle: 'Bring classes',
-    bringClassesDescription:
-      'Attach solo classes you manage to this school.',
+    bringClassesDescription: 'Attach solo classes you manage to this school.',
     bringClassesSubmit: 'Attach selected',
     bringClassesSuccess: 'Classes attached to school',
     bringClassesFailed: 'Failed to attach classes',
@@ -245,8 +243,7 @@ const en = {
     docTitle: 'Join a Class | ClassClarus',
     docDescription: 'Join a class with a join code on ClassClarus',
     enterCode: 'Enter join code',
-    description:
-      'Use a class, school, or guardian code to join.',
+    description: 'Use a class, school, or guardian code to join.',
     submit: 'Join',
     codeIncomplete: 'Enter a complete 8-character join code.',
     joinedAs: 'Joined as {{role}}',
@@ -300,8 +297,7 @@ const en = {
     restore: 'Restore',
     deleteClass: 'Delete class',
     deleteClassTitle: 'Delete class?',
-    deleteClassDescription:
-      'Delete “{{name}}”? This cannot be undone.',
+    deleteClassDescription: 'Delete “{{name}}”? This cannot be undone.',
     deleteFailed: 'Failed to delete class',
     classActions: 'Class actions',
     edit: 'Edit',

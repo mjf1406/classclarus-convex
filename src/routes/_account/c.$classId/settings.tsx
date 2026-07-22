@@ -11,9 +11,7 @@ function ClassSettingsPage() {
   const { classId, canManage } = useClassLayout()
 
   if (!canManage) {
-    return (
-      <Navigate to="/c/$classId/points" params={{ classId }} replace />
-    )
+    return <Navigate to="/c/$classId/points" params={{ classId }} replace />
   }
 
   return <ClassSettingsSection />

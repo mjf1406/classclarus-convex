@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
-import {
-  ChevronRight,
-  LayoutGrid,
-  School,
-  Settings,
-  Users,
-} from 'lucide-react'
+import { ChevronRight, LayoutGrid, School, Settings, Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useSchoolLayout } from '#/components/schools/SchoolLayoutContext'
@@ -136,7 +130,11 @@ export function SchoolNavMain() {
     const Icon = item.icon
     return (
       <SidebarMenuItem key={item.to}>
-        <SidebarMenuButton asChild isActive={isActive} tooltip={t(item.titleKey)}>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive}
+          tooltip={t(item.titleKey)}
+        >
           <Link to={item.to} params={{ schoolId }}>
             <Icon />
             <span>{t(item.titleKey)}</span>

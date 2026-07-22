@@ -6,12 +6,12 @@ For architecture, domains/reverse proxies, and CLI-only Docker Compose, see [sel
 
 When the stack is up:
 
-| What | URL (same-host defaults) |
-|------|--------------------------|
-| **App** | `http://<host>:3000` |
-| **Dashboard** | `http://<host>:6791` |
-| Convex API | `http://<host>:3210` |
-| HTTP actions (OAuth) | `http://<host>:3211` |
+| What                 | URL (same-host defaults) |
+| -------------------- | ------------------------ |
+| **App**              | `http://<host>:3000`     |
+| **Dashboard**        | `http://<host>:6791`     |
+| Convex API           | `http://<host>:3210`     |
+| HTTP actions (OAuth) | `http://<host>:3211`     |
 
 Replace `<host>` with `localhost` or your server’s IP/hostname.
 
@@ -52,17 +52,17 @@ Do not deploy yet — add environment variables first.
 
 In the stack’s **Environment variables** section, add at least:
 
-| Variable | Example / notes |
-|----------|-----------------|
-| `INSTANCE_NAME` | `convex-self-hosted` |
-| `INSTANCE_SECRET` | **Required.** Generate with `openssl rand -hex 32` (64 hex chars). Treat like a password. |
-| `SITE_URL` | `http://localhost:3000` or `http://YOUR_SERVER_IP:3000` |
-| `CONVEX_CLOUD_ORIGIN` | `http://127.0.0.1:3210` (or `http://YOUR_SERVER_IP:3210` if browsers are not on the same machine) |
-| `CONVEX_SITE_ORIGIN` | **Keep** `http://127.0.0.1:3211` (JWT issuer the backend fetches from inside the container). Do **not** set this to a LAN IP — Docker hairpin NAT breaks auth discovery. Do not set `CONVEX_SITE_URL` yourself. |
-| `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` — used by the **dashboard** UI in the browser |
-| `VITE_CONVEX_URL` | Same as `CONVEX_CLOUD_ORIGIN` (baked into the site image at build time) |
-| `CONVEX_IMAGE_TAG` | Leave the value from [`.env.example`](../.env.example) unless you intentionally upgrade |
-| `AUTH_PASSWORD_ENABLED` | `false` (default) or `true` for email/password instead of Google |
+| Variable                     | Example / notes                                                                                                                                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INSTANCE_NAME`              | `convex-self-hosted`                                                                                                                                                                                            |
+| `INSTANCE_SECRET`            | **Required.** Generate with `openssl rand -hex 32` (64 hex chars). Treat like a password.                                                                                                                       |
+| `SITE_URL`                   | `http://localhost:3000` or `http://YOUR_SERVER_IP:3000`                                                                                                                                                         |
+| `CONVEX_CLOUD_ORIGIN`        | `http://127.0.0.1:3210` (or `http://YOUR_SERVER_IP:3210` if browsers are not on the same machine)                                                                                                               |
+| `CONVEX_SITE_ORIGIN`         | **Keep** `http://127.0.0.1:3211` (JWT issuer the backend fetches from inside the container). Do **not** set this to a LAN IP — Docker hairpin NAT breaks auth discovery. Do not set `CONVEX_SITE_URL` yourself. |
+| `NEXT_PUBLIC_DEPLOYMENT_URL` | Same as `CONVEX_CLOUD_ORIGIN` — used by the **dashboard** UI in the browser                                                                                                                                     |
+| `VITE_CONVEX_URL`            | Same as `CONVEX_CLOUD_ORIGIN` (baked into the site image at build time)                                                                                                                                         |
+| `CONVEX_IMAGE_TAG`           | Leave the value from [`.env.example`](../.env.example) unless you intentionally upgrade                                                                                                                         |
+| `AUTH_PASSWORD_ENABLED`      | `false` (default) or `true` for email/password instead of Google                                                                                                                                                |
 
 Optional later (Google only when password auth is off):
 
@@ -104,8 +104,8 @@ Bootstrap files (including the admin key) are stored in the Docker named volume 
 
 ### Option A — From deploy logs
 
-1. **Containers** → select the exited `…deploy…` container  
-2. **Logs**  
+1. **Containers** → select the exited `…deploy…` container
+2. **Logs**
 3. Look for the admin key / “Admin key written” lines
 
 ### Option B — Read the volume (recommended)
@@ -137,7 +137,7 @@ Example: `convex-self-hosted|a1b2c3d4e5f6...`. Paste the **entire** value (name,
 1. Open `http://<host>:6791` (use the same host/IP you put in the stack env for browser URLs).
 2. Paste the full admin key.
 
-**LAN / another device:** The dashboard page runs in *your* browser and calls `NEXT_PUBLIC_DEPLOYMENT_URL`. If that is still `http://127.0.0.1:3210` while you open `http://YOUR_SERVER_IP:6791` from a laptop or phone, login fails even with a valid key.
+**LAN / another device:** The dashboard page runs in _your_ browser and calls `NEXT_PUBLIC_DEPLOYMENT_URL`. If that is still `http://127.0.0.1:3210` while you open `http://YOUR_SERVER_IP:6791` from a laptop or phone, login fails even with a valid key.
 
 1. Set `NEXT_PUBLIC_DEPLOYMENT_URL` (and the other browser URLs) to `http://YOUR_SERVER_IP:3210` / matching ports.
 2. Update the stack so **`dashboard` is recreated** (not only `web`).
@@ -185,6 +185,7 @@ curl http://127.0.0.1:3210/version
    ```
 
    Expect JSON whose `issuer` is `http://127.0.0.1:3211`. The `deploy` job also smoke-checks discovery and fails the stack if a non-loopback issuer is unreachable.
+
 5. If you still see `Auth provider discovery … failed`, the stack almost certainly still has a LAN IP in `CONVEX_SITE_ORIGIN` — fix that and recreate `backend` + `deploy` (see [self-hosting.md](self-hosting.md#3-verify-auth-discovery-after-signup)).
 6. There is **no** self-service password reset. Admins reset passwords in the Convex dashboard by running **`adminAuth:resetPassword`** with `email` and `newPassword` (min 8 characters). Existing passwords cannot be read — only replaced.
 
@@ -226,7 +227,7 @@ Details and production URLs: [self-hosting.md](self-hosting.md#enable-sign-in-wi
 
 ### Pull new code from Git
 
-1. **Stacks** → your stack  
+1. **Stacks** → your stack
 2. Use **Pull and redeploy** (wording varies by Portainer version) so the Git checkout refreshes and services rebuild as needed.
 
 ### After changing public URLs
@@ -244,10 +245,10 @@ Updating the stack so the `deploy` service runs again is enough (it pushes funct
 
 In Portainer → **Volumes**, protect at least:
 
-| Volume | Contents |
-|--------|----------|
-| `*_data` | Convex SQLite / app data |
-| `*_bootstrap` | `admin_key`, JWT files |
+| Volume        | Contents                 |
+| ------------- | ------------------------ |
+| `*_data`      | Convex SQLite / app data |
+| `*_bootstrap` | `admin_key`, JWT files   |
 
 Also store your stack env (especially `INSTANCE_SECRET`) somewhere safe outside Portainer.
 
@@ -271,11 +272,11 @@ Using just `main` (or `master` / `origin/main`) commonly produces this error eve
 
 For this repo, use:
 
-| Field | Value |
-|-------|--------|
-| Repository URL | `https://github.com/mjf1406/classclarus-convex.git` |
-| Compose path | `docker-compose.yml` |
-| Repository reference | `refs/heads/main` |
+| Field                | Value                                               |
+| -------------------- | --------------------------------------------------- |
+| Repository URL       | `https://github.com/mjf1406/classclarus-convex.git` |
+| Compose path         | `docker-compose.yml`                                |
+| Repository reference | `refs/heads/main`                                   |
 
 If it still fails after fixing the ref:
 

@@ -29,13 +29,14 @@ import {
   classSort,
   toPublicClass,
 } from './classes'
-import { listSchoolsForUser, getSchoolNameMap, schoolDocPublic } from './schools'
+import {
+  listSchoolsForUser,
+  getSchoolNameMap,
+  schoolDocPublic,
+} from './schools'
 import { loadGuardianCodesForClass } from './guardians'
 import { tryRedeemGuardianCode } from './lib/guardianLinks'
-import {
-  tryRedeemInviteCode,
-  INVALID_CODE_ERROR,
-} from './inviteCodes'
+import { tryRedeemInviteCode, INVALID_CODE_ERROR } from './inviteCodes'
 import { rateLimiter } from './rateLimiter'
 import {
   GUARDIAN_RELATION,
@@ -393,17 +394,19 @@ const accountChildValidator = v.object({
 async function listMyChildrenForAccountHome(
   ctx: QueryCtx,
   userId: Id<'users'>,
-): Promise<Array<{
-  orgStudentId: Id<'orgStudents'>
-  organizationId?: string
-  displayName: string
-  classes: Array<{
-    classId: Id<'classes'>
-    name: string
-    year: number
-    archivedTime?: number
+): Promise<
+  Array<{
+    orgStudentId: Id<'orgStudents'>
+    organizationId?: string
+    displayName: string
+    classes: Array<{
+      classId: Id<'classes'>
+      name: string
+      year: number
+      archivedTime?: number
+    }>
   }>
-}>> {
+> {
   // Keep these mirrored with `convex/guardians.ts` since we embed the “list
   // children” logic into a single home bundle query.
   const children: Array<{
@@ -523,7 +526,8 @@ export const getAccountHome = query({
     const classes = sortClasses(classDocs, DEFAULT_CLASS_SORT).map((doc) => {
       const held = rolesByClassId.get(doc._id) ?? []
       const myRole = highestClassRole(held) ?? undefined
-      const canManage = held.includes('creator') || held.includes('classTeacher')
+      const canManage =
+        held.includes('creator') || held.includes('classTeacher')
       const school =
         doc.organizationId !== undefined
           ? {

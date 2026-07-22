@@ -97,10 +97,18 @@ export function SchoolSettingsSection() {
         </p>
         {canManage ? (
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={() => setEditOpen(true)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditOpen(true)}
+            >
               {t('edit')}
             </Button>
-            <Button type="button" variant="outline" onClick={handleArchiveToggle}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleArchiveToggle}
+            >
               {archived ? t('unarchive') : t('archive')}
             </Button>
           </div>
@@ -120,12 +128,17 @@ export function SchoolSettingsSection() {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : soloClasses.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">{t('noSoloClasses')}</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            {t('noSoloClasses')}
+          </p>
         ) : (
           <div className="mt-4 space-y-3">
             <ul className="divide-y rounded-lg border">
               {soloClasses.map((classDoc) => (
-                <li key={classDoc._id} className="flex items-center gap-3 px-4 py-3">
+                <li
+                  key={classDoc._id}
+                  className="flex items-center gap-3 px-4 py-3"
+                >
                   <Checkbox
                     checked={selected.includes(classDoc._id)}
                     onCheckedChange={() => toggleClass(classDoc._id)}
@@ -133,7 +146,9 @@ export function SchoolSettingsSection() {
                   />
                   <div className="min-w-0">
                     <p className="truncate font-medium">{classDoc.name}</p>
-                    <p className="text-xs text-muted-foreground">{classDoc.year}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {classDoc.year}
+                    </p>
                   </div>
                 </li>
               ))}

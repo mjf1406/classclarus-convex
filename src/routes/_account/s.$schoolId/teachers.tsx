@@ -8,7 +8,5 @@ export const Route = createFileRoute('/_account/s/$schoolId/teachers')({
 
 function SchoolTeachersPage() {
   const { schoolId } = Route.useParams()
-  return (
-    <SchoolStaffMembersSection schoolId={schoolId} roleFilter="teachers" />
-  )
+  return <SchoolStaffMembersSection schoolId={schoolId} roleFilter="teachers" />
 }

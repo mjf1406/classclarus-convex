@@ -47,7 +47,8 @@ export function SchoolInviteSection({ schoolId }: { schoolId: string }) {
   const roleLabel = (role: string) => {
     if (role === 'principal') return t('rolePrincipal')
     if (role === 'vicePrincipal') return t('roleVicePrincipal')
-    if (role === 'assistantVicePrincipal') return t('roleAssistantVicePrincipal')
+    if (role === 'assistantVicePrincipal')
+      return t('roleAssistantVicePrincipal')
     if (role === 'teacher') return t('roleTeacher')
     if (role === 'admin') return t('roleAdmin')
     return role

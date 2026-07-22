@@ -2,8 +2,7 @@ import React, { useImperativeHandle, useLayoutEffect, useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
-interface PulsatingButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface PulsatingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   pulseColor?: string
   duration?: string
   distance?: string

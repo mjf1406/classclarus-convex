@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
-import {
-  ChevronRight,
-  LayoutGrid,
-  Settings,
-  Star,
-  Users,
-} from 'lucide-react'
+import { ChevronRight, LayoutGrid, Settings, Star, Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useClassLayout } from '#/components/classes/ClassLayoutContext'
@@ -83,9 +77,9 @@ export function ClassNavMain() {
   const membersSectionActive = isMembersPath(pathname, classId)
   const [membersOpen, setMembersOpen] = useState(membersSectionActive)
   const [membersMenuOpen, setMembersMenuOpen] = useState(false)
-  const membersMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  )
+  const membersMenuCloseTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
   const isCollapsedDesktop = state === 'collapsed' && !isMobile
 
   useEffect(() => {

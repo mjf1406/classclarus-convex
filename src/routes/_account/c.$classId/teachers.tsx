@@ -11,12 +11,8 @@ function ClassTeachersPage() {
   const { classId, canManageMembers } = useClassLayout()
 
   if (!canManageMembers) {
-    return (
-      <Navigate to="/c/$classId/points" params={{ classId }} replace />
-    )
+    return <Navigate to="/c/$classId/points" params={{ classId }} replace />
   }
 
-  return (
-    <ClassStaffMembersSection classId={classId} roleFilter="teachers" />
-  )
+  return <ClassStaffMembersSection classId={classId} roleFilter="teachers" />
 }

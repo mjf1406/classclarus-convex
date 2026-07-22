@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { Archive, ArchiveRestore, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import {
+  Archive,
+  ArchiveRestore,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
@@ -42,9 +48,7 @@ export function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
         toast.success(archive ? t('archive') : t('unarchive'))
       })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : t('updateFailed'),
-        )
+        toast.error(error instanceof Error ? error.message : t('updateFailed'))
       })
   }
 
@@ -58,9 +62,7 @@ export function ClassManageActions({ classDoc }: { classDoc: ClassPublic }) {
         void navigate({ to: '/' })
       })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : t('deleteFailed'),
-        )
+        toast.error(error instanceof Error ? error.message : t('deleteFailed'))
       })
   }
 

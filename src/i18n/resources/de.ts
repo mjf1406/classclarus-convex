@@ -123,7 +123,8 @@ const de: Catalog = {
     docDescription: '{{label}} in der ClassClarus-Webapp verwalten',
     createTitle: 'Schule erstellen',
     editTitle: 'Schule bearbeiten',
-    createDescription: 'Fügen Sie eine Schule hinzu, um Personal einzuladen, Teams zu organisieren und Klassen zuzuordnen.',
+    createDescription:
+      'Fügen Sie eine Schule hinzu, um Personal einzuladen, Teams zu organisieren und Klassen zuzuordnen.',
     editDescription: 'Schulname und Slug aktualisieren.',
     nameLabel: 'Schulname',
     nameRequired: 'Geben Sie einen Schulinamen ein.',
@@ -140,7 +141,8 @@ const de: Catalog = {
     noArchivedSchools: 'Keine archivierten Schulen',
     noSchoolsForRole: 'Keine Schulen mit dieser Rolle',
     noArchivedSchoolsForRole: 'Keine archivierten Schulen mit dieser Rolle',
-    emptyCta: 'Erstellen Sie eine Schule, um mit anderem Personal zusammenzuarbeiten.',
+    emptyCta:
+      'Erstellen Sie eine Schule, um mit anderem Personal zusammenzuarbeiten.',
     schoolCreated: 'Schule erstellt',
     schoolUpdated: 'Schule aktualisiert',
     schoolArchived: 'Schule archiviert',
@@ -155,7 +157,8 @@ const de: Catalog = {
     updateFailed: 'Schule konnte nicht aktualisiert werden',
     deleteFailed: 'Schule konnte nicht gelöscht werden',
     deleteSchoolTitle: 'Schule löschen?',
-    deleteSchoolDescription: '{{name}} löschen? Dadurch werden Mitarbeitermitgliedschaften dieser Schule entfernt.',
+    deleteSchoolDescription:
+      '{{name}} löschen? Dadurch werden Mitarbeitermitgliedschaften dieser Schule entfernt.',
     roleOwner: 'Eigentümer/in',
     roleAdmin: 'Admin',
     rolePrincipal: 'Schulleiter/in',
@@ -172,7 +175,8 @@ const de: Catalog = {
     navInvite: 'Einladen',
     navSettings: 'Einstellungen',
     notFoundTitle: 'Schule nicht gefunden',
-    notFoundDescription: 'Diese Schule wurde möglicherweise gelöscht, oder Sie haben keinen Zugriff.',
+    notFoundDescription:
+      'Diese Schule wurde möglicherweise gelöscht, oder Sie haben keinen Zugriff.',
     teachers: 'Lehrkräfte',
     teachersDescription: 'Lehrkräfte im Personalverzeichnis der Schule.',
     admins: 'Admins',
@@ -191,15 +195,18 @@ const de: Catalog = {
     inviteDescription:
       'Erstellen Sie eine zeitlich begrenzte Einladung, damit Kolleginnen und Kollegen als Schulleitung, Konrektor/in, Lehrkraft oder Admin beitreten können. Einladungen laufen aus Sicherheitsgründen innerhalb von 72 Stunden ab.',
     inviteCodeLabel: 'Beitrittscode',
-    inviteShareHint: 'Scannen oder geben Sie diesen Code auf der Beitrittsseite ein.',
+    inviteShareHint:
+      'Scannen oder geben Sie diesen Code auf der Beitrittsseite ein.',
     inviteCodesEnsureFailed: 'Beitrittscodes konnten nicht erstellt werden',
     classesTitle: 'Klassen',
     classesDescription:
       'Klassen erstellen, Teams zuweisen und Lehrkräfte sowie Schülerinnen und Schüler platzieren.',
     createClass: 'Klasse erstellen',
-    noSchoolClassesYet: 'Noch keine Klassen. Erstellen Sie eine Klasse, um zu starten.',
+    noSchoolClassesYet:
+      'Noch keine Klassen. Erstellen Sie eine Klasse, um zu starten.',
     unassignedTeam: 'Nicht zugewiesen',
-    selectClassHint: 'Wählen Sie eine Klasse, um Lehrkräfte und Schüler zuzuweisen.',
+    selectClassHint:
+      'Wählen Sie eine Klasse, um Lehrkräfte und Schüler zuzuweisen.',
     staffPool: 'Schulpersonal',
     studentPool: 'Schülerschaft der Schule',
     classTeachersLane: 'Lehrkräfte',
@@ -221,7 +228,8 @@ const de: Catalog = {
     pendingInvites: 'Ausstehende Einladungen',
     noPendingInvites: 'Keine ausstehenden Einladungen.',
     teamsTitle: 'Teams',
-    teamsDescription: 'Organisieren Sie Personal in Teams und Unterteams (z. B. Jahrgangsstufen).',
+    teamsDescription:
+      'Organisieren Sie Personal in Teams und Unterteams (z. B. Jahrgangsstufen).',
     createTeam: 'Team erstellen',
     createSubTeam: 'Unterteam erstellen',
     noTeamsYet: 'Noch keine Teams. Erstellen Sie ein Team, um zu starten.',
@@ -231,11 +239,14 @@ const de: Catalog = {
     teamDeleted: 'Team gelöscht',
     teamSaveFailed: 'Team konnte nicht gespeichert werden',
     deleteTeamTitle: 'Team löschen?',
-    deleteTeamDescription: '{{name}} löschen? Unterteams darunter müssen möglicherweise ebenfalls bereinigt werden.',
+    deleteTeamDescription:
+      '{{name}} löschen? Unterteams darunter müssen möglicherweise ebenfalls bereinigt werden.',
     settingsTitle: 'Schuleinstellungen',
-    settingsDescription: 'Schuldetails aktualisieren oder die Schule archivieren.',
+    settingsDescription:
+      'Schuldetails aktualisieren oder die Schule archivieren.',
     bringClassesTitle: 'Klassen übernehmen',
-    bringClassesDescription: 'Einzelklassen, die Sie verwalten, dieser Schule zuordnen.',
+    bringClassesDescription:
+      'Einzelklassen, die Sie verwalten, dieser Schule zuordnen.',
     bringClassesSubmit: 'Auswahl zuordnen',
     bringClassesSuccess: 'Klassen der Schule zugeordnet',
     bringClassesFailed: 'Klassen konnten nicht zugeordnet werden',
@@ -245,7 +256,8 @@ const de: Catalog = {
   join: {
     title: 'Einer Klasse beitreten',
     docTitle: 'Einer Klasse beitreten | ClassClarus',
-    docDescription: 'Treten Sie mit einem Code einer Klasse auf ClassClarus bei',
+    docDescription:
+      'Treten Sie mit einem Code einer Klasse auf ClassClarus bei',
     enterCode: 'Beitrittscode eingeben',
     description:
       'Verwenden Sie den Code Ihres Lehrers oder eine Erziehungsberechtigten-Einladung.',
@@ -330,7 +342,7 @@ const de: Catalog = {
     openJoinQrWindow: '{{role}}-Beitritts-QR in neuem Fenster öffnen',
     copyRoleCode: '{{role}}-Code kopieren',
     roleCodeActions: '{{role}}-Code-Aktionen',
-    regenerateCode:  'Code regenerieren',
+    regenerateCode: 'Code regenerieren',
 
     roleLabel: 'Rolle',
     ttlLabel: 'Läuft ab in',
@@ -348,7 +360,8 @@ const de: Catalog = {
     createInvite: 'Einladung erstellen',
     creating: 'Creating…',
     activeInvites: 'Aktive Einladungen',
-    emptyActive: 'Keine aktiven Einladungen. Erstellen Sie eine, um einen Beitrittscode zu teilen.',
+    emptyActive:
+      'Keine aktiven Einladungen. Erstellen Sie eine, um einen Beitrittscode zu teilen.',
     expiresAt: 'Läuft ab {{time}}',
     usesUnlimited: 'Unbegrenzte Nutzungen',
     usesRemaining: '{{remaining}} von {{max}} Nutzungen übrig',
@@ -462,7 +475,8 @@ const de: Catalog = {
     copyJoinLink: 'Beitrittslink kopieren',
     joinLinkCopied: 'Beitrittslink kopiert',
     joinQrTitle: '{{role}}-Beitritts-QR-Code',
-    joinQrDescription: 'Scannen Sie diesen QR-Code, um als {{role}} beizutreten.',
+    joinQrDescription:
+      'Scannen Sie diesen QR-Code, um als {{role}} beizutreten.',
     navClass: 'Klasse',
     navPoints: 'Punkte',
     navMembers: 'Mitglieder',
@@ -472,10 +486,12 @@ const de: Catalog = {
     navGuardians: 'Erziehungsberechtigte',
     navGroups: 'Gruppen',
     groupsTitle: 'Gruppen & Teams',
-    groupsDescription: 'Organisieren Sie Schüler in Gruppen und verschachtelte Teams. Ziehen Sie Schüler zwischen Ungruppiert, Gruppe oder Team.',
+    groupsDescription:
+      'Organisieren Sie Schüler in Gruppen und verschachtelte Teams. Ziehen Sie Schüler zwischen Ungruppiert, Gruppe oder Team.',
     ungrouped: 'Ungruppiert',
     noUngrouped: 'Alle Schüler sind in einer Gruppe.',
-    noGroupsYet: 'Noch keine Gruppen. Erstellen Sie eine Gruppe, um Schüler zu organisieren.',
+    noGroupsYet:
+      'Noch keine Gruppen. Erstellen Sie eine Gruppe, um Schüler zu organisieren.',
     createGroup: 'Gruppe erstellen',
     editGroup: 'Gruppe bearbeiten',
     deleteGroup: 'Gruppe löschen',
@@ -484,8 +500,10 @@ const de: Catalog = {
     deleteTeam: 'Team löschen',
     groupActions: 'Gruppenaktionen',
     teamActions: 'Teamaktionen',
-    groupFormDescription: 'Benennen Sie die Gruppe und fügen Sie optional ein Symbol oder eine Beschreibung hinzu.',
-    teamFormDescription: 'Benennen Sie das Team und fügen Sie optional ein Symbol oder eine Beschreibung hinzu.',
+    groupFormDescription:
+      'Benennen Sie die Gruppe und fügen Sie optional ein Symbol oder eine Beschreibung hinzu.',
+    teamFormDescription:
+      'Benennen Sie das Team und fügen Sie optional ein Symbol oder eine Beschreibung hinzu.',
     iconLabel: 'Symbol',
     pickIcon: 'Symbol wählen',
     clearIcon: 'Symbol entfernen',
@@ -501,9 +519,11 @@ const de: Catalog = {
     downloadGroupsPdfFailed: 'Gruppen-PDF konnte nicht erzeugt werden',
     dropStudentsHere: 'Schüler hier ablegen',
     deleteGroupTitle: 'Gruppe löschen?',
-    deleteGroupDescription: '{{name}} und seine Teams löschen? Schüler in dieser Gruppe werden ungruppiert.',
+    deleteGroupDescription:
+      '{{name}} und seine Teams löschen? Schüler in dieser Gruppe werden ungruppiert.',
     deleteTeamTitle: 'Team löschen?',
-    deleteTeamDescription: '{{name}} löschen? Schüler in diesem Team bleiben in der übergeordneten Gruppe.',
+    deleteTeamDescription:
+      '{{name}} löschen? Schüler in diesem Team bleiben in der übergeordneten Gruppe.',
     navInvite: 'Einladung',
     navSettings: 'Einstellungen',
     settingsTitle: 'Einstellungen',

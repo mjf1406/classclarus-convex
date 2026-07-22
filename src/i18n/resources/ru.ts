@@ -97,7 +97,8 @@ const ru: Catalog = {
     filterRoleAll: 'Все роли',
     noClassesForRole: 'Нет классов с этой ролью',
     noArchivedClassesForRole: 'Нет архивных классов с этой ролью',
-    emptyCta: 'Создайте первый класс, чтобы использовать возможности ClassClarus!',
+    emptyCta:
+      'Создайте первый класс, чтобы использовать возможности ClassClarus!',
     createClass: 'Создать класс',
     noDescription: 'Без описания',
     createdAt: 'Создан {{date}}',
@@ -123,7 +124,8 @@ const ru: Catalog = {
     docDescription: 'Управление {{label}} в веб-приложении ClassClarus',
     createTitle: 'Создать школу',
     editTitle: 'Изменить школу',
-    createDescription: 'Добавьте школу, чтобы приглашать сотрудников, организовывать команды и прикреплять классы.',
+    createDescription:
+      'Добавьте школу, чтобы приглашать сотрудников, организовывать команды и прикреплять классы.',
     editDescription: 'Обновите название и слаг школы.',
     nameLabel: 'Название школы',
     nameRequired: 'Введите название школы.',
@@ -155,7 +157,8 @@ const ru: Catalog = {
     updateFailed: 'Не удалось обновить школу',
     deleteFailed: 'Не удалось удалить школу',
     deleteSchoolTitle: 'Удалить школу?',
-    deleteSchoolDescription: 'Удалить {{name}}? Это удалит членства сотрудников этой школы.',
+    deleteSchoolDescription:
+      'Удалить {{name}}? Это удалит членства сотрудников этой школы.',
     roleOwner: 'Владелец',
     roleAdmin: 'Админ',
     rolePrincipal: 'Директор',
@@ -221,7 +224,8 @@ const ru: Catalog = {
     pendingInvites: 'Ожидающие приглашения',
     noPendingInvites: 'Нет ожидающих приглашений.',
     teamsTitle: 'Команды',
-    teamsDescription: 'Организуйте сотрудников в команды и подкоманды (например, по параллелям).',
+    teamsDescription:
+      'Организуйте сотрудников в команды и подкоманды (например, по параллелям).',
     createTeam: 'Создать команду',
     createSubTeam: 'Создать подкоманду',
     noTeamsYet: 'Пока нет команд. Создайте команду, чтобы начать.',
@@ -231,11 +235,13 @@ const ru: Catalog = {
     teamDeleted: 'Команда удалена',
     teamSaveFailed: 'Не удалось сохранить команду',
     deleteTeamTitle: 'Удалить команду?',
-    deleteTeamDescription: 'Удалить {{name}}? Подкоманды под ней также могут потребовать очистки.',
+    deleteTeamDescription:
+      'Удалить {{name}}? Подкоманды под ней также могут потребовать очистки.',
     settingsTitle: 'Настройки школы',
     settingsDescription: 'Обновите данные школы или архивируйте её.',
     bringClassesTitle: 'Перенести классы',
-    bringClassesDescription: 'Прикрепите к этой школе отдельные классы, которыми вы управляете.',
+    bringClassesDescription:
+      'Прикрепите к этой школе отдельные классы, которыми вы управляете.',
     bringClassesSubmit: 'Прикрепить выбранные',
     bringClassesSuccess: 'Классы прикреплены к школе',
     bringClassesFailed: 'Не удалось прикрепить классы',
@@ -283,8 +289,7 @@ const ru: Catalog = {
     descriptionPlaceholder: 'Необязательные заметки об этом классе',
     descriptionTooLong: 'Описание должно быть не длиннее 500 символов',
     yearLabel: 'Учебный год',
-    yearImmutable:
-      'Учебный год нельзя изменить после создания класса.',
+    yearImmutable: 'Учебный год нельзя изменить после создания класса.',
     yearRequired: 'Год обязателен',
     yearWholeNumber: 'Год должен быть целым числом',
     yearMin: 'Год должен быть не раньше 2000',
@@ -302,8 +307,7 @@ const ru: Catalog = {
     restore: 'Восстановить',
     deleteClass: 'Удалить класс',
     deleteClassTitle: 'Удалить класс?',
-    deleteClassDescription:
-      'Удалить «{{name}}»? Это действие нельзя отменить.',
+    deleteClassDescription: 'Удалить «{{name}}»? Это действие нельзя отменить.',
     deleteFailed: 'Не удалось удалить класс',
     classActions: 'Действия с классом',
     edit: 'Изменить',
@@ -317,8 +321,7 @@ const ru: Catalog = {
     roleStudent: 'Ученик',
     roleGuardian: 'Опекун',
     notFoundTitle: 'Класс не найден',
-    notFoundDescription:
-      'Класс мог быть удалён, или у вас нет доступа.',
+    notFoundDescription: 'Класс мог быть удалён, или у вас нет доступа.',
     joinCodes: 'Приглашения',
     joinCodesDescription:
       'Создайте приглашение с ограниченным сроком, чтобы другие присоединились к классу с нужной ролью. Приглашения истекают в течение 72 часов, чтобы снизить риск утечки данных учеников или опекунов.',
@@ -330,7 +333,7 @@ const ru: Catalog = {
     openJoinQrWindow: 'Открыть QR доступа {{role}} в новом окне',
     copyRoleCode: 'Скопировать код {{role}}',
     roleCodeActions: 'Действия с кодом {{role}}',
-    regenerateCode:  'Пересоздать код',
+    regenerateCode: 'Пересоздать код',
 
     roleLabel: 'Роль',
     ttlLabel: 'Истекает через',
@@ -348,7 +351,8 @@ const ru: Catalog = {
     createInvite: 'Создать приглашение',
     creating: 'Creating…',
     activeInvites: 'Активные приглашения',
-    emptyActive: 'Нет активных приглашений. Создайте одно, чтобы поделиться кодом входа.',
+    emptyActive:
+      'Нет активных приглашений. Создайте одно, чтобы поделиться кодом входа.',
     expiresAt: 'Истекает {{time}}',
     usesUnlimited: 'Без ограничения использований',
     usesRemaining: 'Осталось {{remaining}} из {{max}}',
@@ -432,8 +436,7 @@ const ru: Catalog = {
     guardianCodeRegenerateFailed: 'Не удалось пересоздать код опекуна',
     removeGuardianTitle: 'Убрать опекуна?',
     removeAllGuardiansTitle: 'Убрать всех опекунов?',
-    removeGuardianDescription:
-      'Убрать {{guardian}} как опекуна {{student}}?',
+    removeGuardianDescription: 'Убрать {{guardian}} как опекуна {{student}}?',
     removeAllGuardiansDescription:
       'Убрать всех опекунов ({{count}}) у {{student}}?',
     removeAllGuardians: 'Убрать всех опекунов',
@@ -454,7 +457,8 @@ const ru: Catalog = {
     copyJoinLink: 'Скопировать ссылку',
     joinLinkCopied: 'Ссылка скопирована',
     joinQrTitle: 'QR-код доступа {{role}}',
-    joinQrDescription: 'Отсканируйте этот QR, чтобы присоединиться как {{role}}.',
+    joinQrDescription:
+      'Отсканируйте этот QR, чтобы присоединиться как {{role}}.',
     navClass: 'Класс',
     navPoints: 'Баллы',
     navMembers: 'Участники',
@@ -464,10 +468,12 @@ const ru: Catalog = {
     navGuardians: 'Опекуны',
     navGroups: 'Группы',
     groupsTitle: 'Группы и команды',
-    groupsDescription: 'Организуйте учеников в группы и вложенные команды. Перетаскивайте между без группы, группой или командой.',
+    groupsDescription:
+      'Организуйте учеников в группы и вложенные команды. Перетаскивайте между без группы, группой или командой.',
     ungrouped: 'Без группы',
     noUngrouped: 'Все ученики уже в группах.',
-    noGroupsYet: 'Пока нет групп. Создайте группу, чтобы организовать учеников.',
+    noGroupsYet:
+      'Пока нет групп. Создайте группу, чтобы организовать учеников.',
     createGroup: 'Создать группу',
     editGroup: 'Изменить группу',
     deleteGroup: 'Удалить группу',
@@ -476,8 +482,10 @@ const ru: Catalog = {
     deleteTeam: 'Удалить команду',
     groupActions: 'Действия группы',
     teamActions: 'Действия команды',
-    groupFormDescription: 'Укажите название группы и при желании добавьте значок или описание.',
-    teamFormDescription: 'Укажите название команды и при желании добавьте значок или описание.',
+    groupFormDescription:
+      'Укажите название группы и при желании добавьте значок или описание.',
+    teamFormDescription:
+      'Укажите название команды и при желании добавьте значок или описание.',
     iconLabel: 'Значок',
     pickIcon: 'Выбрать значок',
     clearIcon: 'Убрать значок',
@@ -493,9 +501,11 @@ const ru: Catalog = {
     downloadGroupsPdfFailed: 'Не удалось создать PDF групп',
     dropStudentsHere: 'Перетащите учеников сюда',
     deleteGroupTitle: 'Удалить группу?',
-    deleteGroupDescription: 'Удалить {{name}} и её команды? Ученики этой группы станут без группы.',
+    deleteGroupDescription:
+      'Удалить {{name}} и её команды? Ученики этой группы станут без группы.',
     deleteTeamTitle: 'Удалить команду?',
-    deleteTeamDescription: 'Удалить {{name}}? Ученики этой команды останутся в родительской группе.',
+    deleteTeamDescription:
+      'Удалить {{name}}? Ученики этой команды останутся в родительской группе.',
     navInvite: 'Приглашение',
     navSettings: 'Настройки',
     settingsTitle: 'Настройки',

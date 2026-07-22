@@ -49,11 +49,7 @@ type PendingUnlink = {
   studentName: string
 }
 
-export function ClassGuardiansSection({
-  classId,
-}: {
-  classId: Id<'classes'>
-}) {
+export function ClassGuardiansSection({ classId }: { classId: Id<'classes'> }) {
   const { t } = useTranslation(['classes', 'common'])
   const unlinkGuardian = useUnlinkGuardian()
   const [pendingUnlink, setPendingUnlink] = useState<PendingUnlink | null>(null)
@@ -101,7 +97,9 @@ export function ClassGuardiansSection({
     })
   }, [bundle])
 
-  const guardianLabel = (guardian: Pick<GuardianRow, 'name' | 'email' | 'guardianUserId'>) =>
+  const guardianLabel = (
+    guardian: Pick<GuardianRow, 'name' | 'email' | 'guardianUserId'>,
+  ) =>
     guardian.name ??
     guardian.email ??
     t('common:userFallback', {
@@ -124,9 +122,7 @@ export function ClassGuardiansSection({
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error
-            ? error.message
-            : t('removeGuardianFailed'),
+          error instanceof Error ? error.message : t('removeGuardianFailed'),
         )
       })
       .finally(() => setUnlinkingKey(null))

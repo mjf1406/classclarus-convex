@@ -109,9 +109,9 @@ async function requireActiveEnrollment(
   }
 }
 
-function sortByOrderThenName<
-  T extends { sortOrder?: number; name: string },
->(items: Array<T>): Array<T> {
+function sortByOrderThenName<T extends { sortOrder?: number; name: string }>(
+  items: Array<T>,
+): Array<T> {
   return [...items].sort((left, right) => {
     const leftOrder = left.sortOrder ?? Number.MAX_SAFE_INTEGER
     const rightOrder = right.sortOrder ?? Number.MAX_SAFE_INTEGER
@@ -163,7 +163,10 @@ export const listGroupsBoard = query({
     const assignedIds = new Set<Id<'orgStudents'>>()
     const studentsByGroup = new Map<
       Id<'classGroups'>,
-      { withoutTeam: Array<BoardStudent>; byTeam: Map<Id<'classTeams'>, Array<BoardStudent>> }
+      {
+        withoutTeam: Array<BoardStudent>
+        byTeam: Map<Id<'classTeams'>, Array<BoardStudent>>
+      }
     >()
 
     for (const group of groups) {
@@ -269,10 +272,8 @@ export const createGroup = mutation({
     }
 
     const sortOrder =
-      existing.reduce(
-        (max, group) => Math.max(max, group.sortOrder ?? 0),
-        0,
-      ) + 1
+      existing.reduce((max, group) => Math.max(max, group.sortOrder ?? 0), 0) +
+      1
 
     return await ctx.db.insert('classGroups', {
       classId: args.classId,
@@ -317,7 +318,9 @@ export const updateGroup = mutation({
     }
     if (args.description !== undefined) {
       patch.description =
-        args.description === null ? undefined : args.description.trim() || undefined
+        args.description === null
+          ? undefined
+          : args.description.trim() || undefined
     }
     if (args.icon !== undefined) {
       if (args.icon === null) {
@@ -450,7 +453,9 @@ export const updateTeam = mutation({
     }
     if (args.description !== undefined) {
       patch.description =
-        args.description === null ? undefined : args.description.trim() || undefined
+        args.description === null
+          ? undefined
+          : args.description.trim() || undefined
     }
     if (args.icon !== undefined) {
       if (args.icon === null) {

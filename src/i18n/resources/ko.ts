@@ -123,7 +123,8 @@ const ko: Catalog = {
     docDescription: 'ClassClarus 웹앱에서 {{label}} 관리',
     createTitle: '학교 만들기',
     editTitle: '학교 편집',
-    createDescription: '직원을 초대하고, 팀을 구성하고, 수업을 연결할 학교를 추가합니다.',
+    createDescription:
+      '직원을 초대하고, 팀을 구성하고, 수업을 연결할 학교를 추가합니다.',
     editDescription: '학교 이름과 슬러그를 업데이트합니다.',
     nameLabel: '학교 이름',
     nameRequired: '학교 이름을 입력하세요.',
@@ -155,7 +156,8 @@ const ko: Catalog = {
     updateFailed: '학교 업데이트에 실패했습니다',
     deleteFailed: '학교 삭제에 실패했습니다',
     deleteSchoolTitle: '학교를 삭제할까요?',
-    deleteSchoolDescription: '{{name}}을(를) 삭제할까요? 이 학교의 직원 멤버십이 제거됩니다.',
+    deleteSchoolDescription:
+      '{{name}}을(를) 삭제할까요? 이 학교의 직원 멤버십이 제거됩니다.',
     roleOwner: '소유자',
     roleAdmin: '관리자',
     rolePrincipal: '교장',
@@ -176,8 +178,7 @@ const ko: Catalog = {
     teachers: '교사',
     teachersDescription: '학교 직원 명단의 교사입니다.',
     admins: '관리자',
-    adminsDescription:
-      '이 학교를 관리하는 소유자, 교장, 교감, 관리자입니다.',
+    adminsDescription: '이 학교를 관리하는 소유자, 교장, 교감, 관리자입니다.',
     noTeachersYet: '아직 교사가 없습니다.',
     noAdminsYet: '아직 관리자가 없습니다.',
     colName: '이름',
@@ -231,7 +232,8 @@ const ko: Catalog = {
     teamDeleted: '팀이 삭제되었습니다',
     teamSaveFailed: '팀 저장에 실패했습니다',
     deleteTeamTitle: '팀을 삭제할까요?',
-    deleteTeamDescription: '{{name}}을(를) 삭제할까요? 하위 팀도 정리가 필요할 수 있습니다.',
+    deleteTeamDescription:
+      '{{name}}을(를) 삭제할까요? 하위 팀도 정리가 필요할 수 있습니다.',
     settingsTitle: '학교 설정',
     settingsDescription: '학교 정보를 업데이트하거나 학교를 보관합니다.',
     bringClassesTitle: '수업 가져오기',
@@ -247,8 +249,7 @@ const ko: Catalog = {
     docTitle: '수업 참가 | ClassClarus',
     docDescription: '참가 코드로 ClassClarus 수업에 참가하세요',
     enterCode: '참가 코드 입력',
-    description:
-      '선생님 또는 보호자 초대 코드로 수업에 참가하세요.',
+    description: '선생님 또는 보호자 초대 코드로 수업에 참가하세요.',
     submit: '참가',
     codeIncomplete: '8자리 참가 코드를 모두 입력하세요.',
     joinedAs: '{{role}}(으)로 참가함',
@@ -316,8 +317,7 @@ const ko: Catalog = {
     roleStudent: '학생',
     roleGuardian: '보호자',
     notFoundTitle: '수업을 찾을 수 없습니다',
-    notFoundDescription:
-      '수업이 삭제되었거나 접근 권한이 없을 수 있습니다.',
+    notFoundDescription: '수업이 삭제되었거나 접근 권한이 없을 수 있습니다.',
     joinCodes: '초대',
     joinCodesDescription:
       '해당 역할로 수업에 참여할 수 있는 기간 제한 초대를 만듭니다. 학생·보호자 정보 유출 위험을 줄이기 위해 초대는 72시간 이내에 만료됩니다.',
@@ -329,7 +329,7 @@ const ko: Catalog = {
     openJoinQrWindow: '새 창에서 {{role}} 참가 QR 열기',
     copyRoleCode: '{{role}} 코드 복사',
     roleCodeActions: '{{role}} 코드 작업',
-    regenerateCode:  '코드 재생성',
+    regenerateCode: '코드 재생성',
 
     roleLabel: '역할',
     ttlLabel: '만료 시간',
@@ -347,7 +347,8 @@ const ko: Catalog = {
     createInvite: '초대 만들기',
     creating: 'Creating…',
     activeInvites: '활성 초대',
-    emptyActive: '활성 초대가 없습니다. 참가 코드를 공유하려면 초대를 만드세요.',
+    emptyActive:
+      '활성 초대가 없습니다. 참가 코드를 공유하려면 초대를 만드세요.',
     expiresAt: '만료 {{time}}',
     usesUnlimited: '사용 횟수 무제한',
     usesRemaining: '{{remaining}} / {{max}}회 남음',
@@ -463,7 +464,8 @@ const ko: Catalog = {
     navGuardians: '보호자',
     navGroups: '모둠',
     groupsTitle: '모둠 및 팀',
-    groupsDescription: '학생을 모둠과 하위 팀으로 구성합니다. 미배정, 모둠, 팀 사이로 끌어다 놓으세요.',
+    groupsDescription:
+      '학생을 모둠과 하위 팀으로 구성합니다. 미배정, 모둠, 팀 사이로 끌어다 놓으세요.',
     ungrouped: '미배정',
     noUngrouped: '모든 학생이 모둠에 있습니다.',
     noGroupsYet: '모둠이 아직 없습니다. 모둠을 만들어 학생을 구성하세요.',
@@ -475,8 +477,10 @@ const ko: Catalog = {
     deleteTeam: '팀 삭제',
     groupActions: '모둠 작업',
     teamActions: '팀 작업',
-    groupFormDescription: '모둠 이름을 입력하고 아이콘이나 설명을 선택적으로 추가하세요.',
-    teamFormDescription: '팀 이름을 입력하고 아이콘이나 설명을 선택적으로 추가하세요.',
+    groupFormDescription:
+      '모둠 이름을 입력하고 아이콘이나 설명을 선택적으로 추가하세요.',
+    teamFormDescription:
+      '팀 이름을 입력하고 아이콘이나 설명을 선택적으로 추가하세요.',
     iconLabel: '아이콘',
     pickIcon: '아이콘 선택',
     clearIcon: '아이콘 지우기',
@@ -492,9 +496,11 @@ const ko: Catalog = {
     downloadGroupsPdfFailed: '모둠 PDF 생성에 실패했습니다',
     dropStudentsHere: '여기에 학생을 놓으세요',
     deleteGroupTitle: '모둠을 삭제할까요?',
-    deleteGroupDescription: '{{name}}과(와) 그 팀을 삭제할까요? 이 모둠의 학생은 미배정이 됩니다.',
+    deleteGroupDescription:
+      '{{name}}과(와) 그 팀을 삭제할까요? 이 모둠의 학생은 미배정이 됩니다.',
     deleteTeamTitle: '팀을 삭제할까요?',
-    deleteTeamDescription: '{{name}}을(를) 삭제할까요? 이 팀의 학생은 상위 모둠에 남습니다.',
+    deleteTeamDescription:
+      '{{name}}을(를) 삭제할까요? 이 팀의 학생은 상위 모둠에 남습니다.',
     navInvite: '초대',
     navSettings: '설정',
     settingsTitle: '설정',
@@ -512,8 +518,7 @@ const ko: Catalog = {
     languageLabel: '언어',
     languageDescription: 'ClassClarus 인터페이스에 사용할 개인 언어입니다.',
     themeLabel: '테마',
-    themeDescription:
-      '라이트, 다크 또는 시스템 설정을 따르도록 선택하세요.',
+    themeDescription: '라이트, 다크 또는 시스템 설정을 따르도록 선택하세요.',
   },
   account: {
     docTitle: '계정 | ClassClarus',

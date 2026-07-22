@@ -190,9 +190,7 @@ export function JoinShareDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-xs gap-0 p-4 sm:max-w-sm">
           <DialogHeader className="sr-only">
-            <DialogTitle>
-              {t('joinQrTitle', { role: roleLabel })}
-            </DialogTitle>
+            <DialogTitle>{t('joinQrTitle', { role: roleLabel })}</DialogTitle>
             <DialogDescription>
               {t('joinQrDescription', { role: roleLabelLower })}
             </DialogDescription>

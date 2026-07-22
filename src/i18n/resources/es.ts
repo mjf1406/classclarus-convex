@@ -123,7 +123,8 @@ const es: Catalog = {
     docDescription: 'Gestiona {{label}} en la aplicación web ClassClarus',
     createTitle: 'Crear escuela',
     editTitle: 'Editar escuela',
-    createDescription: 'Añade una escuela para invitar personal, organizar equipos y vincular clases.',
+    createDescription:
+      'Añade una escuela para invitar personal, organizar equipos y vincular clases.',
     editDescription: 'Actualiza el nombre y el slug de la escuela.',
     nameLabel: 'Nombre de la escuela',
     nameRequired: 'Introduce un nombre de escuela.',
@@ -155,7 +156,8 @@ const es: Catalog = {
     updateFailed: 'No se pudo actualizar la escuela',
     deleteFailed: 'No se pudo eliminar la escuela',
     deleteSchoolTitle: '¿Eliminar escuela?',
-    deleteSchoolDescription: '¿Eliminar {{name}}? Se quitan las membresías del personal de esta escuela.',
+    deleteSchoolDescription:
+      '¿Eliminar {{name}}? Se quitan las membresías del personal de esta escuela.',
     roleOwner: 'Propietario/a',
     roleAdmin: 'Admin',
     rolePrincipal: 'Director/a',
@@ -172,7 +174,8 @@ const es: Catalog = {
     navInvite: 'Invitar',
     navSettings: 'Ajustes',
     notFoundTitle: 'Escuela no encontrada',
-    notFoundDescription: 'Es posible que esta escuela se haya eliminado o que no tengas acceso.',
+    notFoundDescription:
+      'Es posible que esta escuela se haya eliminado o que no tengas acceso.',
     teachers: 'Docentes',
     teachersDescription: 'Docentes en la plantilla de la escuela.',
     admins: 'Admins',
@@ -199,7 +202,8 @@ const es: Catalog = {
     createClass: 'Crear clase',
     noSchoolClassesYet: 'Aún no hay clases. Crea una clase para empezar.',
     unassignedTeam: 'Sin asignar',
-    selectClassHint: 'Selecciona una clase para asignar docentes y estudiantes.',
+    selectClassHint:
+      'Selecciona una clase para asignar docentes y estudiantes.',
     staffPool: 'Personal de la escuela',
     studentPool: 'Estudiantes de la escuela',
     classTeachersLane: 'Docentes',
@@ -221,7 +225,8 @@ const es: Catalog = {
     pendingInvites: 'Invitaciones pendientes',
     noPendingInvites: 'No hay invitaciones pendientes.',
     teamsTitle: 'Equipos',
-    teamsDescription: 'Organiza al personal en equipos y subequipos (por ejemplo, niveles).',
+    teamsDescription:
+      'Organiza al personal en equipos y subequipos (por ejemplo, niveles).',
     createTeam: 'Crear equipo',
     createSubTeam: 'Crear subequipo',
     noTeamsYet: 'Aún no hay equipos. Crea un equipo para empezar.',
@@ -231,11 +236,13 @@ const es: Catalog = {
     teamDeleted: 'Equipo eliminado',
     teamSaveFailed: 'No se pudo guardar el equipo',
     deleteTeamTitle: '¿Eliminar equipo?',
-    deleteTeamDescription: '¿Eliminar {{name}}? Es posible que también haya que limpiar los subequipos.',
+    deleteTeamDescription:
+      '¿Eliminar {{name}}? Es posible que también haya que limpiar los subequipos.',
     settingsTitle: 'Ajustes de la escuela',
     settingsDescription: 'Actualiza los datos de la escuela o archívala.',
     bringClassesTitle: 'Traer clases',
-    bringClassesDescription: 'Vincula a esta escuela las clases individuales que gestionas.',
+    bringClassesDescription:
+      'Vincula a esta escuela las clases individuales que gestionas.',
     bringClassesSubmit: 'Vincular seleccionadas',
     bringClassesSuccess: 'Clases vinculadas a la escuela',
     bringClassesFailed: 'No se pudieron vincular las clases',
@@ -302,8 +309,7 @@ const es: Catalog = {
     restore: 'Restaurar',
     deleteClass: 'Eliminar clase',
     deleteClassTitle: '¿Eliminar clase?',
-    deleteClassDescription:
-      '¿Eliminar “{{name}}”? Esto no se puede deshacer.',
+    deleteClassDescription: '¿Eliminar “{{name}}”? Esto no se puede deshacer.',
     deleteFailed: 'No se pudo eliminar la clase',
     classActions: 'Acciones de la clase',
     edit: 'Editar',
@@ -330,7 +336,7 @@ const es: Catalog = {
     openJoinQrWindow: 'Abrir QR de acceso de {{role}} en una ventana nueva',
     copyRoleCode: 'Copiar código de {{role}}',
     roleCodeActions: 'Acciones del código de {{role}}',
-    regenerateCode:  'Regenerar código',
+    regenerateCode: 'Regenerar código',
 
     roleLabel: 'Rol',
     ttlLabel: 'Caduca en',
@@ -348,7 +354,8 @@ const es: Catalog = {
     createInvite: 'Crear invitación',
     creating: 'Creating…',
     activeInvites: 'Invitaciones activas',
-    emptyActive: 'No hay invitaciones activas. Crea una para compartir un código de acceso.',
+    emptyActive:
+      'No hay invitaciones activas. Crea una para compartir un código de acceso.',
     expiresAt: 'Caduca {{time}}',
     usesUnlimited: 'Usos ilimitados',
     usesRemaining: '{{remaining}} de {{max}} usos restantes',
@@ -415,7 +422,8 @@ const es: Catalog = {
     rosterReorderFailed: 'Failed to reorder roster',
     downloadGuardianCodePdf: 'Descargar PDF de códigos de tutor',
     downloadGuardianCodePdfAria: 'Descargar PDF de códigos de tutor',
-    downloadGuardianCodePdfFailed: 'No se pudo generar el PDF de códigos de tutor',
+    downloadGuardianCodePdfFailed:
+      'No se pudo generar el PDF de códigos de tutor',
     noStudentsYet:
       'Aún no hay estudiantes. Aparecen aquí cuando se unen con el código de estudiante.',
     noGuardianLinked: 'Aún no hay tutor vinculado',
@@ -464,10 +472,12 @@ const es: Catalog = {
     navGuardians: 'Tutores',
     navGroups: 'Grupos',
     groupsTitle: 'Grupos y equipos',
-    groupsDescription: 'Organiza a los estudiantes en grupos y equipos anidados. Arrastra entre sin grupo, un grupo o un equipo.',
+    groupsDescription:
+      'Organiza a los estudiantes en grupos y equipos anidados. Arrastra entre sin grupo, un grupo o un equipo.',
     ungrouped: 'Sin grupo',
     noUngrouped: 'Todos los estudiantes están en un grupo.',
-    noGroupsYet: 'Aún no hay grupos. Crea un grupo para organizar a los estudiantes.',
+    noGroupsYet:
+      'Aún no hay grupos. Crea un grupo para organizar a los estudiantes.',
     createGroup: 'Crear grupo',
     editGroup: 'Editar grupo',
     deleteGroup: 'Eliminar grupo',
@@ -476,8 +486,10 @@ const es: Catalog = {
     deleteTeam: 'Eliminar equipo',
     groupActions: 'Acciones del grupo',
     teamActions: 'Acciones del equipo',
-    groupFormDescription: 'Nombra el grupo y opcionalmente añade un icono o una descripción.',
-    teamFormDescription: 'Nombra el equipo y opcionalmente añade un icono o una descripción.',
+    groupFormDescription:
+      'Nombra el grupo y opcionalmente añade un icono o una descripción.',
+    teamFormDescription:
+      'Nombra el equipo y opcionalmente añade un icono o una descripción.',
     iconLabel: 'Icono',
     pickIcon: 'Elegir icono',
     clearIcon: 'Quitar icono',
@@ -493,9 +505,11 @@ const es: Catalog = {
     downloadGroupsPdfFailed: 'Error al generar el PDF de grupos',
     dropStudentsHere: 'Suelta estudiantes aquí',
     deleteGroupTitle: '¿Eliminar grupo?',
-    deleteGroupDescription: '¿Eliminar {{name}} y sus equipos? Los estudiantes de este grupo quedarán sin grupo.',
+    deleteGroupDescription:
+      '¿Eliminar {{name}} y sus equipos? Los estudiantes de este grupo quedarán sin grupo.',
     deleteTeamTitle: '¿Eliminar equipo?',
-    deleteTeamDescription: '¿Eliminar {{name}}? Los estudiantes de este equipo permanecen en el grupo superior.',
+    deleteTeamDescription:
+      '¿Eliminar {{name}}? Los estudiantes de este equipo permanecen en el grupo superior.',
     navInvite: 'Invitación',
     navSettings: 'Ajustes',
     settingsTitle: 'Ajustes',
@@ -511,8 +525,7 @@ const es: Catalog = {
     title: 'Configuración',
     description: 'Gestiona tus preferencias personales.',
     languageLabel: 'Idioma',
-    languageDescription:
-      'Tu idioma personal para la interfaz de ClassClarus.',
+    languageDescription: 'Tu idioma personal para la interfaz de ClassClarus.',
     themeLabel: 'Tema',
     themeDescription:
       'Elige claro, oscuro o sigue la configuración de tu sistema.',

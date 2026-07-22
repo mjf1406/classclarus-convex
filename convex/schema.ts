@@ -39,9 +39,7 @@ export default defineSchema({
     // Home page section order (My Classes / My Schools). Default when missing:
     // ['classes', 'schools'].
     homeSectionOrder: v.optional(
-      v.array(
-        v.union(v.literal('classes'), v.literal('schools')),
-      ),
+      v.array(v.union(v.literal('classes'), v.literal('schools'))),
     ),
   }).index('by_userId', ['userId']),
   // Deprecated permanent school join codes. No longer written or redeemed;

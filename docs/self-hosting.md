@@ -6,11 +6,11 @@ Deploying through **Portainer** instead? Use [self-hosting-portainer.md](self-ho
 
 When it finishes you will have:
 
-| What | URL (local defaults) |
-|------|----------------------|
-| **App (website)** | http://localhost:3000 |
-| **Convex dashboard** | http://localhost:6791 |
-| Convex API | http://127.0.0.1:3210 |
+| What                                  | URL (local defaults)  |
+| ------------------------------------- | --------------------- |
+| **App (website)**                     | http://localhost:3000 |
+| **Convex dashboard**                  | http://localhost:6791 |
+| Convex API                            | http://127.0.0.1:3210 |
 | Convex HTTP actions (OAuth callbacks) | http://127.0.0.1:3211 |
 
 ---
@@ -300,11 +300,11 @@ If you later put the app on a real domain, update Google origins/redirects to ma
 
 After a successful first boot, the **`bootstrap`** volume contains:
 
-| File | Purpose |
-|------|---------|
-| `admin_key` | Paste into the Convex dashboard |
+| File              | Purpose                                                           |
+| ----------------- | ----------------------------------------------------------------- |
+| `admin_key`       | Paste into the Convex dashboard                                   |
 | `jwt_private_key` | Convex Auth signing key (auto-created if you left JWT vars blank) |
-| `jwks` | Matching public JWKS |
+| `jwks`            | Matching public JWKS                                              |
 
 Keep this volume. Removing it can break auth until you redeploy with new keys.
 
@@ -346,12 +346,12 @@ That recreates `dashboard` (needs the new `NEXT_PUBLIC_DEPLOYMENT_URL`) and rebu
 
 Compose publishes plain HTTP ports. For a VPS with a domain, put a reverse proxy (Caddy, Traefik, nginx, Cloudflare) in front, then point hostnames at:
 
-| Hostname example | Proxies to |
-|------------------|------------|
-| `app.example.com` | host port `3000` (web) |
-| `api.example.com` | host port `3210` (Convex API) |
-| `actions.example.com` | host port `3211` (HTTP actions / OAuth) |
-| `dash.example.com` (optional) | host port `6791` (dashboard) |
+| Hostname example              | Proxies to                              |
+| ----------------------------- | --------------------------------------- |
+| `app.example.com`             | host port `3000` (web)                  |
+| `api.example.com`             | host port `3210` (Convex API)           |
+| `actions.example.com`         | host port `3211` (HTTP actions / OAuth) |
+| `dash.example.com` (optional) | host port `6791` (dashboard)            |
 
 Update `.env` so the **browser** can reach Convex (not Docker-internal names like `http://backend:3210`):
 
@@ -524,11 +524,11 @@ On `docker compose up`, Compose starts the backend, generates an admin key, sets
 
 ## Related files
 
-| File | Role |
-|------|------|
-| [`.env.example`](../.env.example) | Template for `.env` |
-| [`docker-compose.yml`](../docker-compose.yml) | Full stack definition |
-| [`Dockerfile`](../Dockerfile) | Builds and serves the website |
-| [`docker/deploy.sh`](../docker/deploy.sh) | One-shot Convex deploy + auth bootstrap |
-| [`scripts/generate-auth-keys.mjs`](../scripts/generate-auth-keys.mjs) | Optional local JWT key generator |
-| [self-hosting-portainer.md](self-hosting-portainer.md) | Portainer Git stack guide |
+| File                                                                  | Role                                    |
+| --------------------------------------------------------------------- | --------------------------------------- |
+| [`.env.example`](../.env.example)                                     | Template for `.env`                     |
+| [`docker-compose.yml`](../docker-compose.yml)                         | Full stack definition                   |
+| [`Dockerfile`](../Dockerfile)                                         | Builds and serves the website           |
+| [`docker/deploy.sh`](../docker/deploy.sh)                             | One-shot Convex deploy + auth bootstrap |
+| [`scripts/generate-auth-keys.mjs`](../scripts/generate-auth-keys.mjs) | Optional local JWT key generator        |
+| [self-hosting-portainer.md](self-hosting-portainer.md)                | Portainer Git stack guide               |

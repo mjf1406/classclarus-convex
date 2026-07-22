@@ -51,7 +51,7 @@ const it: Catalog = {
     signInWithGoogle: 'Accedi con Google',
     continueWithGoogle: 'Continua con Google',
     passwordAuthNote:
-      'Chiedi all\'amministratore del sito se ti serve reimpostare la password. Non c\'è recupero via e-mail.',
+      "Chiedi all'amministratore del sito se ti serve reimpostare la password. Non c'è recupero via e-mail.",
     emailLabel: 'Email',
     emailPlaceholder: 'you@example.com',
     passwordLabel: 'Password',
@@ -64,7 +64,7 @@ const it: Catalog = {
     signUpWithPassword: 'Crea account',
     signUpInstead: 'Non hai un account? Registrati',
     signInInstead: 'Hai già un account? Accedi',
-    invalidEmail: 'Inserisci un\'email valida.',
+    invalidEmail: "Inserisci un'email valida.",
     passwordTooShort: 'La password deve avere almeno 8 caratteri.',
     passwordsDoNotMatch: 'Le password non coincidono.',
     authFailed: 'Accesso non riuscito. Controlla email e password.',
@@ -123,7 +123,8 @@ const it: Catalog = {
     docDescription: 'Gestisci {{label}} nell’app web ClassClarus',
     createTitle: 'Crea scuola',
     editTitle: 'Modifica scuola',
-    createDescription: 'Aggiungi una scuola per invitare il personale, organizzare i team e collegare le classi.',
+    createDescription:
+      'Aggiungi una scuola per invitare il personale, organizzare i team e collegare le classi.',
     editDescription: 'Aggiorna il nome e lo slug della scuola.',
     nameLabel: 'Nome della scuola',
     nameRequired: 'Inserisci un nome per la scuola.',
@@ -155,7 +156,8 @@ const it: Catalog = {
     updateFailed: 'Aggiornamento della scuola non riuscito',
     deleteFailed: 'Eliminazione della scuola non riuscita',
     deleteSchoolTitle: 'Eliminare la scuola?',
-    deleteSchoolDescription: 'Eliminare {{name}}? Verranno rimosse le appartenenze del personale di questa scuola.',
+    deleteSchoolDescription:
+      'Eliminare {{name}}? Verranno rimosse le appartenenze del personale di questa scuola.',
     roleOwner: 'Proprietario',
     roleAdmin: 'Admin',
     rolePrincipal: 'Dirigente',
@@ -172,7 +174,8 @@ const it: Catalog = {
     navInvite: 'Invita',
     navSettings: 'Impostazioni',
     notFoundTitle: 'Scuola non trovata',
-    notFoundDescription: 'Questa scuola potrebbe essere stata eliminata, oppure non hai accesso.',
+    notFoundDescription:
+      'Questa scuola potrebbe essere stata eliminata, oppure non hai accesso.',
     teachers: 'Insegnanti',
     teachersDescription: 'Insegnanti nell’organico della scuola.',
     admins: 'Admin',
@@ -191,7 +194,8 @@ const it: Catalog = {
     inviteDescription:
       'Crea un invito a tempo limitato così i colleghi possono unirsi come dirigente, vicepreside, insegnante o admin. Gli inviti scadono entro 72 ore per sicurezza.',
     inviteCodeLabel: 'codice di accesso',
-    inviteShareHint: 'Scansiona o inserisci questo codice nella pagina di accesso.',
+    inviteShareHint:
+      'Scansiona o inserisci questo codice nella pagina di accesso.',
     inviteCodesEnsureFailed: 'Creazione dei codici di accesso non riuscita',
     classesTitle: 'Classi',
     classesDescription:
@@ -199,7 +203,8 @@ const it: Catalog = {
     createClass: 'Crea classe',
     noSchoolClassesYet: 'Nessuna classe ancora. Crea una classe per iniziare.',
     unassignedTeam: 'Non assegnato',
-    selectClassHint: 'Seleziona una classe per assegnare insegnanti e studenti.',
+    selectClassHint:
+      'Seleziona una classe per assegnare insegnanti e studenti.',
     staffPool: 'Personale della scuola',
     studentPool: 'Studenti della scuola',
     classTeachersLane: 'Insegnanti',
@@ -221,7 +226,8 @@ const it: Catalog = {
     pendingInvites: 'Inviti in sospeso',
     noPendingInvites: 'Nessun invito in sospeso.',
     teamsTitle: 'Team',
-    teamsDescription: 'Organizza il personale in team e sotto-team (ad esempio, livelli scolastici).',
+    teamsDescription:
+      'Organizza il personale in team e sotto-team (ad esempio, livelli scolastici).',
     createTeam: 'Crea team',
     createSubTeam: 'Crea sotto-team',
     noTeamsYet: 'Nessun team ancora. Crea un team per iniziare.',
@@ -231,11 +237,13 @@ const it: Catalog = {
     teamDeleted: 'Team eliminato',
     teamSaveFailed: 'Salvataggio del team non riuscito',
     deleteTeamTitle: 'Eliminare il team?',
-    deleteTeamDescription: 'Eliminare {{name}}? Potrebbe essere necessario ripulire anche i sotto-team.',
+    deleteTeamDescription:
+      'Eliminare {{name}}? Potrebbe essere necessario ripulire anche i sotto-team.',
     settingsTitle: 'Impostazioni scuola',
     settingsDescription: 'Aggiorna i dettagli della scuola o archiviala.',
     bringClassesTitle: 'Porta classi',
-    bringClassesDescription: 'Collega a questa scuola le classi individuali che gestisci.',
+    bringClassesDescription:
+      'Collega a questa scuola le classi individuali che gestisci.',
     bringClassesSubmit: 'Collega selezionate',
     bringClassesSuccess: 'Classi collegate alla scuola',
     bringClassesFailed: 'Collegamento delle classi non riuscito',
@@ -247,8 +255,7 @@ const it: Catalog = {
     docTitle: 'Unisciti a una classe | ClassClarus',
     docDescription: 'Unisciti a una classe con un codice su ClassClarus',
     enterCode: 'Inserisci il codice',
-    description:
-      'Usa il codice dell’insegnante o un invito tutore per unirti.',
+    description: 'Usa il codice dell’insegnante o un invito tutore per unirti.',
     submit: 'Unisciti',
     codeIncomplete: 'Inserisci un codice completo di 8 caratteri.',
     joinedAs: 'Iscritto come {{role}}',
@@ -330,7 +337,7 @@ const it: Catalog = {
     openJoinQrWindow: 'Apri QR di accesso {{role}} in una nuova finestra',
     copyRoleCode: 'Copia codice {{role}}',
     roleCodeActions: 'Azioni codice {{role}}',
-    regenerateCode:  'Rigenera codice',
+    regenerateCode: 'Rigenera codice',
 
     roleLabel: 'Ruolo',
     ttlLabel: 'Scade tra',
@@ -348,7 +355,8 @@ const it: Catalog = {
     createInvite: 'Crea invito',
     creating: 'Creating…',
     activeInvites: 'Inviti attivi',
-    emptyActive: 'Nessun invito attivo. Creane uno per condividere un codice di accesso.',
+    emptyActive:
+      'Nessun invito attivo. Creane uno per condividere un codice di accesso.',
     expiresAt: 'Scade {{time}}',
     usesUnlimited: 'Utilizzi illimitati',
     usesRemaining: '{{remaining}} di {{max}} utilizzi rimasti',
@@ -365,11 +373,11 @@ const it: Catalog = {
     noMembersYet: 'Nessun membro ancora.',
     teachers: 'Insegnanti',
     teachersDescription:
-      'Insegnanti della classe e il creatore. Rimuovi l\'accesso a chi non deve più gestire questa classe.',
+      "Insegnanti della classe e il creatore. Rimuovi l'accesso a chi non deve più gestire questa classe.",
     noTeachersYet: 'Nessun insegnante ancora.',
     assistantTeachers: 'Insegnanti assistenti',
     assistantTeachersDescription:
-      'Insegnanti assistenti di questa classe. Rimuovi l\'accesso a chi non deve più assistere.',
+      "Insegnanti assistenti di questa classe. Rimuovi l'accesso a chi non deve più assistere.",
     noAssistantTeachersYet: 'Nessun insegnante assistente ancora.',
     guardiansDescription:
       'Tutori collegati agli studenti di questa classe. Scollega un tutore se non deve più avere accesso.',
@@ -415,7 +423,8 @@ const it: Catalog = {
     rosterReorderFailed: 'Failed to reorder roster',
     downloadGuardianCodePdf: 'Scarica PDF dei codici tutore',
     downloadGuardianCodePdfAria: 'Scarica PDF dei codici tutore',
-    downloadGuardianCodePdfFailed: 'Generazione del PDF dei codici tutore non riuscita',
+    downloadGuardianCodePdfFailed:
+      'Generazione del PDF dei codici tutore non riuscita',
     noStudentsYet:
       'Nessuno studente ancora. Compariscono qui dopo essersi uniti con il codice studente.',
     noGuardianLinked: 'Nessun tutore collegato ancora',
@@ -429,7 +438,8 @@ const it: Catalog = {
     linkForCopied: 'Link di accesso di {{name}} copiato',
     linkCopyFailed: 'Copia del link non riuscita',
     guardianCodeRegenerated: 'Codice tutore rigenerato per {{name}}',
-    guardianCodeRegenerateFailed: 'Rigenerazione del codice tutore non riuscita',
+    guardianCodeRegenerateFailed:
+      'Rigenerazione del codice tutore non riuscita',
     removeGuardianTitle: 'Rimuovere il tutore?',
     removeAllGuardiansTitle: 'Rimuovere tutti i tutori?',
     removeGuardianDescription:
@@ -464,10 +474,12 @@ const it: Catalog = {
     navGuardians: 'Tutori',
     navGroups: 'Gruppi',
     groupsTitle: 'Gruppi e squadre',
-    groupsDescription: 'Organizza gli studenti in gruppi e squadre annidate. Trascina tra non assegnati, un gruppo o una squadra.',
+    groupsDescription:
+      'Organizza gli studenti in gruppi e squadre annidate. Trascina tra non assegnati, un gruppo o una squadra.',
     ungrouped: 'Non assegnati',
     noUngrouped: 'Tutti gli studenti sono in un gruppo.',
-    noGroupsYet: 'Nessun gruppo ancora. Crea un gruppo per organizzare gli studenti.',
+    noGroupsYet:
+      'Nessun gruppo ancora. Crea un gruppo per organizzare gli studenti.',
     createGroup: 'Crea gruppo',
     editGroup: 'Modifica gruppo',
     deleteGroup: 'Elimina gruppo',
@@ -476,8 +488,10 @@ const it: Catalog = {
     deleteTeam: 'Elimina squadra',
     groupActions: 'Azioni gruppo',
     teamActions: 'Azioni squadra',
-    groupFormDescription: 'Assegna un nome al gruppo e opzionalmente un\'icona o una descrizione.',
-    teamFormDescription: 'Assegna un nome alla squadra e opzionalmente un\'icona o una descrizione.',
+    groupFormDescription:
+      "Assegna un nome al gruppo e opzionalmente un'icona o una descrizione.",
+    teamFormDescription:
+      "Assegna un nome alla squadra e opzionalmente un'icona o una descrizione.",
     iconLabel: 'Icona',
     pickIcon: 'Scegli icona',
     clearIcon: 'Rimuovi icona',
@@ -493,9 +507,11 @@ const it: Catalog = {
     downloadGroupsPdfFailed: 'Generazione PDF gruppi non riuscita',
     dropStudentsHere: 'Trascina qui gli studenti',
     deleteGroupTitle: 'Eliminare il gruppo?',
-    deleteGroupDescription: 'Eliminare {{name}} e le sue squadre? Gli studenti di questo gruppo torneranno non assegnati.',
+    deleteGroupDescription:
+      'Eliminare {{name}} e le sue squadre? Gli studenti di questo gruppo torneranno non assegnati.',
     deleteTeamTitle: 'Eliminare la squadra?',
-    deleteTeamDescription: 'Eliminare {{name}}? Gli studenti di questa squadra restano nel gruppo padre.',
+    deleteTeamDescription:
+      'Eliminare {{name}}? Gli studenti di questa squadra restano nel gruppo padre.',
     navInvite: 'Invito',
     navSettings: 'Impostazioni',
     settingsTitle: 'Impostazioni',
@@ -507,8 +523,7 @@ const it: Catalog = {
   },
   settings: {
     docTitle: 'Impostazioni | ClassClarus',
-    docDescription:
-      'Gestisci le tue impostazioni personali per ClassClarus',
+    docDescription: 'Gestisci le tue impostazioni personali per ClassClarus',
     title: 'Impostazioni',
     description: 'Gestisci le tue preferenze personali.',
     languageLabel: 'Lingua',

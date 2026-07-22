@@ -74,12 +74,7 @@ export async function hasGuardianAccessToClass(
 
   for (const link of links) {
     if (
-      await hasGuardianAccess(
-        ctx,
-        guardianUserId,
-        link.orgStudentId,
-        classId,
-      )
+      await hasGuardianAccess(ctx, guardianUserId, link.orgStudentId, classId)
     ) {
       return true
     }

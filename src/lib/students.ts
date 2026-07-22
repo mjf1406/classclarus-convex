@@ -36,7 +36,10 @@ export function useUpdateStudentProfile() {
   return useMutation(api.students.updateStudentProfile).withOptimisticUpdate(
     (localStore, args) => {
       const queryArgs = { classId: args.classId }
-      const roster = localStore.getQuery(api.students.listClassRoster, queryArgs)
+      const roster = localStore.getQuery(
+        api.students.listClassRoster,
+        queryArgs,
+      )
       if (!roster) return
 
       localStore.setQuery(
@@ -60,7 +63,10 @@ export function useUpdateEnrollmentDisplay() {
   return useMutation(api.students.updateEnrollmentDisplay).withOptimisticUpdate(
     (localStore, args) => {
       const queryArgs = { classId: args.classId }
-      const roster = localStore.getQuery(api.students.listClassRoster, queryArgs)
+      const roster = localStore.getQuery(
+        api.students.listClassRoster,
+        queryArgs,
+      )
       if (!roster) return
 
       localStore.setQuery(

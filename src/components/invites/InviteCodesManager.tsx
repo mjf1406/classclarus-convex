@@ -88,11 +88,7 @@ export function InviteCreateForm({
       maxUses = presetUses
     } else if (maxUsesMode === 'custom') {
       const parsed = Number.parseInt(customUses, 10)
-      if (
-        !Number.isInteger(parsed) ||
-        parsed < 1 ||
-        parsed > MAX_INVITE_USES
-      ) {
+      if (!Number.isInteger(parsed) || parsed < 1 || parsed > MAX_INVITE_USES) {
         toast.error(t('maxUsesInvalid', { max: MAX_INVITE_USES }))
         return
       }
@@ -271,9 +267,7 @@ export function InviteList({
   }
 
   if (sorted.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">{t('emptyActive')}</p>
-    )
+    return <p className="text-sm text-muted-foreground">{t('emptyActive')}</p>
   }
 
   return (

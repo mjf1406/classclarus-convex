@@ -1,11 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useConvexAuth } from '@convex-dev/auth/react'
-import {
-  useNavigate,
-  useRouter,
-  useRouterState,
-} from '@tanstack/react-router'
+import { useNavigate, useRouter, useRouterState } from '@tanstack/react-router'
 import PendingComponent from '@/components/loading/PendingComponent'
 import { getSafeAuthRedirect } from '@/lib/authRedirect'
 

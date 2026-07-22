@@ -139,8 +139,7 @@ export async function tryRedeemGuardianCode(
   userId: Id<'users'>,
   rawCode: string,
 ): Promise<
-  | { ok: true; orgStudentId: Id<'orgStudents'> }
-  | { ok: false; error: string }
+  { ok: true; orgStudentId: Id<'orgStudents'> } | { ok: false; error: string }
 > {
   const code = rawCode.replace(/[\s\u2013-]/g, '').toUpperCase()
   if (code.length !== JOIN_CODE_LENGTH) {

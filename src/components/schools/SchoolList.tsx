@@ -37,11 +37,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -386,9 +382,7 @@ export function SchoolList({
         toast.success(t('schoolDeleted'))
       })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : t('deleteFailed'),
-        )
+        toast.error(error instanceof Error ? error.message : t('deleteFailed'))
       })
   }
 

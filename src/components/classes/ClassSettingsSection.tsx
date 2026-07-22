@@ -5,16 +5,9 @@ import { useTranslation } from 'react-i18next'
 import { useClassLayout } from '#/components/classes/ClassLayoutContext'
 import { useUpdateClass } from '#/lib/classes'
 import { LanguageSelect } from '#/i18n/LanguageSelect'
-import {
-  coerceClassLanguage,
-  DEFAULT_CLASS_LANGUAGE,
-} from '#/i18n/locales'
+import { coerceClassLanguage, DEFAULT_CLASS_LANGUAGE } from '#/i18n/locales'
 import type { ClassLanguage } from '#/i18n/locales'
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function ClassSettingsSection() {
@@ -36,9 +29,7 @@ export function ClassSettingsSection() {
         toast.success(t('updated'))
       })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : t('updateFailed'),
-        )
+        toast.error(error instanceof Error ? error.message : t('updateFailed'))
       })
       .finally(() => setIsSaving(false))
   }

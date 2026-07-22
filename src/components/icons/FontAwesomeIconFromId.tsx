@@ -42,9 +42,7 @@ export function FontAwesomeIconFromId({
       icon={def}
       className={cn(className)}
       style={
-        style as
-          | (React.CSSProperties & Record<string, string>)
-          | undefined
+        style as (React.CSSProperties & Record<string, string>) | undefined
       }
     />
   )

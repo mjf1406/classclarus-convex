@@ -14,11 +14,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import {
-  isPendingClass,
-  useRemoveClass,
-  useUpdateClass,
-} from '#/lib/classes'
+import { isPendingClass, useRemoveClass, useUpdateClass } from '#/lib/classes'
 import type { ClassPublic, ClassSort } from '#/lib/classes'
 import { DEFAULT_CLASS_SORT, sortClasses } from '#/lib/classSort'
 import { ClassRoleBadge } from '#/components/classes/ClassRoleBadge'
@@ -535,9 +531,7 @@ export function ClassList({
   const removeClass = useRemoveClass()
   const updateClass = useUpdateClass()
 
-  const [deletingClass, setDeletingClass] = useState<ClassPublic | null>(
-    null,
-  )
+  const [deletingClass, setDeletingClass] = useState<ClassPublic | null>(null)
 
   const handleArchiveToggle = (classDoc: ClassPublic) => {
     const archive = classDoc.archivedTime === undefined
@@ -568,9 +562,7 @@ export function ClassList({
       })
       .catch((error: unknown) => {
         toast.error(
-          error instanceof Error
-            ? error.message
-            : t('classes:deleteFailed'),
+          error instanceof Error ? error.message : t('classes:deleteFailed'),
         )
       })
   }

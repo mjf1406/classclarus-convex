@@ -374,12 +374,10 @@ export function ClassStudentsSection({
   > | null>(null)
   const [sortKey, setSortKey] = useState<SortKey>('rosterNumber')
   const [sortDesc, setSortDesc] = useState(false)
-  const [editingEnrollmentId, setEditingEnrollmentId] = useState<
-    Id<'classEnrollments'> | null
-  >(null)
-  const [activeDragId, setActiveDragId] = useState<Id<'classEnrollments'> | null>(
-    null,
-  )
+  const [editingEnrollmentId, setEditingEnrollmentId] =
+    useState<Id<'classEnrollments'> | null>(null)
+  const [activeDragId, setActiveDragId] =
+    useState<Id<'classEnrollments'> | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [pendingUnlink, setPendingUnlink] = useState<PendingUnlink | null>(null)
   const [regeneratingStudentId, setRegeneratingStudentId] =
@@ -807,12 +805,8 @@ export function ClassStudentsSection({
       </TableCell>
       <TableCell>{student.lastName || '—'}</TableCell>
       <TableCell>{student.firstName || '—'}</TableCell>
-      <TableCell>
-        {genderLabel(student.gender ?? 'unspecified')}
-      </TableCell>
-      <TableCell>
-        {pronounLabel(student.pronouns ?? 'unspecified')}
-      </TableCell>
+      <TableCell>{genderLabel(student.gender ?? 'unspecified')}</TableCell>
+      <TableCell>{pronounLabel(student.pronouns ?? 'unspecified')}</TableCell>
       <TableCell className="text-muted-foreground">
         {student.email || '—'}
       </TableCell>
@@ -902,7 +896,9 @@ export function ClassStudentsSection({
       <TableCell>
         <div className="flex min-w-48 flex-col gap-1 whitespace-normal">
           {student.guardians.length === 0 ? (
-            <span className="text-muted-foreground">{t('noGuardianLinked')}</span>
+            <span className="text-muted-foreground">
+              {t('noGuardianLinked')}
+            </span>
           ) : (
             student.guardians.map((guardian) => {
               const name =

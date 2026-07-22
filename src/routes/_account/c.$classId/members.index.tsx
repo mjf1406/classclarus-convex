@@ -8,7 +8,5 @@ export const Route = createFileRoute('/_account/c/$classId/members/')({
 
 function ClassMembersRedirect() {
   const { classId } = useClassLayout()
-  return (
-    <Navigate to="/c/$classId/students" params={{ classId }} replace />
-  )
+  return <Navigate to="/c/$classId/students" params={{ classId }} replace />
 }

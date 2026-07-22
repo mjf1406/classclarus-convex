@@ -11,9 +11,7 @@ function ClassGuardiansPage() {
   const { classId, canManageMembers } = useClassLayout()
 
   if (!canManageMembers) {
-    return (
-      <Navigate to="/c/$classId/points" params={{ classId }} replace />
-    )
+    return <Navigate to="/c/$classId/points" params={{ classId }} replace />
   }
 
   return <ClassGuardiansSection classId={classId} />

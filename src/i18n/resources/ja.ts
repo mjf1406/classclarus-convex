@@ -67,7 +67,8 @@ const ja: Catalog = {
     invalidEmail: '有効なメールアドレスを入力してください。',
     passwordTooShort: 'パスワードは8文字以上にしてください。',
     passwordsDoNotMatch: 'パスワードが一致しません。',
-    authFailed: 'ログインできませんでした。メールとパスワードを確認してください。',
+    authFailed:
+      'ログインできませんでした。メールとパスワードを確認してください。',
   },
   pwa: {
     updateTitle: '新しいバージョンがあります',
@@ -123,7 +124,8 @@ const ja: Catalog = {
     docDescription: 'ClassClarusウェブアプリで{{label}}を管理',
     createTitle: 'スクールを作成',
     editTitle: 'スクールを編集',
-    createDescription: 'スタッフを招待し、チームを編成し、クラスを紐づけるスクールを追加します。',
+    createDescription:
+      'スタッフを招待し、チームを編成し、クラスを紐づけるスクールを追加します。',
     editDescription: 'スクール名とスラッグを更新します。',
     nameLabel: 'スクール名',
     nameRequired: 'スクール名を入力してください。',
@@ -155,7 +157,8 @@ const ja: Catalog = {
     updateFailed: 'スクールの更新に失敗しました',
     deleteFailed: 'スクールの削除に失敗しました',
     deleteSchoolTitle: 'スクールを削除しますか？',
-    deleteSchoolDescription: '{{name}}を削除しますか？このスクールのスタッフメンバーシップも削除されます。',
+    deleteSchoolDescription:
+      '{{name}}を削除しますか？このスクールのスタッフメンバーシップも削除されます。',
     roleOwner: 'オーナー',
     roleAdmin: '管理者',
     rolePrincipal: '校長',
@@ -172,12 +175,12 @@ const ja: Catalog = {
     navInvite: '招待',
     navSettings: '設定',
     notFoundTitle: 'スクールが見つかりません',
-    notFoundDescription: 'スクールが削除されたか、アクセス権がない可能性があります。',
+    notFoundDescription:
+      'スクールが削除されたか、アクセス権がない可能性があります。',
     teachers: '教員',
     teachersDescription: 'スクールの教職員名簿の教員です。',
     admins: '管理者',
-    adminsDescription:
-      'この学校を管理するオーナー、校長、副校長、管理者です。',
+    adminsDescription: 'この学校を管理するオーナー、校長、副校長、管理者です。',
     noTeachersYet: 'まだ教員がいません。',
     noAdminsYet: 'まだ管理者がいません。',
     colName: '名前',
@@ -197,7 +200,8 @@ const ja: Catalog = {
     classesDescription:
       'クラスを作成し、スタッフチームに割り当て、教員と生徒を配置します。',
     createClass: 'クラスを作成',
-    noSchoolClassesYet: 'まだクラスがありません。クラスを作成して始めましょう。',
+    noSchoolClassesYet:
+      'まだクラスがありません。クラスを作成して始めましょう。',
     unassignedTeam: '未割り当て',
     selectClassHint: '教員と生徒を割り当てるクラスを選択してください。',
     staffPool: 'スクールスタッフ',
@@ -231,11 +235,14 @@ const ja: Catalog = {
     teamDeleted: 'チームを削除しました',
     teamSaveFailed: 'チームの保存に失敗しました',
     deleteTeamTitle: 'チームを削除しますか？',
-    deleteTeamDescription: '{{name}}を削除しますか？配下のサブチームも整理が必要になる場合があります。',
+    deleteTeamDescription:
+      '{{name}}を削除しますか？配下のサブチームも整理が必要になる場合があります。',
     settingsTitle: 'スクール設定',
-    settingsDescription: 'スクール情報を更新するか、スクールをアーカイブします。',
+    settingsDescription:
+      'スクール情報を更新するか、スクールをアーカイブします。',
     bringClassesTitle: 'クラスを取り込む',
-    bringClassesDescription: '管理している単独クラスをこのスクールに紐づけます。',
+    bringClassesDescription:
+      '管理している単独クラスをこのスクールに紐づけます。',
     bringClassesSubmit: '選択したものを紐づけ',
     bringClassesSuccess: 'クラスをスクールに紐づけました',
     bringClassesFailed: 'クラスの紐づけに失敗しました',
@@ -247,8 +254,7 @@ const ja: Catalog = {
     docTitle: 'クラスに参加 | ClassClarus',
     docDescription: '参加コードでClassClarusのクラスに参加',
     enterCode: '参加コードを入力',
-    description:
-      '先生または保護者の招待コードでクラスに参加します。',
+    description: '先生または保護者の招待コードでクラスに参加します。',
     submit: '参加',
     codeIncomplete: '8文字の参加コードをすべて入力してください。',
     joinedAs: '{{role}}として参加しました',
@@ -273,8 +279,7 @@ const ja: Catalog = {
     editTitle: 'クラスを編集',
     createDescription:
       '名前、学年、言語、任意の説明で新しいクラスを追加します。',
-    editDescription:
-      'クラス名と説明を更新します。学年は変更できません。',
+    editDescription: 'クラス名と説明を更新します。学年は変更できません。',
     nameLabel: '名前',
     namePlaceholder: '3限 生物',
     nameRequired: '名前は必須です',
@@ -329,7 +334,7 @@ const ja: Catalog = {
     openJoinQrWindow: '新しいウィンドウで{{role}}参加QRを開く',
     copyRoleCode: '{{role}}コードをコピー',
     roleCodeActions: '{{role}}コードの操作',
-    regenerateCode:  'コードを再生成',
+    regenerateCode: 'コードを再生成',
 
     roleLabel: '役割',
     ttlLabel: '有効期限',
@@ -347,7 +352,8 @@ const ja: Catalog = {
     createInvite: '招待を作成',
     creating: 'Creating…',
     activeInvites: '有効な招待',
-    emptyActive: '有効な招待はありません。参加コードを共有するには招待を作成してください。',
+    emptyActive:
+      '有効な招待はありません。参加コードを共有するには招待を作成してください。',
     expiresAt: '期限 {{time}}',
     usesUnlimited: '使用回数無制限',
     usesRemaining: '残り {{remaining}} / {{max}} 回',
@@ -463,10 +469,12 @@ const ja: Catalog = {
     navGuardians: '保護者',
     navGroups: 'グループ',
     groupsTitle: 'グループとチーム',
-    groupsDescription: '生徒をグループと入れ子のチームに整理します。未所属・グループ・チームの間でドラッグして移動できます。',
+    groupsDescription:
+      '生徒をグループと入れ子のチームに整理します。未所属・グループ・チームの間でドラッグして移動できます。',
     ungrouped: '未所属',
     noUngrouped: 'すべての生徒がグループに入っています。',
-    noGroupsYet: 'グループはまだありません。グループを作成して生徒の整理を始めましょう。',
+    noGroupsYet:
+      'グループはまだありません。グループを作成して生徒の整理を始めましょう。',
     createGroup: 'グループを作成',
     editGroup: 'グループを編集',
     deleteGroup: 'グループを削除',
@@ -475,8 +483,10 @@ const ja: Catalog = {
     deleteTeam: 'チームを削除',
     groupActions: 'グループ操作',
     teamActions: 'チーム操作',
-    groupFormDescription: 'グループ名を入力し、任意でアイコンや説明を追加できます。',
-    teamFormDescription: 'チーム名を入力し、任意でアイコンや説明を追加できます。',
+    groupFormDescription:
+      'グループ名を入力し、任意でアイコンや説明を追加できます。',
+    teamFormDescription:
+      'チーム名を入力し、任意でアイコンや説明を追加できます。',
     iconLabel: 'アイコン',
     pickIcon: 'アイコンを選択',
     clearIcon: 'アイコンをクリア',
@@ -492,9 +502,11 @@ const ja: Catalog = {
     downloadGroupsPdfFailed: 'グループPDFの生成に失敗しました',
     dropStudentsHere: 'ここに生徒をドロップ',
     deleteGroupTitle: 'グループを削除しますか？',
-    deleteGroupDescription: '{{name}}とそのチームを削除しますか？このグループの生徒は未所属になります。',
+    deleteGroupDescription:
+      '{{name}}とそのチームを削除しますか？このグループの生徒は未所属になります。',
     deleteTeamTitle: 'チームを削除しますか？',
-    deleteTeamDescription: '{{name}}を削除しますか？このチームの生徒は親グループに残ります。',
+    deleteTeamDescription:
+      '{{name}}を削除しますか？このチームの生徒は親グループに残ります。',
     navInvite: '招待',
     navSettings: '設定',
     settingsTitle: '設定',

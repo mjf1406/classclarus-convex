@@ -120,7 +120,10 @@ export const listClassRoster = query({
       if (enrollment.status !== 'active') continue
       if (enrollment.organizationId !== classDoc.organizationId) continue
 
-      const orgStudent = await ctx.db.get('orgStudents', enrollment.orgStudentId)
+      const orgStudent = await ctx.db.get(
+        'orgStudents',
+        enrollment.orgStudentId,
+      )
       if (!orgStudent) continue
       if (orgStudent.organizationId !== classDoc.organizationId) continue
 
@@ -193,9 +196,7 @@ export const updateStudentProfile = mutation({
     const enrollment = await ctx.db
       .query('classEnrollments')
       .withIndex('by_classId_and_orgStudentId', (index) =>
-        index
-          .eq('classId', args.classId)
-          .eq('orgStudentId', args.orgStudentId),
+        index.eq('classId', args.classId).eq('orgStudentId', args.orgStudentId),
       )
       .unique()
     if (!enrollment || enrollment.status !== 'active') {
@@ -464,7 +465,12 @@ export const enrollStudent = mutation({
       })
       if (orgStudent.userId) {
         const scope = classScope(args.classId)
-        const has = await authz.hasRole(ctx, orgStudent.userId, 'student', scope)
+        const has = await authz.hasRole(
+          ctx,
+          orgStudent.userId,
+          'student',
+          scope,
+        )
         if (!has) {
           await authz.assignRole(ctx, orgStudent.userId, 'student', scope)
         }
@@ -556,7 +562,8 @@ export const backfillRosterNames = internalMutation({
     for (const student of orgStudents) {
       const needsNames =
         student.firstName === undefined || student.lastName === undefined
-      const needsEmail = student.email === undefined && student.userId !== undefined
+      const needsEmail =
+        student.email === undefined && student.userId !== undefined
       if (!needsNames && !needsEmail) continue
 
       let firstName = student.firstName
@@ -624,9 +631,7 @@ export const backfillRosterNames = internalMutation({
           }
         }),
       )
-      withNames.sort((left, right) =>
-        left.sortKey.localeCompare(right.sortKey),
-      )
+      withNames.sort((left, right) => left.sortKey.localeCompare(right.sortKey))
 
       let rosterIndex = 0
       for (const { enrollment } of withNames) {

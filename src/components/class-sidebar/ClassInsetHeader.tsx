@@ -87,7 +87,9 @@ export function ClassInsetHeader() {
         {classDoc && classDoc.myRole ? (
           <ClassRoleBadge role={classDoc.myRole} />
         ) : null}
-        {classDoc && canManage ? <ClassManageActions classDoc={classDoc} /> : null}
+        {classDoc && canManage ? (
+          <ClassManageActions classDoc={classDoc} />
+        ) : null}
       </div>
     </header>
   )

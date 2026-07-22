@@ -48,17 +48,49 @@ export function JoinCodeInput({
       pattern="^[A-Za-z0-9]+$"
     >
       <InputOTPGroup aria-invalid={ariaInvalid}>
-        <InputOTPSlot index={0} aria-invalid={ariaInvalid} className="font-mono" />
-        <InputOTPSlot index={1} aria-invalid={ariaInvalid} className="font-mono" />
-        <InputOTPSlot index={2} aria-invalid={ariaInvalid} className="font-mono" />
-        <InputOTPSlot index={3} aria-invalid={ariaInvalid} className="font-mono" />
+        <InputOTPSlot
+          index={0}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
+        <InputOTPSlot
+          index={1}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
+        <InputOTPSlot
+          index={2}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
+        <InputOTPSlot
+          index={3}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
       </InputOTPGroup>
       <InputOTPSeparator />
       <InputOTPGroup aria-invalid={ariaInvalid}>
-        <InputOTPSlot index={4} aria-invalid={ariaInvalid} className="font-mono" />
-        <InputOTPSlot index={5} aria-invalid={ariaInvalid} className="font-mono" />
-        <InputOTPSlot index={6} aria-invalid={ariaInvalid} className="font-mono" />
-        <InputOTPSlot index={7} aria-invalid={ariaInvalid} className="font-mono" />
+        <InputOTPSlot
+          index={4}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
+        <InputOTPSlot
+          index={5}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
+        <InputOTPSlot
+          index={6}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
+        <InputOTPSlot
+          index={7}
+          aria-invalid={ariaInvalid}
+          className="font-mono"
+        />
       </InputOTPGroup>
     </InputOTP>
   )

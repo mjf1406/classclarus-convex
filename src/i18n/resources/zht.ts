@@ -70,8 +70,7 @@ const zht: Catalog = {
   },
   pwa: {
     updateTitle: '有新版本可用',
-    updateBody:
-      'ClassClarus 有新更新可用。立即重新整理以取得最新功能與修正。',
+    updateBody: 'ClassClarus 有新更新可用。立即重新整理以取得最新功能與修正。',
     refreshNow: '立即重新整理',
   },
   home: {
@@ -173,8 +172,7 @@ const zht: Catalog = {
     teachers: '教師',
     teachersDescription: '學校教職員名冊中的教師。',
     admins: '管理員',
-    adminsDescription:
-      '管理此學校的擁有者、校長、副校長與管理員。',
+    adminsDescription: '管理此學校的擁有者、校長、副校長與管理員。',
     noTeachersYet: '尚無教師。',
     noAdminsYet: '尚無管理員。',
     colName: '姓名',
@@ -191,8 +189,7 @@ const zht: Catalog = {
     inviteShareHint: '在加入頁面掃描或輸入此代碼。',
     inviteCodesEnsureFailed: '建立加入碼失敗',
     classesTitle: '班級',
-    classesDescription:
-      '建立班級、指派給教職員團隊，並安排教師與學生。',
+    classesDescription: '建立班級、指派給教職員團隊，並安排教師與學生。',
     createClass: '建立班級',
     noSchoolClassesYet: '尚無班級。建立班級以開始。',
     unassignedTeam: '未指派',
@@ -320,7 +317,7 @@ const zht: Catalog = {
     openJoinQrWindow: '在新視窗開啟{{role}}加入 QR 碼',
     copyRoleCode: '複製{{role}}代碼',
     roleCodeActions: '{{role}}代碼操作',
-    regenerateCode:  '重新產生代碼',
+    regenerateCode: '重新產生代碼',
 
     roleLabel: '角色',
     ttlLabel: '有效期限',
@@ -358,8 +355,7 @@ const zht: Catalog = {
       '本班教師與建立者。移除不應再管理本班的人員的存取權限。',
     noTeachersYet: '尚無教師。',
     assistantTeachers: '助教',
-    assistantTeachersDescription:
-      '本班助教。移除不應再協助的人員的存取權限。',
+    assistantTeachersDescription: '本班助教。移除不應再協助的人員的存取權限。',
     noAssistantTeachersYet: '尚無助教。',
     guardiansDescription:
       '已連結到本班學生的監護人。若某監護人不應再有存取權限，可解除連結。',
@@ -421,7 +417,8 @@ const zht: Catalog = {
     guardianCodeRegenerateFailed: '重新產生監護人代碼失敗',
     removeGuardianTitle: '移除監護人？',
     removeAllGuardiansTitle: '移除所有監護人？',
-    removeGuardianDescription: '將 {{guardian}} 從 {{student}} 的監護人中移除？',
+    removeGuardianDescription:
+      '將 {{guardian}} 從 {{student}} 的監護人中移除？',
     removeAllGuardiansDescription:
       '移除 {{student}} 的全部 {{count}} 名監護人？',
     removeAllGuardians: '移除所有監護人',
@@ -452,7 +449,8 @@ const zht: Catalog = {
     navGuardians: '監護人',
     navGroups: '小組',
     groupsTitle: '小組與小隊',
-    groupsDescription: '將學生分到小組及巢狀小隊中。可在未分組、小組或小隊之間拖放。',
+    groupsDescription:
+      '將學生分到小組及巢狀小隊中。可在未分組、小組或小隊之間拖放。',
     ungrouped: '未分組',
     noUngrouped: '所有學生都已在小組中。',
     noGroupsYet: '還沒有小組。建立小組開始組織學生。',
@@ -481,7 +479,8 @@ const zht: Catalog = {
     downloadGroupsPdfFailed: '產生小組 PDF 失敗',
     dropStudentsHere: '將學生拖放到此處',
     deleteGroupTitle: '刪除小組？',
-    deleteGroupDescription: '刪除 {{name}} 及其小隊？該小組中的學生將變為未分組。',
+    deleteGroupDescription:
+      '刪除 {{name}} 及其小隊？該小組中的學生將變為未分組。',
     deleteTeamTitle: '刪除小隊？',
     deleteTeamDescription: '刪除 {{name}}？該小隊中的學生將留在所屬小組中。',
     navInvite: '邀請',

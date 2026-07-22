@@ -16,9 +16,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 
 function pageTitleKey(pathname: string, schoolId: string): string {
   const prefix = `/s/${schoolId}/`
-  const rest = pathname.startsWith(prefix)
-    ? pathname.slice(prefix.length)
-    : ''
+  const rest = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : ''
   switch (rest) {
     case 'admins':
       return 'admins'

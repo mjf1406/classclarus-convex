@@ -40,21 +40,24 @@ export function JoinCodesSection({
   const revokeInvite = useRevokeInvite({ classId }, now)
   const [revokingId, setRevokingId] = useState<Id<'inviteCodes'> | null>(null)
 
-  const roleOptions = (
-    [
-      ...(isOrgClass
-        ? []
-        : [{ value: 'student' as const, label: translateClassRole(t, 'student') }]),
-      {
-        value: 'classTeacher' as const,
-        label: translateClassRole(t, 'classTeacher'),
-      },
-      {
-        value: 'assistantTeacher' as const,
-        label: translateClassRole(t, 'assistantTeacher'),
-      },
-    ] satisfies Array<{ value: ClassInviteRole; label: string }>
-  )
+  const roleOptions = [
+    ...(isOrgClass
+      ? []
+      : [
+          {
+            value: 'student' as const,
+            label: translateClassRole(t, 'student'),
+          },
+        ]),
+    {
+      value: 'classTeacher' as const,
+      label: translateClassRole(t, 'classTeacher'),
+    },
+    {
+      value: 'assistantTeacher' as const,
+      label: translateClassRole(t, 'assistantTeacher'),
+    },
+  ] satisfies Array<{ value: ClassInviteRole; label: string }>
 
   const defaultRole = isOrgClass ? 'classTeacher' : 'student'
 
@@ -95,9 +98,7 @@ export function JoinCodesSection({
             toast.success(t('inviteCreated'))
           } catch (error: unknown) {
             toast.error(
-              error instanceof Error
-                ? error.message
-                : t('inviteCreateFailed'),
+              error instanceof Error ? error.message : t('inviteCreateFailed'),
             )
           }
         }}

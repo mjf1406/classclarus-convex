@@ -196,7 +196,9 @@ function ClassNavUserSidebar() {
                 {user.image ? (
                   <AvatarImage src={user.image} alt={displayName} />
                 ) : null}
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{displayName}</span>

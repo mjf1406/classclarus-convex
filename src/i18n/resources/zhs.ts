@@ -49,8 +49,7 @@ const zhs: Catalog = {
     appFooter: '这是 ClassClarus 应用。',
     signInWithGoogle: '使用 Google 登录',
     continueWithGoogle: '使用 Google 继续',
-    passwordAuthNote:
-      '如需重置密码，请联系站点管理员。暂无自助邮件找回。',
+    passwordAuthNote: '如需重置密码，请联系站点管理员。暂无自助邮件找回。',
     emailLabel: '邮箱',
     emailPlaceholder: 'you@example.com',
     passwordLabel: '密码',
@@ -70,8 +69,7 @@ const zhs: Catalog = {
   },
   pwa: {
     updateTitle: '有新版本可用',
-    updateBody:
-      'ClassClarus 有新更新可用。立即刷新以获取最新功能和修复。',
+    updateBody: 'ClassClarus 有新更新可用。立即刷新以获取最新功能和修复。',
     refreshNow: '立即刷新',
   },
   home: {
@@ -173,8 +171,7 @@ const zhs: Catalog = {
     teachers: '教师',
     teachersDescription: '学校教职工名册中的教师。',
     admins: '管理员',
-    adminsDescription:
-      '管理此学校的所有者、校长、副校长和管理员。',
+    adminsDescription: '管理此学校的所有者、校长、副校长和管理员。',
     noTeachersYet: '暂无教师。',
     noAdminsYet: '暂无管理员。',
     colName: '姓名',
@@ -191,8 +188,7 @@ const zhs: Catalog = {
     inviteShareHint: '在加入页面扫描或输入此代码。',
     inviteCodesEnsureFailed: '创建加入码失败',
     classesTitle: '班级',
-    classesDescription:
-      '创建班级、分配给教职工团队，并安排教师和学生。',
+    classesDescription: '创建班级、分配给教职工团队，并安排教师和学生。',
     createClass: '创建班级',
     noSchoolClassesYet: '暂无班级。创建班级以开始。',
     unassignedTeam: '未分配',
@@ -320,7 +316,7 @@ const zhs: Catalog = {
     openJoinQrWindow: '在新窗口打开{{role}}加入二维码',
     copyRoleCode: '复制{{role}}代码',
     roleCodeActions: '{{role}}代码操作',
-    regenerateCode:  '重新生成代码',
+    regenerateCode: '重新生成代码',
 
     roleLabel: '角色',
     ttlLabel: '有效期',
@@ -358,8 +354,7 @@ const zhs: Catalog = {
       '本班教师与创建者。移除不应再管理本班的人员的访问权限。',
     noTeachersYet: '还没有教师。',
     assistantTeachers: '助教',
-    assistantTeachersDescription:
-      '本班助教。移除不应再协助的人员的访问权限。',
+    assistantTeachersDescription: '本班助教。移除不应再协助的人员的访问权限。',
     noAssistantTeachersYet: '还没有助教。',
     guardiansDescription:
       '已关联到本班学生的监护人。若某监护人不应再有访问权限，可解除关联。',
@@ -421,7 +416,8 @@ const zhs: Catalog = {
     guardianCodeRegenerateFailed: '重新生成监护人代码失败',
     removeGuardianTitle: '移除监护人？',
     removeAllGuardiansTitle: '移除所有监护人？',
-    removeGuardianDescription: '将 {{guardian}} 从 {{student}} 的监护人中移除？',
+    removeGuardianDescription:
+      '将 {{guardian}} 从 {{student}} 的监护人中移除？',
     removeAllGuardiansDescription:
       '移除 {{student}} 的全部 {{count}} 名监护人？',
     removeAllGuardians: '移除所有监护人',
@@ -452,7 +448,8 @@ const zhs: Catalog = {
     navGuardians: '监护人',
     navGroups: '小组',
     groupsTitle: '小组与小队',
-    groupsDescription: '将学生分到小组及嵌套小队中。可在未分组、小组或小队之间拖放。',
+    groupsDescription:
+      '将学生分到小组及嵌套小队中。可在未分组、小组或小队之间拖放。',
     ungrouped: '未分组',
     noUngrouped: '所有学生都已在小组中。',
     noGroupsYet: '还没有小组。创建小组开始组织学生。',
@@ -481,7 +478,8 @@ const zhs: Catalog = {
     downloadGroupsPdfFailed: '生成小组 PDF 失败',
     dropStudentsHere: '将学生拖放到此处',
     deleteGroupTitle: '删除小组？',
-    deleteGroupDescription: '删除 {{name}} 及其小队？该小组中的学生将变为未分组。',
+    deleteGroupDescription:
+      '删除 {{name}} 及其小队？该小组中的学生将变为未分组。',
     deleteTeamTitle: '删除小队？',
     deleteTeamDescription: '删除 {{name}}？该小队中的学生将留在所属小组中。',
     navInvite: '邀请',

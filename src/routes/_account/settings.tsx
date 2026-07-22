@@ -5,11 +5,7 @@ import i18n from '#/i18n'
 import { usePersonalLocale } from '#/i18n/LocaleProvider'
 import { LanguageSelect } from '#/i18n/LanguageSelect'
 import { ThemeSelect } from '#/components/theme/ThemeSelect'
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 
 export const Route = createFileRoute('/_account/settings')({
   component: SettingsPage,

@@ -1,7 +1,11 @@
 import { jsPDF } from 'jspdf'
 import QRCode from 'qrcode'
 
-import { formatJoinCodeDisplay, getJoinPageUrl, getJoinUrl } from '@/lib/joinCode'
+import {
+  formatJoinCodeDisplay,
+  getJoinPageUrl,
+  getJoinUrl,
+} from '@/lib/joinCode'
 
 type GuardianCodeStudent = {
   displayName: string
@@ -29,8 +33,7 @@ const COLUMNS = 2
 const ROWS = 3
 const AVAILABLE_WIDTH =
   PAGE_WIDTH - PAGE_MARGIN * 2 - COLUMN_GAP * (COLUMNS - 1)
-const AVAILABLE_HEIGHT =
-  PAGE_HEIGHT - PAGE_MARGIN * 2 - ROW_GAP * (ROWS - 1)
+const AVAILABLE_HEIGHT = PAGE_HEIGHT - PAGE_MARGIN * 2 - ROW_GAP * (ROWS - 1)
 const CARD_SIZE = Math.min(AVAILABLE_WIDTH / COLUMNS, AVAILABLE_HEIGHT / ROWS)
 const GRID_WIDTH = COLUMNS * CARD_SIZE + COLUMN_GAP * (COLUMNS - 1)
 const GRID_HEIGHT = ROWS * CARD_SIZE + ROW_GAP * (ROWS - 1)

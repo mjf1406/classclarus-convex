@@ -4,12 +4,14 @@ import { useAuthActions } from '@convex-dev/auth/react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
 import {
-  passwordSignInSchema,
-  passwordSignUpSchema,
-} from '@/lib/authPassword'
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { passwordSignInSchema, passwordSignUpSchema } from '@/lib/authPassword'
 import { getSafeAuthRedirect } from '@/lib/authRedirect'
 
 interface SignInWithPasswordProps {
@@ -155,7 +157,9 @@ export function SignInWithPassword({
             id="auth-password"
             name="password"
             type="password"
-            autoComplete={flow === 'signIn' ? 'current-password' : 'new-password'}
+            autoComplete={
+              flow === 'signIn' ? 'current-password' : 'new-password'
+            }
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}

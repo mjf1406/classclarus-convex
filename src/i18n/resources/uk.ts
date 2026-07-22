@@ -123,7 +123,8 @@ const uk: Catalog = {
     docDescription: 'Керуйте {{label}} у вебзастосунку ClassClarus',
     createTitle: 'Створити школу',
     editTitle: 'Редагувати школу',
-    createDescription: 'Додайте школу, щоб запрошувати персонал, організовувати команди та приєднувати класи.',
+    createDescription:
+      'Додайте школу, щоб запрошувати персонал, організовувати команди та приєднувати класи.',
     editDescription: 'Оновіть назву та слаг школи.',
     nameLabel: 'Назва школи',
     nameRequired: 'Введіть назву школи.',
@@ -155,7 +156,8 @@ const uk: Catalog = {
     updateFailed: 'Не вдалося оновити школу',
     deleteFailed: 'Не вдалося видалити школу',
     deleteSchoolTitle: 'Видалити школу?',
-    deleteSchoolDescription: 'Видалити {{name}}? Це прибере членства персоналу цієї школи.',
+    deleteSchoolDescription:
+      'Видалити {{name}}? Це прибере членства персоналу цієї школи.',
     roleOwner: 'Власник',
     roleAdmin: 'Адмін',
     rolePrincipal: 'Директор',
@@ -172,7 +174,8 @@ const uk: Catalog = {
     navInvite: 'Запросити',
     navSettings: 'Налаштування',
     notFoundTitle: 'Школу не знайдено',
-    notFoundDescription: 'Цю школу могло бути видалено, або у вас немає доступу.',
+    notFoundDescription:
+      'Цю школу могло бути видалено, або у вас немає доступу.',
     teachers: 'Учителі',
     teachersDescription: 'Учителі у штаті школи.',
     admins: 'Адміни',
@@ -180,7 +183,7 @@ const uk: Catalog = {
       'Власники, директори, завучі та адміністратори, які керують цією школою.',
     noTeachersYet: 'Ще немає вчителів.',
     noAdminsYet: 'Ще немає адмінів.',
-    colName: 'Ім\'я',
+    colName: "Ім'я",
     colEmail: 'Ел. пошта',
     colRole: 'Роль',
     memberRemoved: 'Учасника видалено',
@@ -207,7 +210,7 @@ const uk: Catalog = {
     classStudentsLane: 'Учні',
     addStudent: 'Додати учня',
     addStudentTitle: 'Додати учня',
-    firstNameLabel: 'Ім\'я',
+    firstNameLabel: "Ім'я",
     lastNameLabel: 'Прізвище',
     studentCreated: 'Учня додано',
     studentCreateFailed: 'Не вдалося додати учня',
@@ -221,7 +224,8 @@ const uk: Catalog = {
     pendingInvites: 'Очікувані запрошення',
     noPendingInvites: 'Немає очікуваних запрошень.',
     teamsTitle: 'Команди',
-    teamsDescription: 'Організуйте персонал у команди та підкоманди (наприклад, паралелі).',
+    teamsDescription:
+      'Організуйте персонал у команди та підкоманди (наприклад, паралелі).',
     createTeam: 'Створити команду',
     createSubTeam: 'Створити підкоманду',
     noTeamsYet: 'Ще немає команд. Створіть команду, щоб почати.',
@@ -231,11 +235,13 @@ const uk: Catalog = {
     teamDeleted: 'Команду видалено',
     teamSaveFailed: 'Не вдалося зберегти команду',
     deleteTeamTitle: 'Видалити команду?',
-    deleteTeamDescription: 'Видалити {{name}}? Підкоманди під нею також можуть потребувати очищення.',
+    deleteTeamDescription:
+      'Видалити {{name}}? Підкоманди під нею також можуть потребувати очищення.',
     settingsTitle: 'Налаштування школи',
     settingsDescription: 'Оновіть дані школи або архівуйте її.',
     bringClassesTitle: 'Перенести класи',
-    bringClassesDescription: 'Приєднайте до цієї школи окремі класи, якими ви керуєте.',
+    bringClassesDescription:
+      'Приєднайте до цієї школи окремі класи, якими ви керуєте.',
     bringClassesSubmit: 'Приєднати вибрані',
     bringClassesSuccess: 'Класи приєднано до школи',
     bringClassesFailed: 'Не вдалося приєднати класи',
@@ -273,8 +279,7 @@ const uk: Catalog = {
     editTitle: 'Редагувати клас',
     createDescription:
       'Додайте клас із назвою, навчальним роком, мовою та необов’язковим описом.',
-    editDescription:
-      'Оновіть назву та опис. Навчальний рік змінити не можна.',
+    editDescription: 'Оновіть назву та опис. Навчальний рік змінити не можна.',
     nameLabel: 'Назва',
     namePlaceholder: '3-й урок Біологія',
     nameRequired: 'Назва обов’язкова',
@@ -283,8 +288,7 @@ const uk: Catalog = {
     descriptionPlaceholder: 'Необов’язкові нотатки про цей клас',
     descriptionTooLong: 'Опис має бути не довшим за 500 символів',
     yearLabel: 'Навчальний рік',
-    yearImmutable:
-      'Навчальний рік не можна змінити після створення класу.',
+    yearImmutable: 'Навчальний рік не можна змінити після створення класу.',
     yearRequired: 'Рік обов’язковий',
     yearWholeNumber: 'Рік має бути цілим числом',
     yearMin: 'Рік має бути не раніше 2000',
@@ -302,8 +306,7 @@ const uk: Catalog = {
     restore: 'Відновити',
     deleteClass: 'Видалити клас',
     deleteClassTitle: 'Видалити клас?',
-    deleteClassDescription:
-      'Видалити «{{name}}»? Цю дію не можна скасувати.',
+    deleteClassDescription: 'Видалити «{{name}}»? Цю дію не можна скасувати.',
     deleteFailed: 'Не вдалося видалити клас',
     classActions: 'Дії з класом',
     edit: 'Змінити',
@@ -317,8 +320,7 @@ const uk: Catalog = {
     roleStudent: 'Учень',
     roleGuardian: 'Опікун',
     notFoundTitle: 'Клас не знайдено',
-    notFoundDescription:
-      'Клас міг бути видалений, або у вас немає доступу.',
+    notFoundDescription: 'Клас міг бути видалений, або у вас немає доступу.',
     joinCodes: 'Запрошення',
     joinCodesDescription:
       'Створіть запрошення з обмеженим терміном, щоб інші приєдналися до класу з відповідною роллю. Запрошення закінчуються протягом 72 годин, щоб зменшити ризик розкриття даних учнів або опікунів.',
@@ -330,7 +332,7 @@ const uk: Catalog = {
     openJoinQrWindow: 'Відкрити QR доступу {{role}} у новому вікні',
     copyRoleCode: 'Скопіювати код {{role}}',
     roleCodeActions: 'Дії з кодом {{role}}',
-    regenerateCode:  'Перестворити код',
+    regenerateCode: 'Перестворити код',
 
     roleLabel: 'Роль',
     ttlLabel: 'Закінчується через',
@@ -348,7 +350,8 @@ const uk: Catalog = {
     createInvite: 'Створити запрошення',
     creating: 'Creating…',
     activeInvites: 'Активні запрошення',
-    emptyActive: 'Немає активних запрошень. Створіть одне, щоб поділитися кодом входу.',
+    emptyActive:
+      'Немає активних запрошень. Створіть одне, щоб поділитися кодом входу.',
     expiresAt: 'Закінчується {{time}}',
     usesUnlimited: 'Без обмеження використань',
     usesRemaining: 'Залишилось {{remaining}} з {{max}}',
@@ -372,8 +375,8 @@ const uk: Catalog = {
       'Асистенти вчителя цього класу. Видаліть доступ тим, хто більше не повинен допомагати.',
     noAssistantTeachersYet: 'Поки немає асистентів вчителя.',
     guardiansDescription:
-      'Опікуни, пов\'язані з учнями цього класу. Відв\'яжіть опікуна, якщо він більше не повинен мати доступ.',
-    noGuardiansYet: 'Поки немає пов\'язаних опікунів.',
+      "Опікуни, пов'язані з учнями цього класу. Відв'яжіть опікуна, якщо він більше не повинен мати доступ.",
+    noGuardiansYet: "Поки немає пов'язаних опікунів.",
     removeMemberTitle: 'Видалити учасника?',
     removeMemberDescription:
       'Видалити {{name}} з цього класу? Доступ буде втрачено до повторного приєднання.',
@@ -382,9 +385,9 @@ const uk: Catalog = {
     students: 'Учні',
     studentsDescription:
       'Кожен зарахований учень має особистий код опікуна (макс. 5). Скопіюйте код або посилання, перестворіть у разі витоку або завантажте QR для друку всього класу.',
-    colName: 'Ім\'я',
+    colName: "Ім'я",
     colRole: 'Роль',
-    colLinkedStudents: 'Пов\'язані учні',
+    colLinkedStudents: "Пов'язані учні",
     colRosterNumber: '#',
     colLastName: 'Last name',
     colFirstName: 'First name',
@@ -432,8 +435,7 @@ const uk: Catalog = {
     guardianCodeRegenerateFailed: 'Не вдалося перестворити код опікуна',
     removeGuardianTitle: 'Прибрати опікуна?',
     removeAllGuardiansTitle: 'Прибрати всіх опікунів?',
-    removeGuardianDescription:
-      'Прибрати {{guardian}} як опікуна {{student}}?',
+    removeGuardianDescription: 'Прибрати {{guardian}} як опікуна {{student}}?',
     removeAllGuardiansDescription:
       'Прибрати всіх опікунів ({{count}}) у {{student}}?',
     removeAllGuardians: 'Прибрати всіх опікунів',
@@ -464,7 +466,8 @@ const uk: Catalog = {
     navGuardians: 'Опікуни',
     navGroups: 'Групи',
     groupsTitle: 'Групи та команди',
-    groupsDescription: 'Організуйте учнів у групи та вкладені команди. Перетягуйте між без групи, групою або командою.',
+    groupsDescription:
+      'Організуйте учнів у групи та вкладені команди. Перетягуйте між без групи, групою або командою.',
     ungrouped: 'Без групи',
     noUngrouped: 'Усі учні вже в групах.',
     noGroupsYet: 'Поки немає груп. Створіть групу, щоб організувати учнів.',
@@ -476,8 +479,10 @@ const uk: Catalog = {
     deleteTeam: 'Видалити команду',
     groupActions: 'Дії групи',
     teamActions: 'Дії команди',
-    groupFormDescription: 'Вкажіть назву групи та за бажанням додайте значок або опис.',
-    teamFormDescription: 'Вкажіть назву команди та за бажанням додайте значок або опис.',
+    groupFormDescription:
+      'Вкажіть назву групи та за бажанням додайте значок або опис.',
+    teamFormDescription:
+      'Вкажіть назву команди та за бажанням додайте значок або опис.',
     iconLabel: 'Значок',
     pickIcon: 'Вибрати значок',
     clearIcon: 'Прибрати значок',
@@ -493,9 +498,11 @@ const uk: Catalog = {
     downloadGroupsPdfFailed: 'Не вдалося створити PDF груп',
     dropStudentsHere: 'Перетягніть учнів сюди',
     deleteGroupTitle: 'Видалити групу?',
-    deleteGroupDescription: 'Видалити {{name}} та її команди? Учні цієї групи стануть без групи.',
+    deleteGroupDescription:
+      'Видалити {{name}} та її команди? Учні цієї групи стануть без групи.',
     deleteTeamTitle: 'Видалити команду?',
-    deleteTeamDescription: 'Видалити {{name}}? Учні цієї команди залишаться в батьківській групі.',
+    deleteTeamDescription:
+      'Видалити {{name}}? Учні цієї команди залишаться в батьківській групі.',
     navInvite: 'Запрошення',
     navSettings: 'Налаштування',
     settingsTitle: 'Налаштування',
@@ -522,8 +529,7 @@ const uk: Catalog = {
     description: 'Керуйте даними облікового запису.',
     profileLabel: 'Профіль',
     paymentsTitle: 'Платежі',
-    paymentsComingSoon:
-      'Платежі та розрахунки керуватимуться тут. Незабаром.',
+    paymentsComingSoon: 'Платежі та розрахунки керуватимуться тут. Незабаром.',
   },
 }
 
